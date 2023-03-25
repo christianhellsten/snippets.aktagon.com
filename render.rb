@@ -39,15 +39,17 @@ def render_snippets
     body = match.post_match
     id = front_matter['id']
     title = front_matter['title']
-    markdown = front_matter['title']
-    LOG.info "Rendering #{markdown_file} with front matter #{front_matter}"
+    # markdown = front_matter['title']
     suffix = replace_non_alphanumeric_with_dash(title)
+    fork_me_url = "https://github.com/christianhellsten/snippets.aktagon.com/blob/master/src/snippets/#{id}-#{suffix}.md"
     #suffix = front_matter['id']
     html_file = "snippets/#{id}-#{suffix}.html".downcase
+    LOG.info "Rendering #{markdown_file} with front matter #{front_matter}"
     html = render_snippet(
       id: id,
       title: title,
-      body: body
+      body: body,
+      fork_me_url: fork_me_url,
     )
     File.write(html_file, html)
   end
