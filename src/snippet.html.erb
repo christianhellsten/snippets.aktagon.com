@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>How to embed Google Maps driving directions on your site</title>
+    <title><%= title %></title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,900;1,900&amp;display=swap" rel="stylesheet">
     <!--
     <link href="https://cdn.jsdelivr.net/npm/destyle.css@4.0.0/destyle.min.css" rel="stylesheet">
@@ -14,30 +14,19 @@
 </head>
 <body>
     <header class="flex">
-        <h1 class="fadeout">How to embed Google Maps driving directions on your site</h1>
+        <h1 class="fadeout"><%= title %></h1>
     </header>
     <main>
         <section class="flex">
             <div class="flex-item flex-100">
-                <div class="code">```html
-<form action="http://maps.google.com/maps" method="get">
-  <label for="saddr">Where are you starting your trip?</label>
-  <input type="text" name="saddr" id="saddr" value="Adelaide, Australia" />
-  <input type="submit" value="Go" />
-  <input type="hidden" name="daddr" value="Melbourne, Australia" />
-  <input type="hidden" name="hl" value="en" />
-</form>
-```
-    
-
-</div>
+                <div class="code"><%= body %></div>
             </div>
         </section>
     </main>
     <footer class="flex">
         <p>&copy; 2023 Aktagon Ltd.</p>
         <a href="https:://aktagon.com">Aktagon Ltd.</a>
-        <a href="">Fork me &hearts;</a>
+        <a href="<%= form_me_url %>">Fork me &hearts;</a>
     </footer>
     <script>
         marked.setOptions({

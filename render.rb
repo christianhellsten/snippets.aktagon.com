@@ -10,7 +10,7 @@ require 'yaml'
 require 'ostruct'
 
 LOG = Logger.new($stdout)
-SNIPPET_TEMPLATE = File.read('src/index.html.erb')
+SNIPPET_TEMPLATE = File.read('src/snippet.html.erb')
 
 def render_erb(template, vars)
   ERB.new(template).result(OpenStruct.new(vars).instance_eval { binding })
