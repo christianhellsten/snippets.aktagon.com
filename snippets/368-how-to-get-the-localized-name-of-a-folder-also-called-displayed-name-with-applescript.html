@@ -2,23 +2,61 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title></title>
+    <title>How to get the localized name of a folder also called displayed name with AppleScript</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,900;1,900&amp;display=swap" rel="stylesheet">
     <link href=" https://cdn.jsdelivr.net/npm/destyle.css@4.0.0/destyle.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
     <header class="flex">
-        <h1 class="fadeout"></h1>
+        <h1 class="fadeout">How to get the localized name of a folder also called displayed name with AppleScript</h1>
     </header>
     <main>
         <section class="flex">
             <div class="flex-item flex-100">
-                <div class="code"></div>
+                <div class="code">Not using the localized name of folders or items is a basic mistake made in almost all AppleScript examples I've seen.
+
+For example, this code won't work on a Swedish OSX where the Applications folder's name is Program:
+
+
+```applescript
+tell application "Finder"
+	-- Mount a DMG
+	.
+	.
+	.
+	set position of item "Applications" to {175, 65}
+end tell
+```
+    
+
+The correct way of referencing folders is by using the localized name which you can get through the displayed name attribute like this:
+
+
+```applescript
+tell application "Finder"
+	-- Mount a DMG
+	.
+	.
+	.
+	set applications_folder to displayed name of (path to applications folder) -- i18n name
+	set position of item applications_folder to to {175, 65}
+end tell
+```
+    
+
+This is the line which retrieves the localized name of the folder and stores it in a variable named applications\_folder:
+
+
+```applescript
+set applications_folder to displayed name of (path to applications folder) -- i18n name
+```
+    
+
+</div>
             </div>
         </section>
     </main>
@@ -43,4 +81,3 @@
     </script>
 </body>
 </html>
-

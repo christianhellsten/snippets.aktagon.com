@@ -2,23 +2,45 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title></title>
+    <title>How to update the ActiveRecord counter_cache magic column</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,900;1,900&amp;display=swap" rel="stylesheet">
     <link href=" https://cdn.jsdelivr.net/npm/destyle.css@4.0.0/destyle.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
     <header class="flex">
-        <h1 class="fadeout"></h1>
+        <h1 class="fadeout">How to update the ActiveRecord counter_cache magic column</h1>
     </header>
     <main>
         <section class="flex">
             <div class="flex-item flex-100">
-                <div class="code"></div>
+                <div class="code">You can use the model.update\_counters method to update the counter\_cache column. But if you have a million rows it be very fast.
+
+So for large tables it's best to do it with a query such as this:
+
+
+```sql
+update categories, (select 
+                      id as category_id, ifnull(count, 0) as count
+                    from categories left join 
+                      (select category_id, count(id) as count from products group by category_id) as count_table 
+                    on 
+                      categories.id = count_table.category_id) as count_table
+set 
+  categories.products_count = count_table.count
+where
+  categories.id = count_table.category_id
+```
+    
+
+This query updates the count for all rows.
+
+The code needs to be modified for your database design.
+
+</div>
             </div>
         </section>
     </main>
@@ -43,4 +65,3 @@
     </script>
 </body>
 </html>
-

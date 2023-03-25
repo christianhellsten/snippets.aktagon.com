@@ -2,23 +2,42 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title></title>
+    <title>Linux NAT with 3g PPP connection</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,900;1,900&amp;display=swap" rel="stylesheet">
     <link href=" https://cdn.jsdelivr.net/npm/destyle.css@4.0.0/destyle.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
     <header class="flex">
-        <h1 class="fadeout"></h1>
+        <h1 class="fadeout">Linux NAT with 3g PPP connection</h1>
     </header>
     <main>
         <section class="flex">
             <div class="flex-item flex-100">
-                <div class="code"></div>
+                <div class="code">I run this nat.sh script whenever I need to share my 3g connection to other computers in the switch I'm plugged into. Please note that it resets existing iptables rules.
+
+
+```bash
+#!/bin/bash
+iptables --flush            
+iptables --table nat --flush
+iptables --delete-chain
+iptables --table nat --delete-chain
+
+echo 1 > /proc/sys/net/ipv4/ip_forward
+
+internal=eth0
+external=ppp0
+/sbin/iptables -t nat -A POSTROUTING -o ${external} -j MASQUERADE
+/sbin/iptables -A FORWARD -i ${external} -o ${internal} -m state --state RELATED,ESTABLISHED -j ACCEPT
+/sbin/iptables -A FORWARD -i ${internal} -o ${external} -j ACCEPT
+```
+    
+
+</div>
             </div>
         </section>
     </main>
@@ -43,4 +62,3 @@
     </script>
 </body>
 </html>
-

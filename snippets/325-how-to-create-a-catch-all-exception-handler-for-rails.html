@@ -2,23 +2,54 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title></title>
+    <title>How to create a catch-all exception handler for Rails</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,900;1,900&amp;display=swap" rel="stylesheet">
     <link href=" https://cdn.jsdelivr.net/npm/destyle.css@4.0.0/destyle.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
     <header class="flex">
-        <h1 class="fadeout"></h1>
+        <h1 class="fadeout">How to create a catch-all exception handler for Rails</h1>
     </header>
     <main>
         <section class="flex">
             <div class="flex-item flex-100">
-                <div class="code"></div>
+                <div class="code">Rails' exception handling is defined in this file /usr/local/lib/ruby/gems/1.8/gems/actionpack-2.3.2/lib/action\_controller/rescue.rb. To intercept all errors in your Rails app, you can do this:
+
+
+```ruby
+module GulagNotifier
+  def self.included(base)
+    if base.instance_methods.include?("rescue_action_in_public")
+      base.module_eval { alias_method_chain :rescue_action_in_public, :gulag }
+    end
+    if base.instance_methods.include?("rescue_action_locally")
+      base.module_eval { alias_method_chain :rescue_action_locally, :gulag }
+    end
+  end
+
+  def rescue_action_locally_with_gulag(exception)
+    send_to_gulag(exception)
+    rescue_action_locally_without_gulag(exception)
+  end
+
+  def rescue_action_in_public_with_gulag(exception)
+    send_to_gulag(exception)
+    rescue_action_in_public_without_gulag(exception)
+  end 
+
+  def send_to_gulag(exception)
+# Do whatever you want with the exception
+  end
+  
+end
+```
+    
+
+</div>
             </div>
         </section>
     </main>
@@ -43,4 +74,3 @@
     </script>
 </body>
 </html>
-

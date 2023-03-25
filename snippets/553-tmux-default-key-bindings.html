@@ -2,23 +2,67 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title></title>
+    <title>Tmux default key bindings</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,900;1,900&amp;display=swap" rel="stylesheet">
     <link href=" https://cdn.jsdelivr.net/npm/destyle.css@4.0.0/destyle.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
     <header class="flex">
-        <h1 class="fadeout"></h1>
+        <h1 class="fadeout">Tmux default key bindings</h1>
     </header>
     <main>
         <section class="flex">
             <div class="flex-item flex-100">
-                <div class="code"></div>
+                <div class="code">Tmux key bindings:
+
+
+```bash
+Ctrl-b c Create new window
+Ctrl-b d Detach current client
+Ctrl-b l Move to previously selected window
+Ctrl-b n Move to the next window
+Ctrl-b p Move to the previous window
+Ctrl-b & Kill the current window
+Ctrl-b , Rename the current window
+Ctrl-b % Split the current window into two panes
+Ctrl-b q Show pane numbers (used to switch between panes)
+Ctrl-b o Switch to the next pane
+Ctrl-b ? List all keybindings
+
+Ctrl-b n (Move to the next window)
+Ctrl-b p (Move to the previous window)
+Ctrl-b l (Move to the previously selected window)
+Ctrl-b w (List all windows / window numbers)
+Ctrl-b (Move to the specified window number, the default bindings are from 0 – 9)
+
+Ctrl-b % (Split the window vertically)
+Ctrl-b : “split-window” (Split window horizontally)
+Ctrl-b : “break-pane” (Make pane its own window)
+Ctrl-b o (Goto next pane)
+Ctrl-b q (Show pane numbers, when the numbers show up type the key to goto that pane)
+Ctrl-b { (Move the current pane left)
+Ctrl-b } (Move the current pane right)
+
+Ctrl-b : resize-pane (By default it resizes the current pane down)
+Ctrl-b : resize-pane -U (Resizes the current pane upward)
+Ctrl-b : resize-pane -L (Resizes the current pane left)
+Ctrl-b : resize-pane -R (Resizes the current pane right)
+Ctrl-b : resize-pane 20 (Resizes the current pane down by 20 cells)
+Ctrl-b : resize-pane -U 20 (Resizes the current pane upward by 20 cells)
+Ctrl-b : resize-pane -L 20 (Resizes the current pane left by 20 cells)
+Ctrl-b : resize-pane -R 20 (Resizes the current pane right by 20 cells)
+Ctrl-b : resize-pane -t 2 20 (Resizes the pane with the id of 2 down by 20 cells)
+Ctrl-b : resize-pane -t -L 20 (Resizes the pane with the id of 2 left by 20 cells)
+```
+    
+
+From [here](http://blog.hawkhost.com/2010/06/28/tmux-the-terminal-multiplexer/)
+
+</div>
             </div>
         </section>
     </main>
@@ -43,4 +87,3 @@
     </script>
 </body>
 </html>
-

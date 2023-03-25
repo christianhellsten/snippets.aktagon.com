@@ -2,23 +2,59 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title></title>
+    <title>Simple Redis cache utility for Ruby</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,900;1,900&amp;display=swap" rel="stylesheet">
     <link href=" https://cdn.jsdelivr.net/npm/destyle.css@4.0.0/destyle.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
     <header class="flex">
-        <h1 class="fadeout"></h1>
+        <h1 class="fadeout">Simple Redis cache utility for Ruby</h1>
     </header>
     <main>
         <section class="flex">
             <div class="flex-item flex-100">
-                <div class="code"></div>
+                <div class="code">Use it at your own risk with e.g. Sinatra:
+
+
+```ruby
+require 'redis'
+
+module Cache
+  mattr_accessor :redis
+  class << self
+    def get(key)
+      Cache.redis.get(key)
+    end
+
+    def set(key, value, ttl=nil)
+      if ttl
+        Cache.redis.setex(key, ttl, value)
+      else
+        Cache.redis.set(key, value)
+      end
+    end
+
+    def fetch(key)
+      value = get(key)
+      value = yield if block_given? && value.nil?
+      value
+    end
+
+    def establish_connection
+      redis_config = YAML.load_file(File.join(Dir.pwd, 'config', 'redis.yml'))
+      Cache.redis.client.disconnect if Cache.redis
+      Cache.redis = Redis.new(:host => redis_config["host"], :port => redis_config["port"])
+    end
+  end
+end
+```
+    
+
+</div>
             </div>
         </section>
     </main>
@@ -43,4 +79,3 @@
     </script>
 </body>
 </html>
-

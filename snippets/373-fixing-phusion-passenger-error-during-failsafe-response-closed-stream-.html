@@ -2,23 +2,42 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title></title>
+    <title>Fixing Phusion Passenger "Error during failsafe response: closed stream"</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,900;1,900&amp;display=swap" rel="stylesheet">
     <link href=" https://cdn.jsdelivr.net/npm/destyle.css@4.0.0/destyle.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
     <header class="flex">
-        <h1 class="fadeout"></h1>
+        <h1 class="fadeout">Fixing Phusion Passenger "Error during failsafe response: closed stream"</h1>
     </header>
     <main>
         <section class="flex">
             <div class="flex-item flex-100">
-                <div class="code"></div>
+                <div class="code">This error most probably means that Passenger doesn't have read access to all files:
+
+
+```bash
+Error during failsafe response: closed stream
+[Thu Aug 13 01:40:05 2009] [error] [client 88.115.162.70] Premature end of script headers: 
+[ pid=12581 file=Hooks.cpp:516 time=2009-08-13 01:40:05.753 ]:
+  Backend process 18230 did not return a valid HTTP response. It returned: [Status]
+*** Exception NoMethodError in application (undefined method []=' for nil:NilClass) (process 18230):
+```
+    
+
+To fix it run:
+
+
+```bash
+chown -R xxx.www-data /var/www/xxx
+```
+    
+
+</div>
             </div>
         </section>
     </main>
@@ -43,4 +62,3 @@
     </script>
 </body>
 </html>
-

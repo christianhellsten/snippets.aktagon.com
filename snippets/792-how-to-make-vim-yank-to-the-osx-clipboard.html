@@ -2,23 +2,48 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title></title>
+    <title>How to make Vim yank to the OSX clipboard</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,900;1,900&amp;display=swap" rel="stylesheet">
     <link href=" https://cdn.jsdelivr.net/npm/destyle.css@4.0.0/destyle.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
     <header class="flex">
-        <h1 class="fadeout"></h1>
+        <h1 class="fadeout">How to make Vim yank to the OSX clipboard</h1>
     </header>
     <main>
         <section class="flex">
             <div class="flex-item flex-100">
-                <div class="code"></div>
+                <div class="code">Add this to .vimrc:
+```vim
+set clipboard=unnamed
+```
+
+If you use Tmux you probably need this:
+https://github.com/ChrisJohnsen/tmux-MacOSX-pasteboard
+
+```bash
+$ brew install reattach-to-user-namespace
+```
+
+Note, do NOT use something like this because it doesn't work perfectly:
+```vim
+function! ClipboardYank()
+  call system('pbcopy', @@)
+endfunction
+function! ClipboardPaste()
+  let @@ = system('pbpaste')
+endfunction
+
+vnoremap <silent> y y:call ClipboardYank()<cr>
+vnoremap <silent> d d:call ClipboardYank()<cr>
+nnoremap <silent> p :call ClipboardPaste()<cr>p
+```
+
+</div>
             </div>
         </section>
     </main>
@@ -43,4 +68,3 @@
     </script>
 </body>
 </html>
-

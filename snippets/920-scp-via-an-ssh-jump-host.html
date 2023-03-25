@@ -2,23 +2,45 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title></title>
+    <title>SCP via an SSH jump host</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,900;1,900&amp;display=swap" rel="stylesheet">
     <link href=" https://cdn.jsdelivr.net/npm/destyle.css@4.0.0/destyle.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
     <header class="flex">
-        <h1 class="fadeout"></h1>
+        <h1 class="fadeout">SCP via an SSH jump host</h1>
     </header>
     <main>
         <section class="flex">
             <div class="flex-item flex-100">
-                <div class="code"></div>
+                <div class="code">I prefer using rsync to scp when copying files via jump hosts, for example, to **target-host** via the intermediate host **jump-host**:
+
+```bash
+rsync -v -e 'ssh -A -t user@jump-host ssh -A -t target-host' nasty.file :/tmp
+```
+
+rsync syntax is stable across versions and platforms while the syntax of SCP is different across platforms and versions.
+
+man ssh:
+
+```bash
+     -A      Enables forwarding of the authentication agent connection.  This can also be specified on a per-host basis in a configuration
+             file.
+
+             Agent forwarding should be enabled with caution.  Users with the ability to bypass file permissions on the remote host (for the
+             agent's UNIX-domain socket) can access the local agent through the forwarded connection.  An attacker cannot obtain key material
+             from the agent, however they can perform operations on the keys that enable them to authenticate using the identities loaded into
+             the agent.
+             
+     -t      Force pseudo-terminal allocation.  This can be used to execute arbitrary screen-based programs on a remote machine, which can be
+             very useful, e.g. when implementing menu services.  Multiple -t options force tty allocation, even if ssh has no local tty.
+```
+             
+</div>
             </div>
         </section>
     </main>
@@ -43,4 +65,3 @@
     </script>
 </body>
 </html>
-

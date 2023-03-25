@@ -2,23 +2,48 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title></title>
+    <title>How to run ActiveRecord migrations from the console</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,900;1,900&amp;display=swap" rel="stylesheet">
     <link href=" https://cdn.jsdelivr.net/npm/destyle.css@4.0.0/destyle.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
     <header class="flex">
-        <h1 class="fadeout"></h1>
+        <h1 class="fadeout">How to run ActiveRecord migrations from the console</h1>
     </header>
     <main>
         <section class="flex">
             <div class="flex-item flex-100">
-                <div class="code"></div>
+                <div class="code">There are multiple ways of running migrations from the console. This might be the easiest one to remember:
+
+
+```ruby
+irb ActiveRecord::Schema
+add_index :followers, [:leader_id, :follower_id], :unique => true
+```
+    
+
+You can also paste the migration code into the console window:
+
+
+```ruby
+class ModifyRating < ActiveRecord::Migration
+  def self.up
+    change_column :products, :rating, :decimal, :precision => 5, :scale => 3
+  end
+
+  def self.down
+  end
+end
+```
+    
+
+Run the migration by typing **ModifyRating.up**.
+
+</div>
             </div>
         </section>
     </main>
@@ -43,4 +68,3 @@
     </script>
 </body>
 </html>
-

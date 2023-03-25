@@ -2,23 +2,44 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title></title>
+    <title>Hpricot's inner_text doesn't handle HTML entities correctly</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,900;1,900&amp;display=swap" rel="stylesheet">
     <link href=" https://cdn.jsdelivr.net/npm/destyle.css@4.0.0/destyle.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
     <header class="flex">
-        <h1 class="fadeout"></h1>
+        <h1 class="fadeout">Hpricot's inner_text doesn't handle HTML entities correctly</h1>
     </header>
     <main>
         <section class="flex">
             <div class="flex-item flex-100">
-                <div class="code"></div>
+                <div class="code">Hpricot's inner\_text method is fubar and doesn't handle HTML entities correctly, instead you'll see questionmarks in the output. To fix this replace calls to Hpricot's inner\_text with a call to the following method (or Monkey patch Hpricot):
+
+
+```ruby
+require 'rubygems'
+require 'htmlentities'
+
+  def inner_text(node)
+     text = node.innerHTML.gsub(%r{<.*?>}, "").strip
+     HTMLEntities.new.decode(text)
+  end
+```
+    
+
+Remember to install the htmlentities gem:
+
+
+```ruby
+sudo gem install htmlentities
+```
+    
+
+</div>
             </div>
         </section>
     </main>
@@ -43,4 +64,3 @@
     </script>
 </body>
 </html>
-

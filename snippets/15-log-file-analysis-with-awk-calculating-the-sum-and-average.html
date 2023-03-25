@@ -2,23 +2,54 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title></title>
+    <title>Log file analysis with AWK - Calculating the sum and average</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,900;1,900&amp;display=swap" rel="stylesheet">
     <link href=" https://cdn.jsdelivr.net/npm/destyle.css@4.0.0/destyle.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
     <header class="flex">
-        <h1 class="fadeout"></h1>
+        <h1 class="fadeout">Log file analysis with AWK - Calculating the sum and average</h1>
     </header>
     <main>
         <section class="flex">
             <div class="flex-item flex-100">
-                <div class="code"></div>
+                <div class="code">This AWK script is useful when you want to calculate the average and sum for a set of values found in a log file.
+
+
+```bash
+awk '{ s += $1 } END { print "sum: ", s, " average: ", s/NR, " samples: ", NR }' rails_production_log_or_whatever.log
+```
+    
+
+Note that **$1** means that column one contains the values you want to use. **NR** is the total number of rows in the file. As an example, let's say you have this log file:
+
+
+```bash
+1
+2
+3
+4
+5
+```
+    
+
+The output would then be:
+
+
+```bash
+sum:  15  average:  3  samples:  5
+```
+    
+
+Combine it with **grep** or **sed** to do more advanced log file analysis -- you can for example calculate the average time it took to render action xyz in Rails on the 21th of July at 21:00 PM.
+
+Note that by default the column values should be space separated--use the following switch to parse CSV (comma separated) files: **-F,**
+
+</div>
             </div>
         </section>
     </main>
@@ -43,4 +74,3 @@
     </script>
 </body>
 </html>
-

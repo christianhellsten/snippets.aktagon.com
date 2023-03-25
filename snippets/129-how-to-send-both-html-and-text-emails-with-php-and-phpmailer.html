@@ -2,23 +2,52 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title></title>
+    <title>How to send both HTML and text emails with PHP and PHPMailer</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,900;1,900&amp;display=swap" rel="stylesheet">
     <link href=" https://cdn.jsdelivr.net/npm/destyle.css@4.0.0/destyle.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
     <header class="flex">
-        <h1 class="fadeout"></h1>
+        <h1 class="fadeout">How to send both HTML and text emails with PHP and PHPMailer</h1>
     </header>
     <main>
         <section class="flex">
             <div class="flex-item flex-100">
-                <div class="code"></div>
+                <div class="code">This is an example on how to use [PHPMailer](http://phpmailer.sourceforge.net/) to send an HTML email. It also shows how to include a text only version of the same email for clients, such as mutt, that don't support HTML emails.
+
+
+```php
+$mail = new PHPMailer();
+
+$mail->IsHTML(true);
+$mail->CharSet = "text/html; charset=UTF-8;";
+$mail->IsSMTP();
+
+$mail->WordWrap = 80;
+$mail->Host = "smtp.thehost.com"; 
+$mail->SMTPAuth = false;
+
+$mail->From = $from;
+$mail->FromName = $from; // First name, last name
+$mail->AddAddress($to, "First name last name");
+#$mail->AddReplyTo("reply@thehost.com", "Reply to address");
+
+$mail->Subject =  $subject;
+$mail->Body =  $htmlMessage; 
+$mail->AltBody  =  $textMessage;    # This automatically sets the email to multipart/alternative. This body can be read by mail clients that do not have HTML email capability such as mutt.
+
+if(!$mail->Send())
+{
+  throw new Exception("Mailer Error: " . $mail->ErrorInfo);
+}
+```
+    
+
+</div>
             </div>
         </section>
     </main>
@@ -43,4 +72,3 @@
     </script>
 </body>
 </html>
-

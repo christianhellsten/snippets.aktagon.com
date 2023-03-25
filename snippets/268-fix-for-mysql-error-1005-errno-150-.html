@@ -2,23 +2,37 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title></title>
+    <title>Fix for "mysql error 1005 (errno: 150) "</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,900;1,900&amp;display=swap" rel="stylesheet">
     <link href=" https://cdn.jsdelivr.net/npm/destyle.css@4.0.0/destyle.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
     <header class="flex">
-        <h1 class="fadeout"></h1>
+        <h1 class="fadeout">Fix for "mysql error 1005 (errno: 150) "</h1>
     </header>
     <main>
         <section class="flex">
             <div class="flex-item flex-100">
-                <div class="code"></div>
+                <div class="code">There are at least three reasons, that I know of, to why you could be seeing [mysql error 1005 (errno: 150)](http://dev.mysql.com/doc/refman/5.0/en/innodb-foreign-key-constraints.html)
+
+-   Adding a foreign key constraint when column types don't match
+-   Not enough privileges to execute the script
+-   Trying to delete an index that is needed by some other index or constraint ("error on rename of")
+
+Use "SHOW ENGINE INNODB STATUS;" to view the error:
+
+
+```sql
+ALTER TABLE videos ADD constraint fk_videos_channels_id FOREIGN KEY (channel_id) REFERENCES channels (id);
+SHOW ENGINE INNODB STATUS;
+```
+    
+
+</div>
             </div>
         </section>
     </main>
@@ -43,4 +57,3 @@
     </script>
 </body>
 </html>
-

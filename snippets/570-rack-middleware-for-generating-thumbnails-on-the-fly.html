@@ -2,23 +2,110 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title></title>
+    <title>Rack middleware for generating thumbnails on-the-fly</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,900;1,900&amp;display=swap" rel="stylesheet">
     <link href=" https://cdn.jsdelivr.net/npm/destyle.css@4.0.0/destyle.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
     <header class="flex">
-        <h1 class="fadeout"></h1>
+        <h1 class="fadeout">Rack middleware for generating thumbnails on-the-fly</h1>
     </header>
     <main>
         <section class="flex">
             <div class="flex-item flex-100">
-                <div class="code"></div>
+                <div class="code">```ruby
+# Rack middleware for creating image thumbnails on the fly when needed. 
+# Depends on ImageMagick and https://github.com/christianhellsten/thumbnail for thumbnail creation. 
+#
+# Use case 1: Allow any image under /images to be resized to any size
+#
+#   # e.g. /images/me-1280x1024.png
+#   use Rack::Thumbnail, :uri => '/images'
+#
+# Use case 2: Allow any image under /images to be resized to 50x50 or 150x150
+#
+#   # e.g. /images/me-150x150.png
+#   use Rack::Thumbnail, :uri => '/images', :dimensions => ['50x50', '150x150']
+#
+# Use case 3: Allow any image under /images to be resized to 50x50 or 150x150. Allow padding or cutting of thumbnails to fit given dimensions.
+#
+#   # e.g. /images/me-50x50-cut.png
+#   use Rack::Thumbnail, :uri => '/images', :dimensions => ['50x50', '150x150'], :methods => { :pad => :pad_to_fit, :cut => :cut_to_fit }
+#
+require 'thumbnail'
+class Rack::Thumbnail
+  def initialize(app, options = {})
+    @app = app
+    @uri = options.fetch(:uri, '/images')
+    @public_dir = options.fetch(:public_dir, 'public')
+    @uri_regex = options.fetch(:uri_regex, /-(\d+)x(\d+)-?(\w+)?/) # Extracts width, height, method
+    @allowed_methods = options.fetch(:methods, {})
+    @allowed_dimensions = options[:dimensions]
+  end
+
+  def allowed_dimension?(width, height)
+    @allowed_dimensions ? @allowed_dimensions.include?([width, 'x', height].join) : true
+  end
+
+  def call(env)
+    path = env["PATH_INFO"]
+    destination = File.join('public', path)
+    if path.match(@uri) && !File.exist?(destination)
+      _, width, height, method = path.match(@uri_regex).to_a
+      if allowed_dimension?(width, height)
+        source = File.join(@public_dir, path.gsub(@uri_regex, ''))
+        Thumbnail.create(
+          :in => source,
+          :out => destination,
+          :method => @allowed_methods.fetch((method || '').to_sym, :pad_to_fit),
+          :width => width.to_i,
+          :height => height.to_i
+        )
+      end
+    end
+    status, headers, response = @app.call(env)
+    [status, headers, response]
+  end
+end
+```
+    
+
+In Sinatra, generate thumbnail URLs with this helper:
+
+
+```ruby
+helpers do
+  # Generates thumbnail URLs.
+  #
+  # Example: 
+  #  
+  #  img uri=thumbnail('/images/me.png', :width => 50, :height => 50)
+  #
+  # uri - URI of source image.
+  # options - hash containing width and height of thumbnail.
+  #
+  def thumbnail(uri, options = {})
+    width = options.fetch(:width, 50)
+    height = options.fetch(:height, 50)
+    method = options[:method]
+    ext = File.extname(uri)
+    base = File.basename(uri, ext)
+    base_uri = File.dirname(uri)
+    unless method
+      "#{dir}/#{base}-#{width}x#{height}#{ext}"
+    else
+      "#{dir}/#{base}-#{width}x#{height}-#{method}#{ext}"
+    end
+  end
+end
+```
+    
+
+</div>
             </div>
         </section>
     </main>
@@ -43,4 +130,3 @@
     </script>
 </body>
 </html>
-

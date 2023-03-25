@@ -2,23 +2,95 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title></title>
+    <title>Integration Tests With Capybara, Devise, Minitest::Spec, and Capybara-Webkit</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,900;1,900&amp;display=swap" rel="stylesheet">
     <link href=" https://cdn.jsdelivr.net/npm/destyle.css@4.0.0/destyle.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
     <header class="flex">
-        <h1 class="fadeout"></h1>
+        <h1 class="fadeout">Integration Tests With Capybara, Devise, Minitest::Spec, and Capybara-Webkit</h1>
     </header>
     <main>
         <section class="flex">
             <div class="flex-item flex-100">
-                <div class="code"></div>
+                <div class="code">Does your boss want you to run integration tests with Capybara, Devise, Minitest::Spec, Capybara-Webkit, and the Headless gem?
+
+Then use this code, which features:
+\* Automatic test failure on JavaScript errors
+\* Check for XSS attack vectors with assert\_no\_alerts.
+\* Sign in/out with Devise
+
+
+```ruby
+require 'headless'
+require 'awesome_print'
+
+headless = Headless.new(reuse: true, destroy_at_exit: false)
+puts "Headless mode. Display :#{headless.display}. PID #{Process.pid}"
+headless.start
+
+class IntegrationSpec < MiniTest::Spec
+  include Rails.application.routes.url_helpers
+  include Capybara::DSL
+  include Warden::Test::Helpers
+  Warden.test_mode!
+
+  before do
+    assert_no_js_errors
+  end
+
+  after do
+    Warden.test_reset!
+  end
+
+  def sign_in(user, scope = :user)
+    login_as(user, scope: scope)
+  end
+
+  def sign_out(scope = :user)
+    logout(scope)
+  end
+
+  def assert_no_js_errors
+    errors = page.driver.error_messages
+    assert_equal 0, errors.size, errors.ai
+  end
+
+  def assert_no_alerts(types = [:alert, :confirm, :prompt])
+    types.each do |type|
+      alerts = page.driver.send(:"#{type}_messages")
+      assert_equal 0, alerts.size, alerts.ai
+    end
+  end
+
+  def default_url_options
+    Rails.configuration.action_mailer.default_url_options
+  end
+end
+
+MiniTest::Spec.register_spec_type( /integration$/, IntegrationSpec )
+```
+    
+
+Remember to name your tests like this:
+
+
+```ruby
+require 'test_helper'
+
+describe "Dashboard integration" do
+...
+end
+```
+    
+
+Otherwise the tests won't inherit from the IntegrationSpec class.
+
+</div>
             </div>
         </section>
     </main>
@@ -43,4 +115,3 @@
     </script>
 </body>
 </html>
-

@@ -2,23 +2,50 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title></title>
+    <title>RabbitMQ Publisher Confirms with Bunny</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,900;1,900&amp;display=swap" rel="stylesheet">
     <link href=" https://cdn.jsdelivr.net/npm/destyle.css@4.0.0/destyle.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
     <header class="flex">
-        <h1 class="fadeout"></h1>
+        <h1 class="fadeout">RabbitMQ Publisher Confirms with Bunny</h1>
     </header>
     <main>
         <section class="flex">
             <div class="flex-item flex-100">
-                <div class="code"></div>
+                <div class="code">Source https://github.com/ruby-amqp/bunny/blob/master/examples/guides/extensions/publisher_confirms.rb:
+
+```ruby
+require "bunny"
+
+puts "=> Demonstrating publisher confirms"
+puts
+
+conn = Bunny.new
+conn.start
+
+ch   = conn.create_channel
+x    = ch.fanout("amq.fanout")
+q    = ch.queue("", :exclusive => true).bind(x)
+
+ch.confirm_select
+1000.times do
+  x.publish("")
+end
+ch.wait_for_confirms # blocks calling thread until all acks are received
+
+sleep 0.2
+puts "Received acks for all published messages. #{q.name} now has #{q.message_count} messages."
+
+sleep 0.7
+puts "Disconnecting..."
+conn.close
+```
+</div>
             </div>
         </section>
     </main>
@@ -43,4 +70,3 @@
     </script>
 </body>
 </html>
-

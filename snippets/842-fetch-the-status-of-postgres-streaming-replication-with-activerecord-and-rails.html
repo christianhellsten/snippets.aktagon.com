@@ -2,23 +2,45 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title></title>
+    <title>Fetch the status of Postgres' streaming replication with ActiveRecord and Rails</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,900;1,900&amp;display=swap" rel="stylesheet">
     <link href=" https://cdn.jsdelivr.net/npm/destyle.css@4.0.0/destyle.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
     <header class="flex">
-        <h1 class="fadeout"></h1>
+        <h1 class="fadeout">Fetch the status of Postgres' streaming replication with ActiveRecord and Rails</h1>
     </header>
     <main>
         <section class="flex">
             <div class="flex-item flex-100">
-                <div class="code"></div>
+                <div class="code">When using streaming replication you can use this code to fetch the number of bytes the slave is behind the master in applying changes to the WAL (write-ahead log):
+
+```ruby
+class SlaveDatabase < ApplicationRecord
+  self.abstract_class = true
+  # NOTE: Add slave entry to config/database.yml
+  establish_connection :slave
+
+  #
+  # Returns the number of bytes the slave is behind the master in applying WAL updates.
+  #
+  def self.replication_delta
+    # Returns, for example, 12/547C3A58 from the master
+    current_master_wal = ActiveRecord::Base.connection.select_value("SELECT pg_current_wal_flush_lsn();")
+    # Returns, for example, -7504582 from the slave
+    delta = connection.select_value("SELECT #{connection.quote(current_master_wal)} - pg_last_wal_receive_lsn()")
+    raise "pg_last_wal_receive_lsn returned null, see documentation for details" unless delta
+    Integer(delta).abs
+  end
+end
+```
+
+Tested with version Postgres 10. Note that in version 10, pg_last_xlog_receive_location has been renamed to pg_last_wal_receive_lsn, and pg_current_xlog_flush_location has been renamed to pg_current_wal_flush_lsn.
+</div>
             </div>
         </section>
     </main>
@@ -43,4 +65,3 @@
     </script>
 </body>
 </html>
-

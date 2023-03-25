@@ -2,23 +2,47 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title></title>
+    <title>Kill Mac OS disk warning notification</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,900;1,900&amp;display=swap" rel="stylesheet">
     <link href=" https://cdn.jsdelivr.net/npm/destyle.css@4.0.0/destyle.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
     <header class="flex">
-        <h1 class="fadeout"></h1>
+        <h1 class="fadeout">Kill Mac OS disk warning notification</h1>
     </header>
     <main>
         <section class="flex">
             <div class="flex-item flex-100">
-                <div class="code"></div>
+                <div class="code">This explains how you can kill the Mac OS disk warning notification that reminds you that you need to buy more overpriced hardware with more disk space from Apple even if you have plenty of disk space left on your brand new Apple crippleware computer.
+
+Before Mac OS Mojave this used to work:
+
+```bash
+# 1 = 1Gb
+$ defaults write com.apple.diskspaced minFreeSpace 1
+$ killall diskspaced
+```
+
+Setting minFreeSpace to 1 prevents the notification from showing up every second, if free disk space is above 1 Gb.
+
+With Mojave we have to completely disable the agent:
+
+```bash
+$ launchctl unload -w /System/Library/LaunchAgents/com.apple.diskspaced.plist
+```
+
+Tested on Mac OS Mojave and iMac crippleware.
+
+See:
+
+https://apple.stackexchange.com/questions/254485/silencing-your-disk-is-almost-full-notification
+
+https://apple.stackexchange.com/questions/345120/silencing-your-disk-is-almost-full-notification
+</div>
             </div>
         </section>
     </main>
@@ -43,4 +67,3 @@
     </script>
 </body>
 </html>
-

@@ -2,23 +2,151 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title></title>
+    <title>Debugging tools</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,900;1,900&amp;display=swap" rel="stylesheet">
     <link href=" https://cdn.jsdelivr.net/npm/destyle.css@4.0.0/destyle.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
     <header class="flex">
-        <h1 class="fadeout"></h1>
+        <h1 class="fadeout">Debugging tools</h1>
     </header>
     <main>
         <section class="flex">
             <div class="flex-item flex-100">
-                <div class="code"></div>
+                <div class="code">## IO and system calls
+
+- dstat
+
+Monitor network and disk IO:
+```bash
+dstat -t
+```
+
+- dtrace / dtruss (OSX)
+
+To get the list of available system calls use:
+
+```bash
+sudo dtrace -ln 'syscall:::entry'
+```
+
+Find which files a program is opening (same as *strace -f -p $PID -e open*):
+```bash
+sudo dtruss -t open_nocancel -p $PID
+```
+
+Also see *ls /usr/bin/*.d*
+
+- strace (Linux)
+
+Monitor system calls made by an app:
+
+```bash
+strace ruby app.rb
+```
+
+Writes all system calls made by SSH, and subprocesses (-f), to a file named ssh.txt:
+
+```bash
+strace -f -o ssh.txt ssh jebus.com
+```
+
+Spy on all 'open' system calls made by a process:
+
+```bash
+strace -f -p $PID -e open
+```
+
+Use these commands to see a list of all available system calls (Linux only):
+
+```bash
+man syscalls
+```
+
+- opensnoop
+
+Monitor what files are being opened:
+
+```bash
+opensnoop -p $PID
+strace -e open -p $PID
+```
+
+## Networking
+
+- netcat
+
+Pipe/copy data over a network:
+```bash
+cat request.txt | nc metafilter.com 80
+```
+
+- netstat
+
+Find which programs are listening to which port:
+
+```bash
+sudo netstat -tunapl
+lsof -i -P # OSX
+```
+
+- ngrep
+
+Listen to traffic containing the string "localhost" on any network interface:
+
+```bash
+sudo ngrep -d any localhost
+```
+
+- tcpdump
+
+Listen to traffic containing the string "localhost" on any network interface:
+
+```bash
+sudo tcpdump port 80 -w http.pcap
+```
+
+Writes a pcap file that can be analyzed with Wireshark.
+
+- Wireshark
+
+Analyze pcap files from ngrep, tcpdump, etc:
+
+```bash
+wireshark http.pcap
+```
+
+## CPU (Linux)
+
+- perf
+
+Run perf, a sampling profiler, to see where your application is spending its time:
+
+```bash
+sudo perf record ruby app.rb
+```
+
+Find out what the program using the most CPU time is doing:
+
+```bash
+sudo perf top
+```
+
+Find out if an app is using the L1 cache which is ~200 times faster than RAM:
+
+```bash
+sudo perf stat -e L1-dcache-load-misses my_golang_app
+```
+
+## References
+
+- http://jvns.ca/debugging-zine.pdf
+- https://8thlight.com/blog/colin-jones/2015/11/06/dtrace-even-better-than-strace-for-osx.html
+</div>
             </div>
         </section>
     </main>
@@ -43,4 +171,3 @@
     </script>
 </body>
 </html>
-

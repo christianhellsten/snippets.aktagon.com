@@ -2,23 +2,59 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title></title>
+    <title>A simple image replacement technique for increased usability and SEO ranking</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,900;1,900&amp;display=swap" rel="stylesheet">
     <link href=" https://cdn.jsdelivr.net/npm/destyle.css@4.0.0/destyle.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
     <header class="flex">
-        <h1 class="fadeout"></h1>
+        <h1 class="fadeout">A simple image replacement technique for increased usability and SEO ranking</h1>
     </header>
     <main>
         <section class="flex">
             <div class="flex-item flex-100">
-                <div class="code"></div>
+                <div class="code">This is currently my favorite image replacement technique. I don't remember where I found it... Using it can improve both your site's usability and your search engine ranking, by allowing both screen readers and search engines to find your h1 headlines. First create the h1 and the description of your page/site, for example:
+
+
+```css
+<h1 id="logo">Viagra, Botox, you name it</h1>
+```
+    
+
+Then create the CSS rule for the page title:
+
+
+```css
+h1#logo {
+  text-indent: -9000px;
+  background: url(logo.gif);
+  width: 200px; /* Width of image */
+  height: 50px; /* Height of image */
+}
+```
+    
+
+People using a modern browser that support CSS will see your logo (the image), and search engines and people using less modern browsers will see the content of the h1 header tag.
+
+Note that if you replace the text of a link then use the outline CSS property to remove the dotted border:
+
+
+```css
+.text-replacement {
+	text-indent: -9000px;
+}
+
+.text-replacement a {
+	outline: none;
+}
+```
+    
+
+</div>
             </div>
         </section>
     </main>
@@ -43,4 +79,3 @@
     </script>
 </body>
 </html>
-

@@ -2,23 +2,46 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title></title>
+    <title>Answering what has happened before and after with WINDOW functions and PostgreSQL</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,900;1,900&amp;display=swap" rel="stylesheet">
     <link href=" https://cdn.jsdelivr.net/npm/destyle.css@4.0.0/destyle.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
     <header class="flex">
-        <h1 class="fadeout"></h1>
+        <h1 class="fadeout">Answering what has happened before and after with WINDOW functions and PostgreSQL</h1>
     </header>
     <main>
         <section class="flex">
             <div class="flex-item flex-100">
-                <div class="code"></div>
+                <div class="code">This query answers what has happened and if something has happened before and after the current row in the group defined by the window function:
+
+```sql
+WITH log AS (
+  SELECT
+    array_agg(event_type) OVER (w ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW EXCLUDE CURRENT ROW) AS what_happened_before,
+    array_agg(event_type) OVER (w ROWS BETWEEN CURRENT ROW AND UNBOUNDED FOLLOWING EXCLUDE CURRENT ROW) AS what_happened_after,
+    bool_or(event_type='error') OVER (w ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW EXCLUDE CURRENT ROW) AS has_happened_before,
+    bool_or(event_type='error') OVER (w ROWS BETWEEN CURRENT ROW AND UNBOUNDED FOLLOWING EXCLUDE CURRENT ROW) AS has_happened_after,
+    *
+  FROM events
+  WINDOW w AS (PARTITION BY month ORDER BY month, id DESC)
+  ORDER BY month, id DESC
+)
+SELECT * FROM log;
+```
+
+This query answers the following questions:
+
+- What has happened in this group before/after the current row?
+- Has a specific event happened in this group before/after the current row?
+
+See documentation for details:
+https://www.postgresql.org/docs/12/sql-expressions.html#SYNTAX-WINDOW-FUNCTIONS
+</div>
             </div>
         </section>
     </main>
@@ -43,4 +66,3 @@
     </script>
 </body>
 </html>
-

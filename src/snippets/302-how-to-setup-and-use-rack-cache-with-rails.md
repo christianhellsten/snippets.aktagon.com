@@ -1,0 +1,134 @@
+---
+id: '302'
+title: How to setup and use Rack::Cache with Rails
+languages:
+- ruby
+tags:
+---
+Add Rack::Cache to your Gemfile:
+
+
+```ruby
+gem 'rack-cache', :require => 'rack/cache'
+```
+    
+
+Configure Rails to use Rack::Cache by adding this to config/environment.rb:
+
+
+```ruby
+config.middleware.use Rack::Cache,
+  :verbose => true,
+  :metastore   => 'file:/var/cache/rack/meta',
+  :entitystore => 'file:/var/cache/rack/body'
+```
+    
+
+This will cache content in /var/cache/rack/meta. Check the documentation for [instructions on how to use memcached](https://github.com/rtomayko/rack-cache#readme).
+
+### Verify configuration
+
+Verify the configuration:
+
+
+```ruby
+rake middleware
+```
+    
+
+You should see something like this:
+
+
+```ruby
+…
+use Rack::Cache, {:metastore=>"file:/var/cache/rack/meta", :entitystore=>"file:/var/cache/rack/body", :verbose=>true}
+…
+```
+    
+
+### Tell Rack::Cache to cache your content
+
+Tell Rack to cache data by calling expires\_in from your controller's action or from a Rails filter:
+
+
+```ruby
+expires_in 5.minutes, :public => true
+```
+    
+
+Rails sets cache-control to private by default, Rack::Cache needs public content.
+
+### Don't cache private data
+
+Note that you must be careful not to cache private data when a user is signed in. In this case you should set the Cache-Control header to private or completely avoid using expires\_in:
+
+
+```ruby
+fail "Don't cache private data" if signed_in?
+expires_in 5.minutes, :public => true
+```
+    
+
+### Verify caching
+
+With verbose set to true, you'll see this in the logs:
+
+
+```ruby
+[cache] trace: cache miss
+[cache] trace: fetching response from backend
+[cache] trace: store backend response in cache (ttl: 300s)
+[cache] trace: storing response in cache
+[cache] trace: delivering response ...
+[cache] trace: cache hit (ttl: 276s)
+[cache] trace: delivering response ...
+```
+    
+
+### Caching more than one type of content
+
+Make sure you cache e.g. HTML and JSON separately. You could use the Vary HTTP header to achieve this:
+
+
+```ruby
+response.headers['Vary'] = 'Accept'
+```
+    
+
+The problem is that almost every browser version has a unique Accept header.
+
+Instead you could try using the cache\_key configuration option to generate a cache key per content type:
+
+
+```ruby
+:cache_key  =>  lambda { |request|
+  Rack::Cache::Key.new(request).generate + ":jebus"
+}
+```
+    
+
+You could also add the format request parameter to the URL, e.g. /json-and-html?format=html
+
+### Advanced configuration
+
+In production you probably want to disallow reloading of content. This can be done with the following configuration options:
+
+
+```ruby
+config.middleware.use Rack::Cache,
+  :metastore   => 'file:/var/cache/rack/meta',
+  :entitystore => 'file:/var/cache/rack/body',
+  :allow_reload     => false,
+  :allow_revalidate => false,
+```
+    
+
+Read the source ([options.rb](https://github.com/rtomayko/rack-cache/blob/master/lib/rack/cache/options.rb)) for more advanced configuration options (ignore\_headers, private\_headers, etc).
+
+### References
+
+[HTTP RFC - Cache-Control](http://www.w3.org/Protocols/rfc2616/rfc2616-sec14.html#sec14.9.1)
+[Rack::Cache options documentation](http://tomayko.com/src/rack-cache/api/classes/Rack/Cache/Options.html)
+[Rails expires\_in documentation](http://api.rubyonrails.org/classes/ActionController/Base.html#M000666)
+[HTTP Vary Header](http://www.subbu.org/blog/2007/12/vary-header-for-restful-applications)
+

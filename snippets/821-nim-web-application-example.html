@@ -2,23 +2,86 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title></title>
+    <title>Nim web application example</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,900;1,900&amp;display=swap" rel="stylesheet">
     <link href=" https://cdn.jsdelivr.net/npm/destyle.css@4.0.0/destyle.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
     <header class="flex">
-        <h1 class="fadeout"></h1>
+        <h1 class="fadeout">Nim web application example</h1>
     </header>
     <main>
         <section class="flex">
             <div class="flex-item flex-100">
-                <div class="code"></div>
+                <div class="code">```bash
+brew install nimlang
+nimble install jester
+vim hello.nim
+nim compile --run hello.nim
+```
+
+```nim
+import jester, asyncdispatch, strutils, asyncnet, htmlgen, logging
+#
+# * CLI *
+#
+# brew install nimlang
+# nimble install jester
+# vim hello.nim
+# nim compile --run hello.nim
+#
+# * DOCS *
+#
+# https://nim-lang.org/docs/htmlgen.html
+# https://learnxinyminutes.com/docs/nim/
+#
+var L = newConsoleLogger()
+addHandler(L)
+
+settings:
+  port = Port(3000)
+  appName = "/"
+  bindAddr = "127.0.0.1"
+
+proc layout(content: string): string =
+  htmlgen.html(htmlgen.body(content))
+
+routes:
+  get "/":
+    logging.debug("render form $1 $2" % [$status, $headers])
+    var content = `div`(
+        h1(a(href="http://nim-lang.org", title="Hello", "Hello Nim")),
+        """
+        <form name="input" action="$1" method="post">
+          <input type="text" name="first_name" value="" placeholder="First name" />
+          <input type="text" name="last_name" value="" placeholder="Last name" />
+          <input type="submit" value="Submit" />
+        </form>
+        """ % [uri("/", absolute = false)]
+        )
+    body.add(layout(content))
+    status = Http200
+
+  post "/":
+    logging.debug("process form $1 $2" % [$status, $headers])
+    # TODO: How can we sanitize submitted form data?
+    var content = `div`(
+        h1(
+          a(href="http://nim-lang.org", title="Hello", "Hello $1 $2" % [$request.params["first_name"], $request.params["last_name"]])
+        ),
+        h4("Form data"),
+        p($request.params),
+    )
+    body.add(layout(content))
+    status = Http200
+
+runForever()
+```
+</div>
             </div>
         </section>
     </main>
@@ -43,4 +106,3 @@
     </script>
 </body>
 </html>
-

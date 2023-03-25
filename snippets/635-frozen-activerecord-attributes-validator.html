@@ -2,23 +2,60 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title></title>
+    <title>Frozen ActiveRecord Attributes Validator</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,900;1,900&amp;display=swap" rel="stylesheet">
     <link href=" https://cdn.jsdelivr.net/npm/destyle.css@4.0.0/destyle.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
     <header class="flex">
-        <h1 class="fadeout"></h1>
+        <h1 class="fadeout">Frozen ActiveRecord Attributes Validator</h1>
     </header>
     <main>
         <section class="flex">
             <div class="flex-item flex-100">
-                <div class="code"></div>
+                <div class="code">Disallows update of frozen attributes:
+
+
+```ruby
+#
+# Validates that an attribute cannot be changed after object has been created.
+#
+# Usage:
+#   validates :user_id, :token, frozen_attribute: true, allow_blank: true
+#
+# allow_blank: set to true to allow setting nil attributes
+#
+class FrozenAttributeValidator < ActiveModel::EachValidator
+  def validate_each(record, attribute, value)
+    changed = record.send("#{attribute}_changed?")
+    was_not_blank = if options[:allow_blank]
+                      !(record.send("#{attribute}_was").blank? && value.present?)
+                    else
+                      true
+                    end
+    if record.persisted? && changed && was_not_blank
+      record.errors.add(attribute, 'is frozen')
+    end
+    true
+  end
+end
+```
+    
+
+Put the thing in app/validators/frozen\_attribute\_validator.rb. Use it like this:
+
+
+```ruby
+class Horse < ActiveRecord::Base
+  validates :user_id, :token, frozen_attribute: true, allow_blank: true
+```
+    
+
+</div>
             </div>
         </section>
     </main>
@@ -43,4 +80,3 @@
     </script>
 </body>
 </html>
-

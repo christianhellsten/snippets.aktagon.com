@@ -2,23 +2,50 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title></title>
+    <title>How to show Rails environment in Rails/Pry console</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,900;1,900&amp;display=swap" rel="stylesheet">
     <link href=" https://cdn.jsdelivr.net/npm/destyle.css@4.0.0/destyle.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
     <header class="flex">
-        <h1 class="fadeout"></h1>
+        <h1 class="fadeout">How to show Rails environment in Rails/Pry console</h1>
     </header>
     <main>
         <section class="flex">
             <div class="flex-item flex-100">
-                <div class="code"></div>
+                <div class="code">Show Rails environment in Rails/Pry console by adding this to ~/.pryrc:
+
+
+```ruby
+def env
+  env = Rails.env
+  if env.production? 
+    "\e[1;31m#{env}\e[0m - " 
+  else
+    "\e[1;30m#{env}\e[0m - " 
+  end
+end
+
+prompt = env
+
+Pry.config.prompt = [
+  proc { |obj, nest_level, _| "#{prompt}(#{obj}):#{nest_level} > " },
+  proc { |obj, nest_level, _| "#{prompt}(#{obj}):#{nest_level} * " }
+]
+
+Pry.config.hooks.add_hook(:before_session, :show_ruby_version) do
+  puts "Ruby #{RUBY_VERSION}-p#{RUBY_PATCHLEVEL}"
+end
+```
+    
+
+Environment name is shown in red, if in production. Note: use pry-rails gem…
+
+</div>
             </div>
         </section>
     </main>
@@ -43,4 +70,3 @@
     </script>
 </body>
 </html>
-

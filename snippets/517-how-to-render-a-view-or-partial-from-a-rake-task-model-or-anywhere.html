@@ -2,23 +2,84 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title></title>
+    <title>How to render a view or partial from a Rake task, model or anywhere</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,900;1,900&amp;display=swap" rel="stylesheet">
     <link href=" https://cdn.jsdelivr.net/npm/destyle.css@4.0.0/destyle.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
     <header class="flex">
-        <h1 class="fadeout"></h1>
+        <h1 class="fadeout">How to render a view or partial from a Rake task, model or anywhere</h1>
     </header>
     <main>
         <section class="flex">
             <div class="flex-item flex-100">
-                <div class="code"></div>
+                <div class="code">This is tested with Rails 3.0.7 and will most likely change in future versions of Rails:
+
+
+```ruby
+# @newsletter in the view file
+assigns = { :newsletter => self }
+
+routes = Rails::Application.routes # Rails => YourApp
+routes.default_url_options = { :host => 'xxx.com' }
+
+av = ActionView::Base.new(Rails::Application::Configuration.new(Rails.root).paths.app.views.first, assigns)
+av.class_eval do
+  include ApplicationHelper
+  include routes.url_helpers
+end
+
+self.html = av.render :template => 'newsletters/show'
+```
+    
+
+After some experimentation I ended up with this code:
+
+
+```ruby
+class RenderHelper
+  class << self
+    def render(assigns, options, request = {})
+      request = { 
+        "SERVER_PROTOCOL" => "http", 
+        "REQUEST_URI" => "/",
+        "SERVER_NAME" => "localhost", 
+        "SERVER_PORT" => 80
+      }.merge(request)
+
+      av = ActionView::Base.new(ActionController::Base.view_paths, assigns)
+      
+      av.config = Rails.application.config.action_controller
+      av.extend ApplicationController._helpers
+      av.controller = ActionController::Base.new
+      av.controller.request = ActionController::Request.new(request)
+      av.controller.response = ActionController::Response.new
+      av.controller.headers = Rack::Utils::HeaderHash.new
+
+      av.class_eval do
+        include Rails.application.routes.url_helpers
+      end
+
+      av.render options 
+    end
+  end
+end
+```
+    
+
+And this is how I use it:
+
+
+```ruby
+RenderHelper.render(:newsletter => self, :template => 'mailchimp/daily')
+```
+    
+
+</div>
             </div>
         </section>
     </main>
@@ -43,4 +104,3 @@
     </script>
 </body>
 </html>
-

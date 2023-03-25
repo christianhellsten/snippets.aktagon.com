@@ -2,23 +2,100 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title></title>
+    <title>My Janus Installation</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,900;1,900&amp;display=swap" rel="stylesheet">
     <link href=" https://cdn.jsdelivr.net/npm/destyle.css@4.0.0/destyle.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
     <header class="flex">
-        <h1 class="fadeout"></h1>
+        <h1 class="fadeout">My Janus Installation</h1>
     </header>
     <main>
         <section class="flex">
             <div class="flex-item flex-100">
-                <div class="code"></div>
+                <div class="code">.vimrc.before:
+
+
+```
+"call janus#disable_plugin('nerdcommenter')
+let mapleader = ","
+
+highlight OverLength ctermbg=red ctermfg=white guibg=#592929
+match OverLength /\%81v.\+/
+
+map <C-h> 5<C-w>>
+map <C-j> 5<C-w><
+map <C-k> 3<C-w>+
+map <C-l> 3<C-w>-
+map <leader><leader> :ZoomWin<cr>
+
+set undofile
+set undodir=~/.vimundo/
+
+set wildignore+=*/tmp/*,*.so,*.swp,*.zip,*/log/*,*/vendor/bundle/*
+
+let g:ctrlp_working_path_mode = 0
+let g:ctrlp_max_height = 30
+
+" No wrapping
+set nowrap
+set textwidth=0 wrapmargin=0
+
+" Strip trailing whitespace
+function! <SID>StripTrailingWhitespaces()
+    if &ft =~ '\|ruby\|javascript\|perl'
+        return
+    endif
+    " Preparation: save last search, and cursor position.
+    let _s=@/
+    let l = line(".")
+    let c = col(".")
+    " Do the business:
+    %s/\s\+$//e
+    " Clean up: restore previous search history, and cursor position
+    let @/=_s
+    call cursor(l, c)
+endfunction
+autocmd BufWritePre * :call <SID>StripTrailingWhitespaces()
+```
+    
+
+Optional .gvimrc.after:
+
+
+```
+colorscheme jellybeans
+" colorscheme molokai
+"colorscheme vibrantink
+set guifont=Monaco:h13
+
+" Position and maximize window
+:winpos 0 0 " Center window
+vsplit " Split window vertically
+wincmd l  " Move to right window
+split     " Split window horizontally
+set fuopt=maxvert,maxhorz  " Maximize
+
+" Remove stuff
+set guioptions-=L
+"set guioptions-=r " Disable window resize
+set guioptions-=T
+```
+    
+
+Optional .vimrc.after:
+
+
+```
+colorscheme vibrantink
+```
+    
+
+</div>
             </div>
         </section>
     </main>
@@ -43,4 +120,3 @@
     </script>
 </body>
 </html>
-

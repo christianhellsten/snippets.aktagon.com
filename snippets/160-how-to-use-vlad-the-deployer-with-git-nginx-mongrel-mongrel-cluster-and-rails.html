@@ -2,23 +2,144 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title></title>
+    <title>How to use Vlad the Deployer with git, nginx, mongrel, mongrel_cluster and Rails</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,900;1,900&amp;display=swap" rel="stylesheet">
     <link href=" https://cdn.jsdelivr.net/npm/destyle.css@4.0.0/destyle.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
     <header class="flex">
-        <h1 class="fadeout"></h1>
+        <h1 class="fadeout">How to use Vlad the Deployer with git, nginx, mongrel, mongrel_cluster and Rails</h1>
     </header>
     <main>
         <section class="flex">
             <div class="flex-item flex-100">
-                <div class="code"></div>
+                <div class="code">This is a draft...
+
+Installing Vlad the Deployer
+----------------------------
+
+
+```ruby
+gem install vlad
+```
+    
+
+Configuring Vlad the Deployer
+-----------------------------
+
+Add this to the end of **RakeFile**:
+
+
+```ruby
+begin
+  require 'rubygems'
+  require 'vlad'
+  Vlad.load :scm => :git
+rescue LoadError => e
+  puts "Unable to load Vlad #{e}."
+end
+```
+    
+
+Note that we're telling Vlad to use git. [This snippet](http://snippets.aktagon.com/snippets/157-Installing-compiling-and-using-git-with-Ruby-on-Rails-on-Mac-OS-X-Leopard-and-Debian-Linux-) gives you a quick introduction on how to use git with Rails.
+
+Creating the deployment recipe
+------------------------------
+
+If you're uncertain what these variables mean, have a look at the [docs](http://hitsquad.rubyforge.org/vlad/files/doco/variables_txt.html).
+[This folder](http://hitsquad.rubyforge.org/vlad/files/) is also worth a look, and don't forget to take a peek at the vlad source code.
+
+
+```ruby
+#
+# General configuration
+#
+set :ssh_flags,             '-p 666'
+set :application,           'xxx.com'
+set :domain,                '127.0.01'
+set :deploy_to,             '/var/www/xxx.com'
+set :repository,            '/var/lib/git/repositories/xxx.com/.git/'
+
+
+#
+# Mongrel configuration
+#
+set :mongrel_clean,         true
+set :mongrel_command,       'sudo mongrel_rails'
+set :mongrel_group,         'www-data'
+set :mongrel_port,          9000
+set :mongrel_servers,       3
+
+#set :mongrel_address,       '127.0.0.1'
+#set(:mongrel_conf)          { '#{shared_path}/mongrel_cluster.conf' }
+#set :mongrel_config_script, nil
+#set :mongrel_environment,   'production'
+#set :mongrel_log_file,      nil
+#set :mongrel_pid_file,      nil
+#set :mongrel_prefix,        nil
+#set :mongrel_user,          'mongrel'
+
+#
+# Customize Vlad to our needs
+#
+namespace :vlad do
+  #
+  # Add an after_update hook
+  #
+  remote_task :update do
+    Rake::Task['vlad:after_update'].invoke
+  end
+
+  #
+  # The after_update hook, which is run after vlad:update
+  #
+  remote_task :after_update do
+  # Link to shared resources, if you have them in .gitignore
+  #  run "ln -s #{deploy_to}/shared/system/database.yml #{deploy_to}/current/config/database.yml"
+  end
+
+  #
+  # Deploys a new version of your application
+  #
+  remote_task :deploy => [:update, :migrate, :start_app]
+end
+```
+    
+
+Setup the server
+----------------
+
+
+```ruby
+$ rake vlad:setup
+```
+    
+
+This will create the necessary folders and mongrel\_cluster configuration file.
+
+Deploy the application
+----------------------
+
+Now deploy the application with vlad:deploy, which is a custom rake task that we added to the deployment recipe:
+
+
+```ruby
+$ rake vlad:deploy
+```
+    
+
+Copying your SSH public key to the remote server
+------------------------------------------------
+
+Vlad uses ssh for executing commands on the remotely, and rsync for copying the build to your server, which means you'll quickly grow tired of typing your password each time a command is run.
+
+This problem is solved by copying your public SSH keys to the remote server, [this snippet](http://snippets.aktagon.com/snippets/120-SSH-public-key-encryption-How-to-generate-the-key-and-how-to-copy-it-to-the-remote-machine-) explains how to do exactly that.
+
+</div>
             </div>
         </section>
     </main>
@@ -43,4 +164,3 @@
     </script>
 </body>
 </html>
-

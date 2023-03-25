@@ -2,23 +2,83 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title></title>
+    <title>How to write a custom DataMapper type for marshaled data</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,900;1,900&amp;display=swap" rel="stylesheet">
     <link href=" https://cdn.jsdelivr.net/npm/destyle.css@4.0.0/destyle.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
     <header class="flex">
-        <h1 class="fadeout"></h1>
+        <h1 class="fadeout">How to write a custom DataMapper type for marshaled data</h1>
     </header>
     <main>
         <section class="flex">
             <div class="flex-item flex-100">
-                <div class="code"></div>
+                <div class="code">This is an example of how to write a custom data type for Ruby's DataMapper. We're going to write something similar to DataMapper::Property::Object
+
+DataMapper &gt;= 1.0
+--------------------
+
+This code is for DataMapper version 1.0 and later where the DataMapper type concept has been merged with properties:
+
+
+```ruby
+module DataMapper
+  class Property
+    class Marshal < Object
+      primitive ::Object
+      def load(value)
+        ::Marshal.load(value) if value
+      end
+
+      def dump(value)
+        ::Marshal.dump(value) if value
+      end
+    end
+  end
+end
+```
+    
+
+DataMapper &lt; 1.0
+-------------------
+
+
+```ruby
+require 'dm-core'
+
+module DataMapper
+  module Types
+    class Marshal < DataMapper::Type
+      primitive Text
+
+      def self.load(value, property)
+        ::Marshal.load(value) if value
+      end
+
+      def self.dump(value, property)
+        ::Marshal.dump(value) if value
+      end
+    end 
+  end 
+end
+```
+    
+
+Next declare your field:
+
+
+```ruby
+property :properties, Marshal
+```
+    
+
+Which is the same as **property :properties, Object** in this case.
+
+</div>
             </div>
         </section>
     </main>
@@ -43,4 +103,3 @@
     </script>
 </body>
 </html>
-

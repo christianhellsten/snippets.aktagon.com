@@ -2,23 +2,95 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title></title>
+    <title>Where should I store my application configuration in Sinatra?</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,900;1,900&amp;display=swap" rel="stylesheet">
     <link href=" https://cdn.jsdelivr.net/npm/destyle.css@4.0.0/destyle.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
     <header class="flex">
-        <h1 class="fadeout"></h1>
+        <h1 class="fadeout">Where should I store my application configuration in Sinatra?</h1>
     </header>
     <main>
         <section class="flex">
             <div class="flex-item flex-100">
-                <div class="code"></div>
+                <div class="code">This is one option:
+
+
+```ruby
+require 'yaml'
+require 'ostruct'
+require 'sinatra/base'
+
+# Usage:
+#
+# config/application.yml:
+#   development:
+#     username: ...
+#   production:
+#     username: ...
+#   url: http://...
+#
+# app.rb:
+# class App < Sinatra::Base                    
+#   register Sinatra::Configuration            
+#   load_configuration 'config/application.yml'
+#   get '/' do
+#     App.configuration.username
+#   end
+#
+module Sinatra
+  module Configuration
+    # From https://www.ruby-forum.com/topic/137104
+    class NestedOstruct
+      def self.new(hash={})
+        OpenStruct.new(hash.inject({}){|r,p| r[p[0]] = p[1].kind_of?(Hash) ?  NestedOstruct.new(p[1]) : p[1]; r })
+      end
+
+      def self.to_ostruct(object)
+        return case object
+        when Hash
+          object = object.clone
+          object.each do |key, value|
+            object[key] = to_ostruct(value)
+          end
+          OpenStruct.new(object)
+        when Array
+          object = object.clone
+          object.map! { |i| to_ostruct(i) }
+        else
+          object
+        end
+      end
+    end
+
+    def self.registered(base)
+      base.set :environments, %w[test development staging production]
+    end
+
+    def load_configuration(file, namespace = :configuration)
+      set namespace, parse_configuration(YAML.load_file(file)) || {}
+    end
+
+    private
+
+    def parse_configuration(hash)
+      base = hash.except(*environments)
+      base.merge!(hash[environment.to_s])
+      NestedOstruct.to_ostruct(base)
+    end
+  end
+
+  register Configuration
+  Delegator.delegate :load_configuration
+end
+```
+    
+
+</div>
             </div>
         </section>
     </main>
@@ -43,4 +115,3 @@
     </script>
 </body>
 </html>
-

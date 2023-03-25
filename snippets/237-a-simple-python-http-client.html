@@ -2,23 +2,71 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title></title>
+    <title>A simple Python HTTP client</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,900;1,900&amp;display=swap" rel="stylesheet">
     <link href=" https://cdn.jsdelivr.net/npm/destyle.css@4.0.0/destyle.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
     <header class="flex">
-        <h1 class="fadeout"></h1>
+        <h1 class="fadeout">A simple Python HTTP client</h1>
     </header>
     <main>
         <section class="flex">
             <div class="flex-item flex-100">
-                <div class="code"></div>
+                <div class="code">A simple HTTP client I had laying around that I wrote a long time ago. It supports cookies, redirects and stuff:
+
+
+```python
+#!/usr/bin/env python
+#
+#     Http
+#
+#     A simple HTTP client that supports persistent cookies
+#
+
+import cookielib
+import httplib
+#httplib.HTTPConnection.debuglevel = 1
+import urllib2
+
+class Http:
+  def __init__(self, redirect_callback = None):
+    self.redirect_callback = redirect_callback
+    self.cookie_jar = cookielib.CookieJar()
+    self.opener = urllib2.build_opener(urllib2.HTTPCookieProcessor (self.cookie_jar))
+
+    urllib2.install_opener(self.opener)
+
+  def get(self, url, headers = None):
+    request = urllib2.Request(url, headers = headers)
+    return self.execute_request(request)
+
+  def post(self, url, headers = None, parameters = None):
+    data = None
+    if parameters != None:
+      data = urllib.urlencode(parameters)
+
+    request = urllib2.Request(url, data, headers)
+    return self.execute_request(request)
+
+  def execute_request(self, request):
+    response = self.opener.open(request)
+    # Check for redirect, maybe better way to do this
+    if response.geturl() != request.get_full_url():
+      if self.redirect_callback == None:
+        raise "Redirected to '" + response.geturl() + "' but no redirect callback defined"
+      else:
+        self.redirect_callback(response)
+
+    return response
+```
+    
+
+</div>
             </div>
         </section>
     </main>
@@ -43,4 +91,3 @@
     </script>
 </body>
 </html>
-

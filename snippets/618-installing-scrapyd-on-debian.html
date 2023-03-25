@@ -2,23 +2,98 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title></title>
+    <title>Installing Scrapyd on Debian</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,900;1,900&amp;display=swap" rel="stylesheet">
     <link href=" https://cdn.jsdelivr.net/npm/destyle.css@4.0.0/destyle.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
     <header class="flex">
-        <h1 class="fadeout"></h1>
+        <h1 class="fadeout">Installing Scrapyd on Debian</h1>
     </header>
     <main>
         <section class="flex">
             <div class="flex-item flex-100">
-                <div class="code"></div>
+                <div class="code">Install Debian pre-requisites
+-----------------------------
+
+
+```bash
+sudo apt-get install python-pip python-dev
+# Scrapyd image module requirements
+sudo apt-get install libjpeg-dev libfreetype6-dev zlib1g-dev libpng12-dev
+```
+    
+
+Install Python libraries
+
+Customize for your project:
+
+
+```bash
+sudo pip install unidecode mysql-python pyes pil
+```
+    
+
+Use pip freeze if you want:
+
+
+```bash
+pip freeze > requirements.txt
+```
+    
+
+Install scrapy
+
+
+```bash
+git clone https://github.com/scrapy/scrapy.git
+cd scrapy
+sudo python setup.py install
+```
+    
+
+Install scrapyd
+
+
+```bash
+git clone https://github.com/scrapy/scrapyd.git
+cd scrapyd
+sudo python setup.py install
+```
+    
+
+Deploy project to Scrapyd (http://localhost:6800)
+
+
+```bash
+cd project
+scrapy deploy
+```
+    
+
+Run
+
+
+```bash
+- Start a spider
+curl http://localhost:6800/schedule.json -d project=default -d spider=xxx
+
+- List spiders
+curl http://localhost:6800/listspiders.json?project=default
+
+- List jobs
+curl http://localhost:6800/listjobs.json?project=default
+
+- Cancel job
+curl http://localhost:6800/cancel.json -d project=default -d job=4abb6c78fd1a11e28ed9fefdb24fae0a
+```
+    
+
+</div>
             </div>
         </section>
     </main>
@@ -43,4 +118,3 @@
     </script>
 </body>
 </html>
-

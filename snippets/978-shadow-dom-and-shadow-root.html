@@ -2,23 +2,59 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title></title>
+    <title>Shadow DOM and shadow root</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,900;1,900&amp;display=swap" rel="stylesheet">
     <link href=" https://cdn.jsdelivr.net/npm/destyle.css@4.0.0/destyle.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
     <header class="flex">
-        <h1 class="fadeout"></h1>
+        <h1 class="fadeout">Shadow DOM and shadow root</h1>
     </header>
     <main>
         <section class="flex">
             <div class="flex-item flex-100">
-                <div class="code"></div>
+                <div class="code">https://developer.mozilla.org/en-US/docs/Web/Web_Components/Using_shadow_DOM
+
+> Shadow DOM is very important for web components because it allows specific sections of the HTML document to be completely isolated from the rest of the document. This means CSS styles that are applied to the DOM are not applied to the Shadow DOM, and vice versa. 
+
+
+The shadow DOM can only be accessed through the reference returned by attachShadow:
+
+```javascript
+const shadowComponent =  document.getElementById('component').attachShadow({mode: 'open'}); 
+const p = document.createElement('p'); 
+p.setAttribute('class', 'title'); 
+p.innerText = 'Lorem ipsum'; 
+shadowComponent.appendChild(p);
+```
+
+The shadow root can be styled with CSS:
+
+```javascript
+const css = document.createElement('style'); 
+css.innerText = ` 
+  .title { 
+      font-size: 2rem; 
+      font-weight: bolder; 
+  }
+`; 
+shadowComponent.appendChild(css);
+```
+
+Use templates and slots make it easier to create components:
+https://developer.mozilla.org/en-US/docs/Web/Web_Components/Using_templates_and_slots
+
+Reference:
+https://developer.mozilla.org/en-US/docs/Web/Web_Components/Using_shadow_DOM
+
+Also see the Awesome Styled Components repository and the Styled Components project for inspiration:
+https://github.com/styled-components/awesome-styled-components
+https://styled-components.com/
+</div>
             </div>
         </section>
     </main>
@@ -43,4 +79,3 @@
     </script>
 </body>
 </html>
-

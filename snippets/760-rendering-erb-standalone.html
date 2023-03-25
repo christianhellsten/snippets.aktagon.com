@@ -2,23 +2,63 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title></title>
+    <title>Rendering ERB standalone</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,900;1,900&amp;display=swap" rel="stylesheet">
     <link href=" https://cdn.jsdelivr.net/npm/destyle.css@4.0.0/destyle.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
     <header class="flex">
-        <h1 class="fadeout"></h1>
+        <h1 class="fadeout">Rendering ERB standalone</h1>
     </header>
     <main>
         <section class="flex">
             <div class="flex-item flex-100">
-                <div class="code"></div>
+                <div class="code">How to Render ERB standalone
+
+## Basic example
+
+```ruby
+require 'erb'
+msg = "world"
+puts ERB.new("hello #{msg}").result(binding)
+=> hello world
+```
+
+## Advanced example
+
+```ruby
+#
+# Renders an ERB template.
+#
+# Example:
+#
+#  assert_equal "world", Utils::ERB.render(
+#    template: "<%= hello %>",
+#    locals: { hello: "world"}
+#  )
+#
+def self.render(template:, locals:)
+  locals = Struct.new(*locals.keys).new(*locals.values) if locals.is_a?(Hash)
+  # dash => trim whitespaces, e.g., <% if x = y -%>
+  ::ERB.new(template, nil, '-').result(locals.instance_eval { binding })
+rescue Exception => e
+  message = "#{e.class}: #{e} "
+  line = e.backtrace.grep(/^\(erb\)/)[0]
+  if line
+    line_no = line.split(':')[1].to_i
+    message += "while evaluating line #{line_no}:\n"
+    message += template.split("\n")[line_no-1]
+    message += "\nBacktrace: " + e.backtrace.join("\n")
+    raise e.class, message
+  end
+  raise e
+end
+```
+</div>
             </div>
         </section>
     </main>
@@ -43,4 +83,3 @@
     </script>
 </body>
 </html>
-

@@ -2,23 +2,67 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title></title>
+    <title>Populating a table with n checkbox fields </title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,900;1,900&amp;display=swap" rel="stylesheet">
     <link href=" https://cdn.jsdelivr.net/npm/destyle.css@4.0.0/destyle.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
     <header class="flex">
-        <h1 class="fadeout"></h1>
+        <h1 class="fadeout">Populating a table with n checkbox fields </h1>
     </header>
     <main>
         <section class="flex">
             <div class="flex-item flex-100">
-                <div class="code"></div>
+                <div class="code">Let's say you have 10 checkboxes and you want to display 4 per line as shown here:
+
+
+```ruby
+x  x  x  x
+x  x  x  x
+x  x
+```
+    
+
+This can be achieved with the following code:
+
+
+```ruby
+<table>
+<% 
+	from = 0
+	to   = checkboxes.size
+	cols = 4
+
+	from.step(to, cols) do |i| 
+%>
+	<tr>
+	<% for checkbox in checkboxes.slice(i..i + (cols -1)) %>
+   		<td><input type="checkbox" id="<%= checkbox.name %>" name="column" value="<%= checkbox.value %>"/> <label for="<%= column.name %>"><%= column.name%></label></td>
+	<% end %>
+	</tr>
+<% end %>
+</table>
+```
+    
+
+If you're using Rails you can also use the built in method described [here](http://weblog.rubyonrails.org/2006/03/01/new-in-rails-enumerable-group_by-and-array-in_groups_of/).
+
+
+```ruby
+%w(1 2 3 4 5 6 7).in_groups_of(3) {|g| p g}
+["1", "2", "3"]
+["4", "5", "6"]
+["7", nil, nil]
+```
+    
+
+You can also use the [Enumerator class](http://www.ruby-doc.org/stdlib/libdoc/enumerator/rdoc/index.html)
+
+</div>
             </div>
         </section>
     </main>
@@ -43,4 +87,3 @@
     </script>
 </body>
 </html>
-

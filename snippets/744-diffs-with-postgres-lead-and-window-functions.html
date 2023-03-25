@@ -2,23 +2,58 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title></title>
+    <title>Diffs with Postgres' lead and window functions</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,900;1,900&amp;display=swap" rel="stylesheet">
     <link href=" https://cdn.jsdelivr.net/npm/destyle.css@4.0.0/destyle.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
     <header class="flex">
-        <h1 class="fadeout"></h1>
+        <h1 class="fadeout">Diffs with Postgres' lead and window functions</h1>
     </header>
     <main>
         <section class="flex">
             <div class="flex-item flex-100">
-                <div class="code"></div>
+                <div class="code">Our requirement
+---------------
+
+Output the previous quarter's value for each company:
+
+
+```sql
+ID | NAME              | QUARTER     |  VALUE    | PREVIOUS_VALUE
+1  | CORP              | 2015-03-31  |  44317.00 | 38755.00
+1  | CORP              | 2014-12-31  |  38755.00 | 33617.00
+1  | CORP              | 2014-09-30  |  33617.00 | 32406.00
+1  | CORP              | 2014-06-30  |  32406.00 | 29909.00
+1  | CORP              | 2014-03-31  |  29909.00 | 0
+```
+    
+
+The solution
+------------
+
+To calculate the change we use the window and lead functions:
+
+
+```sql
+WITH diffs AS (
+  select
+    *,
+    coalesce(lead(value) over (partition by company_id order by quarter desc), 0) as previous_value
+  from
+    history
+)
+select * from diffs;
+```
+    
+
+Note that the window is partitioned by company\_id, and ordered by quarter.
+
+</div>
             </div>
         </section>
     </main>
@@ -43,4 +78,3 @@
     </script>
 </body>
 </html>
-

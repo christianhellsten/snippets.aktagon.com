@@ -1,0 +1,87 @@
+---
+id: '684'
+title: A Reusable JavaScript Modal Dialog Based on Bootstrap Modal
+languages:
+- coffeescript
+tags:
+---
+The Coffeescript class:
+
+
+```coffeescript
+root = exports ? this
+
+class Modal
+  constructor: (options = {}) ->
+    @options = options
+    @id = options.id ? 'modal-dialog-' + Math.round((Math.random() * 1000))
+    @dom_id = "##{@id}"
+    @onPrimaryButton = options.onPrimaryButton ? ->
+    @onSecondaryButton = options.onSecondaryButton ? ->
+    @template = options.template ? HandlebarsTemplates['modal'](id: @id)
+    @render()
+
+  render: ->
+    $('body').append(@template)
+    @modal = $(@dom_id)
+    _this = this
+    @modal.find('.btn-primary').on 'click', ->
+      _this.onPrimaryButton(this)
+    @modal.find('.btn-secondary').on 'click', ->
+      _this.onSecondaryButton(this)
+
+  setButtonText: (primary, secondary) ->
+    @modal.find('.btn-primary').html(primary)
+    @modal.find('.btn-secondary').html(secondary)
+
+  setTitle: (title) ->
+    @modal.find('.title').html(title)
+
+  setBody: (body) ->
+    @modal.find('.body').html(body)
+
+  show: ->
+    @modal.modal('show')
+
+  hide: ->
+    @modal.modal('hide')
+
+root.Modal = Modal
+```
+    
+
+The view (bootstrap 2.3.2):
+
+
+```coffeescript
+<div class="modal hide fade" id="{{id}}">
+  <div class="modal-header">
+    <button aria-hidden="true" class="close" data-dismiss="modal" type="button"> &times;</button>
+    <h3 class="title"></h3>
+  </div>
+  <div class="modal-body body">
+  </div>
+  <div class="modal-footer">
+    <button class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+    <button class="btn btn-primary" data-dismiss="modal">Ok</button>
+  </div>
+</div>
+```
+    
+
+Usage, e.g.:
+
+
+```coffeescript
+class Notifications
+  constructor:  ->
+    @modal = new Modal
+      onPrimaryButton: $.proxy(@onItemDelete, this)
+      onSecondaryButton: $.proxy(@onItemRead, this)
+  onItemDelete: ->
+    # do something when primary button was clicked
+  onItemRead: ->
+    # do something when secondary button was clicked
+```
+    
+

@@ -2,23 +2,308 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title></title>
+    <title>Sinatra App Template</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,900;1,900&amp;display=swap" rel="stylesheet">
     <link href=" https://cdn.jsdelivr.net/npm/destyle.css@4.0.0/destyle.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
     <header class="flex">
-        <h1 class="fadeout"></h1>
+        <h1 class="fadeout">Sinatra App Template</h1>
     </header>
     <main>
         <section class="flex">
             <div class="flex-item flex-100">
-                <div class="code"></div>
+                <div class="code">A quick and dirty template for Sinatra apps with many of the features you can find in Rails.
+
+Supports:
+\* Slim views
+\* Sass stylesheets
+\* Coffee script
+\* [Compass](compass-style.org)
+\* Susy ([susy.oddbird.net](http://susy.oddbird.net))
+\* Asset pipeline (Sprockets)
+\* View helpers
+\* A console
+\* I18n
+\* Logging
+\* ActiveRecord+migrations
+\* Debugging with Pry
+\* Flash messages
+\* Class reloading in development mode
+\* Security features such as CSRF, Cross Site Scripting, etc. All provided by Rack::Protection and Sinatra.
+
+Create app.rb:
+
+
+```ruby
+require 'slim'
+require 'i18n'
+require 'mysql2'
+require 'sprockets'
+require 'sprockets-sass'
+require 'compass'
+require 'susy'
+require 'sinatra/base'
+require 'sinatra/cookies'
+require 'sinatra/content_for'
+require 'sinatra/activerecord'
+require 'sinatra/partial'
+require 'rack-flash'
+
+class App < Sinatra::Base
+  enable :sessions, :logging
+  register Sinatra::Partial
+
+  use Rack::MethodOverride
+  use Rack::Flash, :accessorize => [:info, :error, :success], :sweep => true
+  use Rack::Protection::AuthenticityToken # HTML forms now require: input name="authenticity_token" value=session[:csrf] type="hidden"
+  set :public_folder, File.dirname(__FILE__) + '/public'
+  set :views, File.dirname(__FILE__) + '/app/views'
+  set :slim, :layout_engine => :slim, :layout => :'layouts/default', :use_html_safe => true, :pretty => App.environment == :development
+  set :partial_template_engine, :slim
+  set :session_secret, "25729f31a6bc7c57f8575db9b79ee468...." # SecureRandom.hex(128)
+  set :cookie_options, { path: '/'}
+
+  def self.sprockets
+    project_root = File.expand_path(File.dirname(__FILE__))
+    assets = Sprockets::Environment.new(project_root)
+    assets.append_path('app/js')
+    assets.append_path('app/css')
+    # Twitter Bootstrap...
+    assets.append_path('lib/bootstrap/js')
+    assets.append_path('lib/bootstrap/css')
+    assets
+  end
+
+  helpers Sinatra::Cookies
+  helpers Sinatra::ContentFor
+  helpers do
+    def t(*args)
+      ::I18n::t(*args)
+    end
+    def authenticity_token
+      session[:csrf] = SecureRandom.hex(128) unless session.has_key?(:csrf)
+      %Q{<input type="hidden" name="authenticity_token" value="#{session[:csrf]}"/>}
+    end
+  end
+
+  configure do
+    # Configure logging, WTF
+    set :logging, false
+    class ::Logger; alias_method :write, :<<; end
+    logfile = File.join(App.root, 'log', "#{App.environment}.log")
+    # Send STDs to log file
+    $stdout.reopen(logfile)
+    $stderr.reopen(logfile)
+    $stderr.sync = true
+    $stdout.sync = true
+    # Weekly roll
+    log  = Logger.new(logfile, 'weekly')
+    log.level = Logger::DEBUG
+    # use Rack::CommonLogger, log
+    set :log, log
+
+    Compass.add_project_configuration(File.join(Sinatra::Application.root, 'config', 'compass.rb'))
+  end
+
+  configure :development do
+    require "sinatra/reloader"
+    register Sinatra::Reloader
+    also_reload 'app/**/*.rb'
+    also_reload 'lib/**/*.rb'
+    also_reload 'conf/**/*.rb'
+    set :raise_errors, true
+  end
+
+  [:error, :info, :success].each do |key|
+    class_eval "
+    def flash_#{key}(key, now=true)
+      message(key, :#{key}, now)
+    end
+    "
+  end
+
+  def message(key, type=:notice, now=true)
+    hash = now ? flash.now : flash
+    hash[type] = I18n.t(key)
+  end
+
+  # Set view variables, e.g.:
+  # - meta :title, "Page title"
+  # Retrieve view variables, e.g.:
+  # = meta :title
+  def meta(key, value = nil)
+    value ? content_for(key) { value } : yield_content(key)
+  end
+
+  # Helper method for creating HTML tags:
+  # content_tag :a, 'Contact us', href: 'mailto:xxx@xxx.com'
+  def content_tag(name, content, attributes = nil)
+    name = html_escape(name) unless name.html_safe?
+    content = html_escape(content) unless content.html_safe?
+    attributes = attributes.map do |name, value|
+      value = html_escape(value) unless value.html_safe?
+      %Q{#{name}="#{value}"}
+    end if attributes && attributes.any?
+    start = [name, attributes.join(" ")].reject(&:nil?).join(' ')
+    "<#{start}>#{content}</#{name}>"
+  end
+
+  def debug_something_with_pry
+    Kernel.binding.pry
+  end
+
+  error do
+    slim :'errors/500'
+  end
+
+  not_found do
+    slim :'errors/404'
+  end
+
+  error ActiveRecord::RecordNotFound do
+    slim :'errors/404'
+  end
+
+  before do
+    I18n.locale = params[:locale] || I18n.default_locale
+  end
+end
+
+# Require attr_accessible...
+ActiveRecord::Base.send(:attr_accessible, nil)
+
+# Move to config/init/db.rb if you like
+OpenStruct.new(YAML::load(File.open('config/database.yml'))[App.environment.to_s].symbolize_keys).tap do |config|
+  ActiveRecord::Base.establish_connection(
+    host: config.host,
+    adapter: config.adapter,
+    database: config.database,
+    username: config.username,
+    password: config.password
+  )
+end
+
+%w(models controllers concerns).each do |name|
+  Dir[File.join('app', name, '**/*.rb')].each do |file|
+    require_relative file
+  end
+end
+
+# Move to config/init/i18n.rb if you like
+Dir[File.join(App.root, 'config', 'locales', '*.yml')].each do |file|
+  I18n.backend.load_translations(file)
+end
+I18n.default_locale = :en
+
+# Move to app/controllers/root_controller.rb
+class RootController < App
+  get '/' do
+    flash_alert "Thanks for nothing"
+    slim :'index'
+  end
+end
+```
+    
+
+Create Gemfile:
+
+
+```ruby
+source :rubygems
+gem 'thin'
+gem 'slim'
+gem 'sass'
+gem 'sinatra'
+gem 'sprockets'
+gem 'sprockets-sass'
+gem 'compass'
+gem 'susy'
+
+gem 'sinatra-partial'
+gem 'coffee-script'
+gem 'therubyracer'
+group :development do
+  gem 'sinatra-reloader'
+  gem 'sinatra-activerecord'
+  gem 'pry'
+end
+gem 'rack-flash3'
+gem 'awesome_print'
+gem 'mysql2'
+```
+    
+
+Create Rakefile:
+
+
+```ruby
+require 'bundler/setup'
+require 'sinatra/activerecord/rake'
+require 'pry'
+require './app'
+
+Dir[File.join('lib', 'tasks', '**', '*.rake')].each do |file|
+  import file
+end
+
+task :console do
+  binding.pry
+end
+
+# Asset pipeline (Sprockets)
+namespace :assets do
+  task :precompile do
+    App.sprockets['application.js'].write_to('public/assets/application.js')
+    App.sprockets['application.css'].write_to('public/assets/application.css')
+  end
+end
+```
+    
+
+Create config/database.yml:
+
+
+```ruby
+development:
+  adapter: mysql2
+  database: xxx_development
+  username: root
+  password: 
+  host: localhost
+```
+    
+
+Create config.ru:
+
+
+```ruby
+require './app'
+map "/" do
+  run RootController
+end
+
+map "/assets" do
+ run App.sprockets
+end
+```
+    
+
+Run:
+
+
+```ruby
+mkdir -p app/controllers app/models app/concerns app/views/layouts app/css app/js lib tmp log public/img config/init db/migrate lib/tasks
+bundle
+bundle exec thin start -p 3000
+```
+    
+
+</div>
             </div>
         </section>
     </main>
@@ -43,4 +328,3 @@
     </script>
 </body>
 </html>
-

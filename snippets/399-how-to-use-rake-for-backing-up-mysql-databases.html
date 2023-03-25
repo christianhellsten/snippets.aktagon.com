@@ -2,23 +2,63 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title></title>
+    <title>How to use Rake for backing up MySQL databases</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,900;1,900&amp;display=swap" rel="stylesheet">
     <link href=" https://cdn.jsdelivr.net/npm/destyle.css@4.0.0/destyle.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
     <header class="flex">
-        <h1 class="fadeout"></h1>
+        <h1 class="fadeout">How to use Rake for backing up MySQL databases</h1>
     </header>
     <main>
         <section class="flex">
             <div class="flex-item flex-100">
-                <div class="code"></div>
+                <div class="code">This is a customized version of [this script](http://pastie.org/199267):
+
+
+```ruby
+require 'find'
+
+namespace :db do
+
+  desc "Backup the database to a file. Options: DIR=base_dir RAILS_ENV=production MAX=20"
+
+  task :backup => [:environment] do
+    datestamp = Time.now.strftime("%Y-%m-%d_%H-%M-%S")
+    base_path = ENV["DIR"] || "db"
+    backup_base = File.join(base_path, 'backup')
+    backup_folder = File.join(backup_base, datestamp)
+    backup_file = File.join(backup_folder, "#{RAILS_ENV}_dump.sql.gz")
+    FileUtils.mkdir_p(backup_folder)
+    db_config = ActiveRecord::Base.configurations[RAILS_ENV]
+    pass = ''
+    pass = '-p' + db_config['password'] if db_config['password']
+    cmd = "mysqldump -P #{db_config['port']} -h #{db_config['host']} -u #{db_config['username']} #{pass} #{db_config['da
+tabase']} -Q --add-drop-table -O add-locks=FALSE -O lock-tables=FALSE | gzip -c > #{backup_file}"
+    sh cmd
+    dir = Dir.new(backup_base)
+    all_backups = dir.entries[2..-1].sort.reverse
+    puts "Created backup: #{backup_file}"
+    max_backups = (ENV["MAX"] || 20).to_i
+    puts max_backups
+    unwanted_backups = all_backups[max_backups..-1] || []
+    for unwanted_backup in unwanted_backups
+      FileUtils.rm_rf(File.join(backup_base, unwanted_backup))
+      puts "deleted #{unwanted_backup}"
+    end
+    puts "Deleted #{unwanted_backups.length} backups, #{all_backups.length - unwanted_backups.length} backups available"
+
+  end
+
+end
+```
+    
+
+</div>
             </div>
         </section>
     </main>
@@ -43,4 +83,3 @@
     </script>
 </body>
 </html>
-

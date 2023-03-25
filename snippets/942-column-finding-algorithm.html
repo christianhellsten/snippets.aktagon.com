@@ -2,23 +2,63 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title></title>
+    <title>Column finding algorithm</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,900;1,900&amp;display=swap" rel="stylesheet">
     <link href=" https://cdn.jsdelivr.net/npm/destyle.css@4.0.0/destyle.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
     <header class="flex">
-        <h1 class="fadeout"></h1>
+        <h1 class="fadeout">Column finding algorithm</h1>
     </header>
     <main>
         <section class="flex">
             <div class="flex-item flex-100">
-                <div class="code"></div>
+                <div class="code">Given text containing left and right aligned data separated by one or more spaces this algorithm will try to detect the columns indices:
+
+```python
+def find_columns(text):
+    left_aligned_cols = {}
+    right_aligned_cols = {}
+    lines = text.split("\n")
+    line_count = len(lines)
+
+    for line in lines:
+        prev_char = None
+        # start-of-line is a column delimiter
+        if '0' not in left_aligned_cols:
+            left_aligned_cols['0'] = 0
+        left_aligned_cols['0'] += 1
+        for pos, char in enumerate(line):
+            # left-aligned column
+            if prev_char and prev_char.isspace() and not char.isspace():
+                key = str(pos)
+                if key not in left_aligned_cols:
+                    left_aligned_cols[key] = 0
+                left_aligned_cols[key] += 1
+            # right-aligned column
+            if prev_char and not prev_char.isspace() and char.isspace():
+                key = str(pos + 1)
+                if key not in right_aligned_cols:
+                    right_aligned_cols[key] = 0
+                right_aligned_cols[key] += 1
+            prev_char = char
+        # end-of-line is a column delimiter
+        key = str(len(line))
+        if key not in right_aligned_cols:
+            right_aligned_cols[key] = 0
+        right_aligned_cols[key] += 1
+
+    left_aligned_cols = [ int(key) for (key, count) in left_aligned_cols.items() if count == line_count ]
+    right_aligned_cols = [ int(key) for (key, count) in right_aligned_cols.items() if count == line_count ]
+    column_indices = sorted(set(left_aligned_cols + right_aligned_cols))
+    columns = list(map(list, zip(column_indices, column_indices[1:])))
+    return columns
+```
+</div>
             </div>
         </section>
     </main>
@@ -43,4 +83,3 @@
     </script>
 </body>
 </html>
-

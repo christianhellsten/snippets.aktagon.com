@@ -1,0 +1,236 @@
+---
+id: '161'
+title: Using backgroundrb to execute tasks asynchronously in Rails
+languages:
+- ruby
+tags:
+- argument
+- keyword
+- options
+- ruby
+---
+Draft...
+
+Planning on using BackgroundDRB? Take a long look at the alternatives first
+---------------------------------------------------------------------------
+
+Ask yourself, do you really need a complex solution like BackgroundDRB? Most likely you don't, so use a simple daemonized process instead, see [this snippet about the daemons gem](http://snippets.aktagon.com/snippets/212-How-to-create-a-daemon-process-using-Ruby-and-the-daemons-RubyGem) for more information.
+
+Heck, even a simple Ruby script run by cron every 5 minutes will be more stable than BackgroundDRB and require less work.
+
+Even if you really need to process a lot of data asynchronously in the background, I wouldn't recommend BackgroundDRB, it's riddled with bugs and unstable in production, so use the [BJ plugin](http://agilewebdevelopment.com/plugins/bj) instead.
+
+Anyway, continue reading if you want to use BackgroundDRB...
+
+Installing the prerequisites:
+-----------------------------
+
+
+```ruby
+$ sudo gem install chronic packet
+```
+    
+
+Installing backgroundrb
+-----------------------
+
+
+```ruby
+$ cd rails_project
+$ git clone git://gitorious.org/backgroundrb/mainline.git vendor/plugins/backgroundrb
+```
+    
+
+You can also get the latest stable version from the Subversion repository:
+
+
+```ruby
+svn co http://svn.devjavu.com/backgroundrb/trunk  vendor/plugins/backgroundrb
+```
+    
+
+Setup backgroundrb
+------------------
+
+
+```ruby
+rake backgroundrb:setup
+```
+    
+
+Create a worker
+---------------
+
+
+```ruby
+./script/generate worker feeds_worker
+```
+    
+
+
+```ruby
+class FeedsWorker < BackgrounDRb::MetaWorker
+  set_worker_name :feeds_worker
+  
+  def create(args = nil)
+    # this method is called, when worker is loaded for the first time
+    logger.info "Created feeds worker"
+  end
+  
+  def update(data)
+    logger.info "Updating #{Feed.count} feeds."
+    
+    seconds = Benchmark.realtime do
+      thread_pool.defer do
+        Feed.update_all()
+      end
+    end
+
+    logger.info "Update took #{'%.5f' % seconds}."
+  end
+end
+```
+    
+
+Starting backgroundrb
+---------------------
+
+First configure backgroundrb by opening config/backgroundrb.yml in your editor:
+
+
+```ruby
+:backgroundrb:
+  :ip: 0.0.0.0
+
+:development:
+  :backgroundrb:
+    :port: 11111     # use port 11111
+    :log: foreground # foreground mode,print log messages on console
+
+:production:
+  :backgroundrb:
+    :port: 22222      # use port 22222
+```
+    
+
+Next, start backgroundrb in development mode:
+
+
+```ruby
+./script/backgroundrb -e development &
+```
+    
+
+Call your worker
+----------------
+
+From the command line:
+
+
+```ruby
+$ script/console
+Loading development environment (Rails 2.0.2)
+>> MiddleMan.worker(:feeds_worker).update()
+```
+    
+
+When things go wrong
+--------------------
+
+Asynchronous programming is complex, so expect bugs...
+
+### Rule \#1 know who you're calling.
+
+If you give your MiddleMan the wrong name of your worker, he'll just spit this crap at you:
+
+
+```ruby
+You have a nil object when you didn't expect it!
+The error occurred while evaluating nil.send_request
+/usr/local/lib/ruby/gems/1.8/gems/packet-0.1.5/lib/packet/packet_master.rb:44:in ask_worker'
+/Users/christian/Documents/Projects/xxx/vendor/plugins/backgroundrb/server/lib/master_worker.rb:104:in process_work'
+/Users/christian/Documents/Projects/xxx/vendor/plugins/backgroundrb/server/lib/master_worker.rb:35:in receive_data'
+/usr/local/lib/ruby/gems/1.8/gems/packet-0.1.5/lib/packet/packet_parser.rb:29:in call'
+/usr/local/lib/ruby/gems/1.8/gems/packet-0.1.5/lib/packet/packet_parser.rb:29:in extract'
+/Users/christian/Documents/Projects/xxx/vendor/plugins/backgroundrb/server/lib/master_worker.rb:31:in receive_data'
+```
+    
+
+So for example this command would generate the above mentioned error:
+
+
+```ruby
+MiddleMan.worker(:illegal_worker).update()
+```
+    
+
+It's always nice to see a cryptic error messages such as this, it really deserves an award.
+
+### Check for bugs and bug fixes
+
+[git mainline commits](http://gitorious.org/projects/backgroundrb/repos/mainline/logs/master)
+
+### Going to production
+
+Starting the daemon:
+
+
+```ruby
+./script/backgroundrb -e production start
+```
+    
+
+Configuring your task to run periodically
+-----------------------------------------
+
+The following example makes backgroundrb call the FeedsWorker's update method once every 15 minutes:
+
+
+```ruby
+:production:
+  :backgroundrb:
+    :port: 22222      # use port 22222
+    :lazy_load: true  # do not load models eagerly
+    :debug_log: false # disable log workers and other logging
+# Cron based scheduling
+:schedules:
+  :feeds_worker:
+    :update:
+      :trigger_args: * */15 * * * *
+      :data: "Hello world"
+```
+    
+
+At the time of writing, the cron scheduler seems to be broken, so I prefer hard-coding the interval in the worker's create method:
+
+
+```ruby
+def create
+           add_periodic_timer(15.minutes) { update }
+         end
+```
+    
+
+If using Vlad or Capistrano, it's also a good idea to fix script/backgroundrb by changing these lines:
+
+
+```ruby
+pid_file = "#{RAILS_HOME}/../../shared/pids/backgroundrb_#{CONFIG_FILE[:backgroundrb][:port]}.pid"
+SERVER_LOGGER = "#{RAILS_HOME}/../../shared/log/backgroundrb_server_#{CONFIG_FILE[:backgroundrb][:port]}.log"
+```
+    
+
+### Resources
+
+[Backgroundrb homepage](http://backgroundrb.rubyforge.org/)
+
+[Backgroundrb best practices](http://gnufied.org/2008/02/12/backgroundrb-best-practises/)
+
+[Backgroundrb scheduling](http://backgroundrb.rubyforge.org/scheduling/index.html)
+
+[Debugging backgroundrb](http://www.johnyerhot.com/2008/02/11/debugging-backgroundrb/)
+
+[Backroundrb's README](http://backgroundrb.rubyforge.org/files/README.html)
+
+[topfunky's messaging article](http://nubyonrails.com/articles/about-this-blog-beanstalk-messaging-queue)
+

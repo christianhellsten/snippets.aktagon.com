@@ -2,23 +2,137 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title></title>
+    <title>How to install ffmpeg, mencoder and flvtool2 on Mac OSX Leopard, convert an AVI to FLV, and view the FLV video with FlowPlayer</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,900;1,900&amp;display=swap" rel="stylesheet">
     <link href=" https://cdn.jsdelivr.net/npm/destyle.css@4.0.0/destyle.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
     <header class="flex">
-        <h1 class="fadeout"></h1>
+        <h1 class="fadeout">How to install ffmpeg, mencoder and flvtool2 on Mac OSX Leopard, convert an AVI to FLV, and view the FLV video with FlowPlayer</h1>
     </header>
     <main>
         <section class="flex">
             <div class="flex-item flex-100">
-                <div class="code"></div>
+                <div class="code">This is a short tutorial on how to quickly get up to speed with FLV movie creation (transcoding) and viewing (Flash player).
+
+I tried to install ffmpeg using ports and fink, but had problems. The instructions I found [here](http://www.macosxhints.com/article.php?story=20061220082125312) work though.
+
+The following is my adaptation of the instruction, where I show you how to install both ffmpeg and flvtool2.
+
+First, download ffmpegx, which contains ffmpeg from <http://ffmpegx.com/download.html>
+
+Then, mount the .dmg file, navigate to the mounted disk, and control-click on the ffmpegX application (ffmpegX.app), choose Show Package Contents from the pop-up menu, and copy the ffmpeg binary to, for example, /tmp.
+
+Now execute the following commands in a terminal shell:
+
+
+```bash
+# Move ffmpeg to /usr/local/bin:
+sudo mv /tmp/ffmpeg /usr/local/bin/
+
+# Change owner and make executable
+sudo chown root:wheel /usr/local/bin/ffmpeg
+sudo chmod 755 /usr/local/bin/ffmpeg
+```
+    
+
+You're now ready to use ffmpeg; the following command lists all the supported input and output formats:
+
+
+```bash
+ffmpeg -formats
+```
+    
+
+Use the following command to transcode an AVI to FLV (Flash video) format:
+
+
+```bash
+fmpeg -i mymovie.avi -s 320x240 -ar 44100 -r 12 mymovie.flv
+cat mymovie.flv | flvtool2 -U stdin mymovie.flv
+```
+    
+
+To add metadata to the FLV file&mdash;such as video length, which is required for the Flash player progress bar&mdash;you need to install [flvtool2](http://rubyforge.org/projects/flvtool2/).
+
+This is done with the following command (note this requires Ruby and RubyGems, which are not part of all OSX Leopard installations):
+
+
+```bash
+sudo gem install flvtool2
+```
+    
+
+Now add the metadata to the FLV file:
+
+
+```bash
+flvtool2 -UP mymovie.flv
+```
+    
+
+To test the FLV movie you just created, download and extract [FlowPlayer](http://flowplayer.org) to your folder of choice. Now create a page that loads your FLV movie; note that you need to update the paths:
+
+
+```bash
+<html>
+	<head>
+		<script type="text/javascript" src="../flowplayer/html/swfobject.js"></script>
+	</head>
+<body>
+	<div id="flowplayerholder">
+		This will be replaced by the player. 
+	</div>
+	
+<script type="text/javascript">
+// <![CDATA[
+var fo = new SWFObject("../flowplayer/FlowPlayerDark.swf", "FlowPlayer", "468", "350", "7", "#000000", true);
+	// need this next line for local testing, it's optional if your swf is on the same domain as your html page
+	fo.addParam("allowScriptAccess", "always");
+	fo.addVariable("config", "{ countryCode: 'fi', playList: [ {overlayId: 'play' }, { url: '/mockup/mymovie.flv' } ], initialScale: 'scale',  fullScreenScriptURL: 'fullscreen.js' }");
+	fo.write("flowplayerholder");
+// ]]>
+</script>
+</body>
+</html>
+```
+    
+
+I've [been told](http://www.macosxhints.com/article.php?story=20060923203722112&query=dec) that [mencoder](http://www2.mplayerhq.hu/MPlayer/releases/) produces higher quality FLV videos, so lets compare the mencoder output to ffmpeg by first downloading and extracting mencoder to /tmp.
+
+Now move mencoder to /usr/local/bin:
+
+
+```bash
+sudo mv /tmp/mencoder /usr/local/bin/
+
+sudo chown root:wheel /usr/local/bin/mencoder
+sudo chmod 755 /usr/local/bin/mencoder
+```
+    
+
+Next transcode the video to FLV format using mencoder:
+
+
+```bash
+mencoder mymovie.avi -ofps 12 -o mymovie.flv -of lavf -lavfopts \
+i_certify_that_my_video_stream_does_not_use_b_frames -oac lavc -lavcopts \
+acodec=mp3:abitrate=32 -srate 22050  -ovc lavc -lavcopts vcodec=flv:\
+vbitrate=100:mbd=2:mv0:trell:v4mv:cbp:last_pred=3:predia=2:dia=2:\
+vmax_b_frames=0:vb_strategy=1:precmp=2:cmp=2:subcmp=2:preme=2:qns=2 \
+-vop scale=360:240
+```
+    
+
+View the video in the Flash player; you should notice the difference in quality...
+
+For even higher quality encode the videos using the H.264 format, which FlowPlayer also supports; instructions can be found [here](http://www.brad-x.com/2007/05/19/yet-another-linuxnix-video-h264-howto/).
+
+</div>
             </div>
         </section>
     </main>
@@ -43,4 +157,3 @@
     </script>
 </body>
 </html>
-

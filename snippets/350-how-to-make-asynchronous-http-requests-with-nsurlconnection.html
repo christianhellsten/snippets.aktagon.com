@@ -2,23 +2,172 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title></title>
+    <title>How to make asynchronous HTTP requests with NSURLConnection</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,900;1,900&amp;display=swap" rel="stylesheet">
     <link href=" https://cdn.jsdelivr.net/npm/destyle.css@4.0.0/destyle.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
     <header class="flex">
-        <h1 class="fadeout"></h1>
+        <h1 class="fadeout">How to make asynchronous HTTP requests with NSURLConnection</h1>
     </header>
     <main>
         <section class="flex">
             <div class="flex-item flex-100">
-                <div class="code"></div>
+                <div class="code">Example of how to make asynchronous HTTP requests with NSURLConnection:
+
+
+```objectivec
+//
+//  HTTP.h
+//
+#import <Cocoa/Cocoa.h>
+#import "HTTPDelegate.h"
+
+@interface HTTP : NSObject {
+	id delegate;
+	NSMutableData *receivedData;
+	NSURL *url;
+}
+@property (nonatomic,retain) NSMutableData *receivedData;
+@property (retain) id delegate;
+
+- (void)get: (NSString *)urlString;
+- (void)post: (NSString *)urlString;
+
+@end
+```
+    
+
+
+```objectivec
+//
+//  HTTP.m
+//
+
+#import "HTTP.h"
+
+
+@implementation HTTP
+
+@synthesize receivedData;
+
+- init {
+    if ((self = [super init])) {
+		
+    }
+    return self;
+}
+
+- (void)dealloc {
+    [super dealloc];
+}
+
+
+- (void)setDelegate:(id)val
+{
+    delegate = val;
+}
+
+- (id)delegate
+{
+    return delegate;
+}
+
+- (void)get: (NSString *)urlString {
+	
+	NSLog ( @"GET: %@", urlString );
+
+	self.receivedData = [[NSMutableData alloc] init];
+	
+       NSURLRequest *request = [[NSURLRequest alloc]
+							 initWithURL: [NSURL URLWithString:urlString]
+							 cachePolicy: NSURLRequestReloadIgnoringLocalCacheData
+							 timeoutInterval: 10
+							 ];
+
+       NSURLConnection *connection = [[NSURLConnection alloc]
+								   initWithRequest:request
+								   delegate:self
+								   startImmediately:YES];
+	if(!connection) {
+		NSLog(@"connection failed :(");
+	} else {
+		NSLog(@"connection succeeded  :)");
+		
+	}
+	
+	[connection release];
+        [request release];  
+        [receivedData release];  
+}
+
+
+- (void)post: (NSString *)urlString {
+	
+	// POST
+	//[request setHTTPMethod:@"POST"];
+	// NSString *postString = @"Some post string";
+	//[request setHTTPBody:[postString dataUsingEncoding:NSUTF8StringEncoding]];
+}	
+
+// ====================
+// Callbacks
+// ====================
+
+#pragma mark NSURLConnection delegate methods
+- (NSURLRequest *)connection:(NSURLConnection *)connection
+			 willSendRequest:(NSURLRequest *)request
+			redirectResponse:(NSURLResponse *)redirectResponse {
+	NSLog(@"Connection received data, retain count");
+       return request;
+}
+
+
+- (void)connection:(NSURLConnection *)connection didReceiveResponse:(NSURLResponse *)response {
+	NSLog(@"Received response: %@", response);
+	
+      [receivedData setLength:0];
+}
+
+- (void)connection:(NSURLConnection *)connection didReceiveData:(NSData *)data {
+	NSLog(@"Received %d bytes of data", [data length]); 
+	
+       [receivedData appendData:data];
+	NSLog(@"Received data is now %d bytes", [receivedData length]); 
+
+}
+
+- (void)connection:(NSURLConnection *)connection didFailWithError:(NSError *)error {
+	NSLog(@"Error receiving response: %@", error);
+       [[NSAlert alertWithError:error] runModal];
+}
+
+- (void)connectionDidFinishLoading:(NSURLConnection *)connection {
+       // Once this method is invoked, "responseData" contains the complete result
+	NSLog(@"Succeeded! Received %d bytes of data", [receivedData length]); 
+	
+	NSString *dataStr=[[NSString alloc] initWithData:receivedData encoding:NSASCIIStringEncoding];
+	NSLog(@"Succeeded! Received %@ bytes of data", dataStr); 
+	
+	if ([delegate respondsToSelector:@selector(didFinishDownload:)]) {
+		NSLog(@"Calling the delegate"); 
+		//NSString* dataAsString = [[[NSString alloc] initWithData:receivedData encoding:NSUTF8StringEncoding] autorelease];
+		[delegate performSelector:@selector(didFinishDownload:) withObject: dataStr];
+	}
+	
+	[dataStr release];
+}
+
+
+@end
+```
+    
+
+</div>
             </div>
         </section>
     </main>
@@ -43,4 +192,3 @@
     </script>
 </body>
 </html>
-

@@ -1,0 +1,621 @@
+---
+id: '309'
+title: My Rails template
+languages:
+- ruby
+tags:
+- bash
+- docker
+- shell
+---
+
+```ruby
+# Rails template based on:
+#
+# database:   mysql
+# testing:    shoulda, matchy, rr, cucumber
+# plugins:    thinking-sphinx, paperclip
+# gems:       will_paginate
+# deployment: vlad
+#
+# Inspiration:
+# http://github.com/jeremymcanally/rails-templates/blob/master/suspenders.rb
+#
+
+#====================
+# CONFIGURATION
+#====================
+app_name = ask("\nWhat is your application's UNIX name, ex google-search?")
+app_domain = ask("\nOn what domain will the application be hosted, ex google.com?")
+project_name = ask("\nWhat is the project's name, ex Google Search?")
+
+#====================
+# PLUGINS
+#====================
+
+plugin 'sitemap-generator', :git => "git://github.com/christianhellsten/sitemap-generator.git"
+
+if yes? "Want thinking-sphinx?"
+  plugin 'thinking-sphinx', :git => "git://github.com/freelancing-god/thinking-sphinx.git"
+end
+
+if yes? "Want paperclip?"
+  plugin 'paperclip', :git => 'git://github.com/thoughtbot/paperclip.git'
+end
+
+#====================
+# GEMS
+#====================
+
+if yes? "Want authlogic?"
+  gem 'binarylogic-authlogic', :lib => 'authlogic', :source => 'http://gems.github.com'
+end
+
+gem 'mislav-will_paginate', :lib => 'will_paginate', :source => 'http://gems.github.com'
+gem 'thoughtbot-factory_girl', :lib => 'factory_girl', :source => 'http://gems.github.com'
+gem 'thoughtbot-shoulda', :lib => 'shoulda', :source => 'http://gems.github.com'
+gem 'jeremymcanally-matchy', :lib => 'matchy', :source => 'http://gems.github.com'
+gem 'rr'
+
+
+#====================
+# RAILS CONFIGURATION
+#====================
+
+file 'config/environments/development.rb', 
+%q{# Settings specified here will take precedence over those in config/environment.rb
+
+# In the development environment your application's code is reloaded on
+# every request.  This slows down response time but is perfect for development
+# since you don't have to restart the webserver when you make code changes.
+config.cache_classes = false
+
+# Log error messages when you accidentally call methods on nil.
+config.whiny_nils = true
+
+# Show full error reports and disable caching
+config.action_controller.consider_all_requests_local = true
+config.action_controller.perform_caching             = false
+config.action_view.debug_rjs                         = true
+
+# Don't care if the mailer can't send
+config.action_mailer.raise_delivery_errors = false
+}
+
+file 'config/environments/production.rb', 
+%q{# Settings specified here will take precedence over those in config/environment.rb
+
+# The production environment is meant for finished, "live" apps.
+# Code is not reloaded between requests
+config.cache_classes = true
+
+# Use a different logger for distributed setups
+# config.logger = SyslogLogger.new
+
+# Full error reports are disabled and caching is turned on
+config.action_controller.consider_all_requests_local = false
+config.action_controller.perform_caching             = true
+
+# Enable serving of images, stylesheets, and javascripts from an asset server
+# config.action_controller.asset_host                  = "http://assets.example.com"
+
+# Disable delivery errors, bad email addresses will be ignored
+config.action_mailer.raise_delivery_errors = false
+}
+
+file 'config/environments/staging.rb', 
+%q{# Settings specified here will take precedence over those in config/environment.rb
+
+# We'd like to stay as close to prod as possible
+# Code is not reloaded between requests
+config.cache_classes = true
+
+# Full error reports are disabled and caching is turned on
+config.action_controller.consider_all_requests_local = false
+config.action_controller.perform_caching             = true
+
+# Disable delivery errors if you bad email addresses should just be ignored
+config.action_mailer.raise_delivery_errors = false
+}
+
+file 'config/environments/test.rb', 
+%q{# Settings specified here will take precedence over those in config/environment.rb
+
+# The test environment is used exclusively to run your application's
+# test suite.  You never need to work with it otherwise.  Remember that
+# your test database is "scratch space" for the test suite and is wiped
+# and recreated between test runs.  Don't rely on the data there!
+config.cache_classes = true
+
+# Log error messages when you accidentally call methods on nil.
+config.whiny_nils = true
+
+# Show full error reports and disable caching
+config.action_controller.consider_all_requests_local = true
+config.action_controller.perform_caching             = false
+
+# Disable request forgery protection in test environment
+config.action_controller.allow_forgery_protection    = false
+
+# Tell ActionMailer not to deliver emails to the real world.
+# The :test delivery method accumulates sent emails in the
+# ActionMailer::Base.deliveries array.
+config.action_mailer.delivery_method = :test
+
+config.gem 'thoughtbot-factory_girl', 
+           :lib => 'factory_girl', 
+           :source => 'http://gems.github.com', 
+           :version => '>= 1.1.3'
+config.gem 'thoughtbot-shoulda', 
+           :lib => 'shoulda', 
+           :source => 'http://gems.github.com', 
+           :version => '>= 2.0.5'
+config.gem 'jeremymcanally-matchy', 
+           :lib => 'matchy', 
+           :source => 'http://gems.github.com'
+config.gem 'rr'
+
+config.gem 'cucumber', :lib => false
+config.gem 'webrat', :lib => false
+
+
+begin require 'redgreen'; rescue LoadError; end
+}
+
+#====================
+# INITIALIZE
+#====================
+rake("gems:install", :sudo => true)
+
+generate :controller, "home index"  
+route "map.root :controller => 'home', :action => 'index'"
+
+#====================
+# APP
+#====================
+
+file 'app/controllers/application_controller.rb', 
+%Q{class ApplicationController < ActionController::Base
+
+  filter_parameter_logging :password, :password_confirmation
+
+  before_filter :set_metadata
+
+  helper :all
+
+  protect_from_forgery
+
+  protected
+    def set_metadata
+      @meta_title        = "#{project_name}"
+      @meta_keywords     = "#{project_name}" 
+      @meta_description  = @meta_title 
+    end 
+
+    alias_method :rescue_action_locally, :rescue_action_in_public if RAILS_ENV != 'development'
+    
+    def render_optional_error_file(status_code)
+      @tags = Tag.all(:order => 'name ASC', :limit => 50)
+      @posts = Post.all(:order => 'title ASC', :limit => 50)
+      @countries = Country.all(:order => 'name ASC', :limit => 50)
+
+      if status_code == :not_found
+#        activate_authlogic
+        render_404
+      else
+        super
+      end
+    end
+
+    def render_404
+      respond_to do |type| 
+        type.html { render :template => "errors/error_404", :layout => 'application', :status => 404 } 
+        type.all  { render :nothing => true, :status => 404 } 
+      end
+
+      true  # so we can do "render_404 and return"
+    end
+end
+}
+
+file 'app/helpers/application_helper.rb', 
+%q{module ApplicationHelper
+  def body_class
+    "#{controller.controller_name} #{controller.controller_name}-#{controller.action_name}"
+  end
+end
+}
+
+file 'app/views/layouts/_flashes.html.erb', 
+%q{<div id="flash">
+  <% flash.each do |key, value| -%>
+    <div id="flash_<%= key %>"><%=h value %></div>
+  <% end -%>
+</div>
+}
+
+file 'app/views/layouts/application.html.erb', 
+%Q{<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" 
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+  <head>
+    <meta http-equiv="Content-type" content="text/html; charset=utf-8" />
+
+    <title><%= @meta_title || project_name.humanize %></title>
+    <meta name="keywords" content="<%= @meta_keywords %>" />
+    <meta name="description" content="<%= @meta_description %>" />
+
+    <link rel="icon" href="/favicon.ico" type="image/ico" />
+
+    <%= stylesheet_link_tag('blueprint/print', :media => "print", :cache => true) %>
+    <%= stylesheet_link_tag 'blueprint/screen.css', 'blueprint/plugins/fancy-type/screen.css', 'application', :cache => true %>
+
+    <!--[if IE]><link rel="stylesheet" href="css/blueprint/ie.css" type="text/css" media="screen, projection"><![endif]--> 
+    
+    <%= javascript_include_tag 'jquery-1.3.2.js', 'application.js', :cache => true %>
+  </head>
+  <body class="<%= body_class %>">
+    <div class="container">
+      <div class="span-24 last">
+      <%= render :partial => 'layouts/flashes' -%>
+      <%= yield %>
+      </div>
+    </div>
+  </body>
+</html>
+}
+
+#====================
+# INITIALIZERS
+#====================
+
+initializer 'requires.rb', 
+%q{
+
+Dir[File.join(RAILS_ROOT, 'lib', 'extensions', '*.rb')].each do |f|
+  require f
+end
+
+Dir[File.join(RAILS_ROOT, 'lib', '*.rb')].each do |f|
+  require f
+end
+}
+
+initializer 'time_formats.rb', 
+%q{# Example time formats
+{ :short_date => "%x", :long_date => "%a, %b %d, %Y" }.each do |k, v|
+  ActiveSupport::CoreExtensions::Time::Conversions::DATE_FORMATS.update(k => v)
+end
+}
+
+# ====================
+# CONFIG
+# ====================
+
+file 'Rakefile',
+%q{
+# Add your own tasks in files placed in lib/tasks ending in .rake,
+# for example lib/tasks/capistrano.rake, and they will automatically be available to Rake.
+
+require(File.join(File.dirname(__FILE__), 'config', 'boot'))
+
+require 'rake'
+require 'rake/testtask'
+require 'rake/rdoctask'
+
+require 'tasks/rails'
+
+begin
+  require 'vlad'
+  Vlad.load :scm => :git
+rescue LoadError
+  # do nothing
+end
+
+task :restart do
+  system("touch tmp/restart.txt")
+  system("touch tmp/debug.txt") if ENV["DEBUG"] == 'true'
+end
+}
+
+file 'config/environment.rb', 
+%Q{# Be sure to restart your server when you modify this file
+
+# Change this to the name of your rails project, like carbonrally.  
+# Just use the same name as the svn repo.
+app_name = "#{app_name}"
+
+throw "The project's name in environment.rb is blank" if app_name.empty?
+throw "Project name (#{app_name}) must_be_like_this" unless app_name =~ /^[a-z_]*$/
+
+# Specifies gem version of Rails to use when vendor/rails is not present
+RAILS_GEM_VERSION = '2.3.4' unless defined? RAILS_GEM_VERSION
+
+# Bootstrap the Rails environment, frameworks, and default configuration
+require File.join(File.dirname(__FILE__), 'boot')
+
+Rails::Initializer.run do |config|
+  # Settings in config/environments/* take precedence over those specified here.
+
+  # Application configuration should go into files in config/initializers
+  # -- all .rb files in that directory are automatically loaded.
+  # See Rails::Configuration for more options.
+
+  # Skip frameworks you're not going to use. To use Rails without a database
+  # you must remove the Active Record framework.
+  # config.frameworks -= [ :active_record, :active_resource, :action_mailer ]
+
+  # Specify gems that this application depends on.
+  config.gem 'mislav-will_paginate', 
+             :lib => 'will_paginate', 
+             :source => 'http://gems.github.com', 
+             :version => '~> 2.3.5'
+#  config.gem 'binarylogic-authlogic', 
+#             :lib => 'authlogic', 
+#             :source => 'http://gems.github.com'
+  
+  # Only load the plugins named here, in the order given. By default, all plugins 
+  # in vendor/plugins are loaded in alphabetical order.
+  # :all can be used as a placeholder for all plugins not explicitly named
+  # config.plugins = [ :exception_notification, :ssl_requirement, :all ]
+  
+  # Add the vendor/gems/*/lib directories to the LOAD_PATH
+  config.load_paths += Dir.glob(File.join(RAILS_ROOT, 'vendor', 'gems', '*', 'lib'))
+
+  # Force all environments to use the same logger level
+  # (by default production uses :info, the others :debug)
+  # config.log_level = :debug
+
+  # Make Time.zone default to the specified zone, and make Active Record store time values
+  # in the database in UTC, and return them converted to the specified local zone.
+  # Run "rake -D time" for a list of tasks for finding time zone names. Uncomment to use default local time.
+  config.time_zone = 'UTC'
+
+  # Your secret key for verifying cookie session data integrity.
+  # If you change this key, all old sessions will become invalid!
+  # Make sure the secret is at least 30 characters and all random, 
+  # no regular words or you'll be exposed to dictionary attacks.
+  SESSION_KEY = "CHANGESESSION" 
+  config.action_controller.session = {
+    :session_key => "_#{app_name}_session",
+    :secret      => SESSION_KEY
+  }
+
+  # Use the database for sessions instead of the cookie-based default,
+  # which shouldn't be used to store highly confidential information
+  # (create the session table with "rake db:sessions:create")
+  # config.action_controller.session_store = :active_record_store
+
+  # Use SQL instead of Active Record's schema dumper when creating the test database.
+  # This is necessary if your schema can't be completely dumped by the schema dumper,
+  # like if you have constraints or database-specific column types
+  # config.active_record.schema_format = :sql
+
+  # Activate observers that should always be running
+  # config.active_record.observers = :cacher, :garbage_collector
+end
+}
+
+file 'config/database.yml', 
+%Q{<% PASSWORD_FILE = File.join(RAILS_ROOT, '..', '..', 'shared', 'config', 'dbpassword') %>
+
+development:
+  adapter: mysql
+  database: #{app_name}_development
+  username: root
+  password: 
+  host: localhost
+  encoding: utf8
+  
+test:
+  adapter: mysql
+  database: #{app_name} %>_test
+  username: root
+  password: 
+  host: localhost
+  encoding: utf8
+  
+staging:
+  adapter: mysql
+  database: #{app_name}_staging
+  username: #{app_name}
+  password: <%= File.read(PASSWORD_FILE).chomp if File.readable? PASSWORD_FILE %>
+  host: localhost
+  encoding: utf8
+  socket: /var/lib/mysql/mysql.sock
+  
+production:
+  adapter: mysql
+  database: #{app_name}_production
+  username: #{app_name}
+  password: <%= File.read(PASSWORD_FILE).chomp if File.readable? PASSWORD_FILE %>
+  host: localhost
+  encoding: utf8
+  socket: /var/lib/mysql/mysql.sock
+}
+
+file 'config/deploy.rb', 
+%Q{
+set :application,           '#{app_domain}'
+set :domain,                '#{app_domain}'
+set :deploy_to,             '/var/www/#{app_domain}'
+set :revision,              'master'
+set :repository,            '/home/git/repositories/#{app_domain}.git/'
+set :scm,                   :git
+
+namespace :vlad do
+
+  #
+  # Add an after_update hook
+  #
+  remote_task :update do
+    Rake::Task['vlad:after_update'].invoke
+  end
+
+  #
+  # Add an after_start_app hook
+  #
+  remote_task :start_app do
+    Rake::Task['vlad:after_start_app'].invoke
+  end
+
+  #
+  # The after_update hook, which is run after vlad:update
+  #
+  remote_task :after_update do
+      run "ln -nfs \#{shared_path}/config/database.yml \#{release_path}/config/database.yml"
+      run "ln -nfs \#{shared_path}/config/sphinx.conf \#{release_path}/config/production.sphinx.conf"
+      run "ln -nfs \#{shared_path}/sitemap.xml \#{release_path}/public/sitemap.xml"
+      run "ln -nfs \#{shared_path}/assets \#{release_path}/public/assets"
+
+      # Create and link to the asset directory
+      #run "rm -rf \#{current_path}/public/assets"
+      run "mkdir -p \#{deploy_to}/shared/assets"
+
+      # Link asset directory
+      run "ln -nfs \#{deploy_to}/shared/assets \#{current_path}/public/assets"
+  end
+  
+  remote_task :restart do
+    run "touch \#{current_path}/tmp/restart.txt"
+  end
+  
+  #
+  # The after_start_app hook, which is run after vlad:start_app
+  #
+  remote_task :after_start_app do
+  end
+
+  #
+  # Deploys a new version of your application
+  #
+  remote_task :deploy => [:update, 'db:migrate', :restart]
+  
+end
+}
+
+
+# ====================
+# TEST
+# ====================
+
+inside ('test') do
+  run "mkdir factories"
+end
+
+file 'test/test_helper.rb', 
+%q{ENV["RAILS_ENV"] = "test"
+require File.expand_path(File.dirname(__FILE__) + "/../config/environment")
+require 'test_help'
+require 'action_view/test_case'
+
+include RR::Adapters::RRMethods
+
+#class Test::Unit::TestCase
+class ActiveSupport::TestCase
+
+  self.use_transactional_fixtures = true
+  self.use_instantiated_fixtures  = false
+
+  self.backtrace_silencers << :rails_vendor
+  self.backtrace_filters   << :rails_root
+
+end
+
+class ActionView::TestCase
+  # Enable UrlWriter when testing helpers
+  include ActionController::UrlWriter
+  # Default host for helper tests
+  default_url_options[:host] = 'localhost'
+end
+}
+
+#====================
+# CUCUMBER
+#====================
+generate :cucumber
+
+file("features/support/env.rb") do
+  <<-EOF
+# Sets up the Rails environment for Cucumber
+ENV["RAILS_ENV"] ||= "cucumber"
+require File.expand_path(File.dirname(__FILE__) + '/../../config/environment')
+require 'cucumber/rails/world'
+ 
+# Comment out the next line if you don't want Cucumber Unicode support
+require 'cucumber/formatter/unicode'
+ 
+# Comment out the next line if you don't want transactions to
+# open/roll back around each scenario
+Cucumber::Rails.use_transactional_fixtures
+ 
+# Comment out the next line if you want Rails' own error handling
+# (e.g. rescue_action_in_public / rescue_responses / rescue_from)
+Cucumber::Rails.bypass_rescue
+ 
+require 'webrat'
+ 
+Webrat.configure do |config|
+config.mode = :rails
+end
+ 
+require 'cucumber/rails/rspec'
+require 'webrat/core/matchers'
+ 
+EOF
+end
+
+#====================
+# JQUERY
+#====================
+run "curl -L http://jqueryjs.googlecode.com/files/jquery-1.3.2.min.js > public/javascripts/jquery-1.3.2.js"
+
+#====================
+# BLUEPRINT CSS
+#====================
+run "git clone git://github.com/joshuaclayton/blueprint-css.git"
+run "cp -R blueprint-css/blueprint public/stylesheets/"
+run "rm -rf blueprint-css"
+
+# ====================
+# FINALIZE
+# ====================
+run "mkdir assets"
+run "rm public/index.html"
+rake "db:create"
+rake "db:migrate"
+
+rake "db:create RAILS_ENV=test"
+rake "db:migrate"
+
+# ====================
+# GIT
+# ====================
+
+file ".gitignore", <<-END
+.DS_Store
+log/*.log
+tmp/**/*
+config/database.yml
+assets/*
+.idea
+*.swp
+.generators
+END
+run 'find . \( -type d -empty \) -and \( -not -regex ./\.git.* \) -exec touch {}/.gitignore \;'
+git :init
+git :add => "."
+git :commit => "-a -m 'Initial project commit'"
+```
+    
+
+Use it like this:
+
+
+```ruby
+rails hello-ww  -m rails-template/basic.rb
+```
+    
+
+Note that you need Rails 2.3 or later.
+

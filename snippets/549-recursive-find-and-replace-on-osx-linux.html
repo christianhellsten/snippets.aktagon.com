@@ -2,23 +2,59 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title></title>
+    <title>Recursive find and replace on OSX/Linux</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,900;1,900&amp;display=swap" rel="stylesheet">
     <link href=" https://cdn.jsdelivr.net/npm/destyle.css@4.0.0/destyle.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
     <header class="flex">
-        <h1 class="fadeout"></h1>
+        <h1 class="fadeout">Recursive find and replace on OSX/Linux</h1>
     </header>
     <main>
         <section class="flex">
             <div class="flex-item flex-100">
-                <div class="code"></div>
+                <div class="code">NOTE: remember to exclude the .git folder...
+
+Search and replace XXX with YYY in all files:
+
+```bash
+perl -e "s/XXX/YYY/g;" -pi $(find . -type f)
+```
+
+## Troubleshooting
+
+If you get this error:
+```bash
+zsh: argument list too long: perl
+```
+
+Your argument list is clearly too long. Try this instead, or use xargs:
+```bash
+find . \
+   -type f \
+   -exec perl -i -pe's/XXX/YYY/g' {} +
+```
+
+## Search and Replace with Sed
+
+Using sed is more complicated, but this should at least work on Linux:
+
+```bash
+# Find, backup and replace
+find . -name "*.rb" -print | xargs sed -i.bak 's/XXX/YYY/g'
+# Delete backup files
+find . -name '*.bak' -type f -delete
+```
+
+[Reference](http://danilo.ariadoss.com/how-to-recursively-remove-ds_store-files-on-mac-os-x/).
+
+Also see:
+https://snippets.aktagon.com/snippets/861-search-and-replace-file-contents-and-file-names
+</div>
             </div>
         </section>
     </main>
@@ -43,4 +79,3 @@
     </script>
 </body>
 </html>
-

@@ -2,23 +2,41 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title></title>
+    <title>How to fix issues with missing gem specifications</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,900;1,900&amp;display=swap" rel="stylesheet">
     <link href=" https://cdn.jsdelivr.net/npm/destyle.css@4.0.0/destyle.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
     <header class="flex">
-        <h1 class="fadeout"></h1>
+        <h1 class="fadeout">How to fix issues with missing gem specifications</h1>
     </header>
     <main>
         <section class="flex">
             <div class="flex-item flex-100">
-                <div class="code"></div>
+                <div class="code">I was getting this error after unpacking hpricot with **gem unpack hpricot**. I also tried **rake gems:unpack hpricot** but it did nothing...
+
+
+```bash
+config.gem: Unpacked gem hpricot-0.8.1 in vendor/gems has no specification file. Run 'rake gems:refresh_specs' to fix this.
+```
+    
+
+The rake gems:refresh\_specs command doesn't work, and appears to have been a temporary workaround, so to fix this error I did this:
+
+
+```bash
+cd vendor/gems/hpricot-0.8.1
+gem specification hpricot > .specification
+```
+    
+
+I had this issue with Rails 2.3.4.
+
+</div>
             </div>
         </section>
     </main>
@@ -43,4 +61,3 @@
     </script>
 </body>
 </html>
-

@@ -1,48 +1,104 @@
 #
+# Script is used for rendering markdown.
+#
 # $ ruby render.rb
 #
-require 'erb'
-require 'ostruct'
 require 'pg'
+require 'erb'
+require 'logger'
+require 'yaml'
+require 'ostruct'
 
-def render(template, vars)
+LOG = Logger.new($stdout)
+SNIPPET_TEMPLATE = File.read('src/index.html.erb')
+
+def render_erb(template, vars)
   ERB.new(template).result(OpenStruct.new(vars).instance_eval { binding })
 end
 
-SNIPPET_TEMPLATE = File.read('index.html.erb')
-
 def render_snippet(vars)
-  render(SNIPPET_TEMPLATE, vars)
+  render_erb(SNIPPET_TEMPLATE, vars)
 end
-
-# Connect to the PostgreSQL database
-conn = PG.connect(dbname: 'snippets', user: '', password: '')
-
-# Fetch all data from the table
-result = conn.exec("SELECT id, title, CONVERT_FROM(body, 'UTF8') AS body FROM snippets")
 
 def replace_non_alphanumeric_with_dash(str)
-  # Replace all non-alphanumeric characters with a dash using a regular expression
   regex = /[^a-zA-Z0-9]+/
-  str.gsub(regex, '-').gsub(/-+/, '-')
+  str&.gsub(regex, '-')&.gsub(/-+/, '-')
 end
 
-# Loop through the result and print each row
-result.each do |row|
-  id = row['id']
-  title = row['title']
-  body = row['body']
-  suffix = replace_non_alphanumeric_with_dash(title)
-  file = "snippets/#{id}-#{suffix}.html".downcase
-  contents = render_snippet(snippet: body)
-
-  File.write(file, contents)
-  # puts file
-  # puts "ID: #{row['id']}, User ID: #{row['user_id']}, Title: #{row['title']}, Body: #{row['body']}, Rendered Body: #{row['rendered_body']}, Version: #{row['version']}, Lock Version: #{row['lock_version']}, Inserted At: #{row['inserted_at']}, Updated At: #{row['updated_at']}"
-  # URL
-  # https://snippets.aktagon.com/snippets/332-Testing-sessions-with-Sinatra
+def pg_array_to_a(text)
+  text&.gsub(/^\{(.*)\}$/, '\1')&.gsub(/\ANULL\z/, '')&.split(',')&.compact
 end
 
-# Close the database connection
-conn.close
+def render_snippets
+  Dir['src/snippets/**.md'].each do |markdown_file|
+    markdown = File.read(markdown_file)
+    front_matter_regex = /^---\s*(.*?)\s*^---\s*/m
+    match = markdown.match(front_matter_regex)
+    front_matter = match[1]
+    front_matter = YAML.safe_load(front_matter)
+    body = match.post_match
+    id = front_matter['id']
+    title = front_matter['title']
+    markdown = front_matter['title']
+    LOG.info "Rendering #{markdown_file} with front matter #{front_matter}"
+    suffix = replace_non_alphanumeric_with_dash(title)
+    #suffix = front_matter['id']
+    html_file = "snippets/#{id}-#{suffix}.html".downcase
+    html = render_snippet(
+      id: id,
+      title: title,
+      body: body
+    )
+    File.write(html_file, html)
+  end
+end
 
+#
+# This method is used once to migrate database data to Markdown files.
+#
+def migrate_legacy_database_to_files
+  conn = PG.connect(dbname: 'snippets', user: '', password: '')
+  sql = <<~SQL
+    SELECT
+      s.id,
+      s.title,
+      CONVERT_FROM(s.body, 'UTF8') AS body,
+      ARRAY_AGG(DISTINCT l.name) FILTER (WHERE l.name IS NOT NULL) AS languages,
+      ARRAY_AGG(DISTINCT t.name) FILTER (WHERE t.name IS NOT NULL) AS tags
+    FROM
+      snippets s
+    LEFT JOIN snippet_languages AS sl ON s.id=sl.snippet_id
+    LEFT JOIN snippet_tags AS st ON sl.id=st.snippet_id
+    LEFT JOIN tags t ON t.id=st.tag_id
+    LEFT JOIN languages l ON l.id=sl.language_id
+    GROUP BY 1, 2, 3
+  SQL
+  result = conn.exec(sql)
+
+  # Loop through the result and print each row
+  result.each do |row|
+    id = row['id']
+    title = row['title']
+    markdown = row['body']
+    languages = pg_array_to_a(row['languages'])
+    tags = pg_array_to_a(row['tags'])
+    front_matter = {
+      'id' => id,
+      'title' => title,
+      'languages' => languages,
+      'tags' => tags
+    }.to_yaml
+    markdown = <<~MD
+      #{front_matter}---
+      #{markdown}
+    MD
+    suffix = replace_non_alphanumeric_with_dash(title)
+    markdown_file = "src/snippets/#{id}-#{suffix}.md".downcase
+    File.write(markdown_file, markdown)
+  end
+
+  conn.close
+end
+
+# migrate_legacy_database_to_files
+render_snippets

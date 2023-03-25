@@ -2,23 +2,51 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title></title>
+    <title>How to list and sort directories by size in Linux/Unix</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,900;1,900&amp;display=swap" rel="stylesheet">
     <link href=" https://cdn.jsdelivr.net/npm/destyle.css@4.0.0/destyle.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
     <header class="flex">
-        <h1 class="fadeout"></h1>
+        <h1 class="fadeout">How to list and sort directories by size in Linux/Unix</h1>
     </header>
     <main>
         <section class="flex">
             <div class="flex-item flex-100">
-                <div class="code"></div>
+                <div class="code">For human-readable output use the following command:
+
+```bash
+du -sh /* | sort -h
+```
+
+Use this command to find the directories taking up the most space:
+
+```bash
+du -k | sort -nr | more
+```
+    
+
+The **du** command along with the **-k** switch lists all directories and their respective size in kilobytes.
+The **sort** command sorts the output so that the largest directory is shown first in the list. The **-nr** switch reverses the list and uses only numbers when sorting.
+
+Here's an example of the output:
+
+
+```bash
+12939451  .
+1814892  ./abcdef
+1219582  ./abcde
+839586  ./abcd
+718330  ./abc
+695610  ./ab
+690380  ./a
+```
+
+</div>
             </div>
         </section>
     </main>
@@ -43,4 +71,3 @@
     </script>
 </body>
 </html>
-

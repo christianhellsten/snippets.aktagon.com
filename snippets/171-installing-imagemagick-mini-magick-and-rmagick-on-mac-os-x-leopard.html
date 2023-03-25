@@ -2,23 +2,50 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title></title>
+    <title>Installing ImageMagick, mini-magick and rmagick on Mac OS X Leopard</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,900;1,900&amp;display=swap" rel="stylesheet">
     <link href=" https://cdn.jsdelivr.net/npm/destyle.css@4.0.0/destyle.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
     <header class="flex">
-        <h1 class="fadeout"></h1>
+        <h1 class="fadeout">Installing ImageMagick, mini-magick and rmagick on Mac OS X Leopard</h1>
     </header>
     <main>
         <section class="flex">
             <div class="flex-item flex-100">
-                <div class="code"></div>
+                <div class="code">I had no success installing ImageMagick and mini-magick with the instructions I found on [this page](http://www.aldenta.com/2007/11/26/installing-imagemagickrmagick-on-leopard/) but after some googling I found [this blog post](http://nullstyle.com/2007/10/27/how-to-build-imagemagick-and-install-rmagick-with-macports-on-mac-os-x-leopard/), which had the magic commands that worked for me:
+
+
+```ruby
+sudo port install tiff -macosx  #disables the linkage with Apple's open gl
+sudo port install ImageMagick
+
+sudo gem install rmagick
+sudo gem install mini_magick
+```
+    
+
+To test mini-magick, open an irb console and paste in the following code:
+
+
+```ruby
+require 'rubygems'
+require 'mini_magick'
+
+path = "public/images/0000/0003/logo.jpg"
+image = MiniMagick::Image.new(path)
+
+#print width and height
+puts image[:width]
+puts image[:height]
+```
+    
+
+</div>
             </div>
         </section>
     </main>
@@ -43,4 +70,3 @@
     </script>
 </body>
 </html>
-

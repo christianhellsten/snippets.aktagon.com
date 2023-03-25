@@ -1,0 +1,139 @@
+---
+id: '866'
+title: How to check if an IP address is private (IPv6, IPv4, cidr)
+languages:
+- ruby
+tags:
+---
+```ruby
+require 'resolv'
+require 'ipaddr'
+
+class PrivateIP
+  # https://en.wikipedia.org/wiki/Private_network#Private_IPv4_address_spaces
+  IPV4_NETWORKS = %w[0.0.0.0/8
+  10.0.0.0/8
+  100.64.0.0/10
+  127.0.0.0/8
+  169.254.0.0/16
+  172.16.0.0/12
+  192.0.0.0/24
+  192.0.0.0/29
+  192.0.0.8/32
+  192.0.0.9/32
+  192.0.0.170/32
+  192.0.0.171/32
+  192.0.2.0/24
+  192.31.196.0/24
+  192.52.193.0/24
+  192.88.99.0/24
+  192.168.0.0/16
+  192.175.48.0/24
+  198.18.0.0/15
+  198.51.100.0/24
+  203.0.113.0/24
+  240.0.0.0/4
+  255.255.255.255/32
+  224.0.0.0/24
+  239.0.0.0/8].map { |cidr| IPAddr.new(cidr) }
+
+  # https://en.wikipedia.org/wiki/Unique_local_address
+  IPV6_NETWORKS = %w[fd00::/8
+  fc00::/8
+  0000:0000:0000:0000:0000:0000:0000:0000/64].map { |cidr| IPAddr.new(cidr) }
+
+  class InvalidHost < ArgumentError; end
+
+  # Examples:
+  # private?('127.0.0.1') => true
+  # private?('localhost') => true
+  # private?('google.com') => false
+  def self.private?(ip_or_host)
+    address = IPAddr.new(ip_or_host)
+    if address.ipv4?
+      IPV4_NETWORKS.any? { |cidr| cidr.include?(ip_or_host) }
+    elsif address.ipv6?
+      IPV6_NETWORKS.any? { |cidr| cidr.include?(ip_or_host) }
+    else
+      false
+    end
+  rescue IPAddr::InvalidAddressError
+    private_host?(ip_or_host)
+  end
+
+  # Example: private_host?('localhost') => true
+  def self.private_host?(host)
+    host_ips(host).any? do |type, ips|
+      ips.any? { |ip| private?(ip) }
+    end
+  end
+
+  # Example: host_ips('localhost') => {ipv4: ['127.0.0.1'], ipv6: []}
+  def self.host_ips(host)
+    ipv4 = Resolv::DNS.new.getresources(host, Resolv::DNS::Resource::IN::A)
+    ipv6 = Resolv::DNS.new.getresources(host, Resolv::DNS::Resource::IN::AAAA)
+    raise InvalidHost, "unknown host: #{host}" if ipv4.empty? && ipv6.empty?
+    { ipv4: ipv4.map { |r| r.address.to_s },
+      ipv6: ipv6.map { |r| r.address.to_s } }
+  end
+end
+```
+
+```ruby
+require 'test_helper'
+require 'private_ip'
+
+class PrivateIPTest < ActiveSupport::TestCase
+  test "private?" do
+    assert PrivateIP.private?('localhost')
+    assert PrivateIP.private?('127.0.0.1')
+    assert PrivateIP.private?('0.0.0.0')
+    refute PrivateIP.private?('google.com')
+    refute PrivateIP.private?('209.216.230.240')
+  end
+
+  test "private? (IPV6)" do
+    assert PrivateIP.private?('fd7b:5886:20a0:11a0:1111:2222:3333:4444')
+    assert PrivateIP.private?('::1') # Try http://[::1]:3000 in browser
+    assert PrivateIP.private?('::')
+    assert PrivateIP.private?('0:0:0:0:0:0:0:1')
+  end
+
+  test "private? (CIDR)" do
+    PrivateIP::IPV4_NETWORKS.each do |cidr|
+      assert PrivateIP.private?(cidr.to_s)
+    end
+    PrivateIP::IPV6_NETWORKS.each do |cidr|
+      assert PrivateIP.private?(cidr.to_s)
+    end
+  end
+
+  test "private_host?" do
+    assert PrivateIP.private_host?('localhost')
+    refute PrivateIP.private_host?('google.com')
+  end
+
+  test "host_ips" do
+    assert_equal({ ipv4: ["127.0.0.1"], ipv6: [] }, PrivateIP.host_ips('localhost'))
+    assert_equal({ ipv4: ["209.216.230.240"], ipv6: []}, PrivateIP.host_ips('news.ycombinator.com'))
+  end
+
+  test "host_ips (invalid)" do
+    assert_raise PrivateIP::InvalidHost do
+      PrivateIP.host_ips('https://google.com')
+    end
+    assert_raise PrivateIP::InvalidHost do
+      PrivateIP.host_ips('127.0.0.1')
+    end
+    assert_raise PrivateIP::InvalidHost do
+      PrivateIP.host_ips('::1')
+    end
+    assert_raise PrivateIP::InvalidHost do
+      PrivateIP.host_ips('[::1]')
+    end
+    assert_raise PrivateIP::InvalidHost do
+      PrivateIP.host_ips('::')
+    end
+  end
+end
+```

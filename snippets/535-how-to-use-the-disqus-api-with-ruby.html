@@ -2,23 +2,66 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title></title>
+    <title>How to use the Disqus API with Ruby</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,900;1,900&amp;display=swap" rel="stylesheet">
     <link href=" https://cdn.jsdelivr.net/npm/destyle.css@4.0.0/destyle.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
     <header class="flex">
-        <h1 class="fadeout"></h1>
+        <h1 class="fadeout">How to use the Disqus API with Ruby</h1>
     </header>
     <main>
         <section class="flex">
             <div class="flex-item flex-100">
-                <div class="code"></div>
+                <div class="code">```ruby
+require 'httparty'
+
+# See http://disqus.com/api/docs/
+module Disqus
+  class Base
+    include HTTParty
+    format :json
+    base_uri 'http://disqus.com/api/3.0'
+    debug_output $stderr
+  end
+
+  class Forum < Base
+    # http://disqus.com/api/docs/forums/create/
+    def create(options)
+      url = "/forums/create.json"
+      self.class.post(url, :body => options.merge({ :api_secret => API_SECRET }))
+    end
+
+    def posts(id)
+      url = "/forums/listPosts.json?api_secret=#{API_SECRET}&forum=#{id}"
+      self.class.get(url)
+    end
+
+    def threads(id)
+      url = "http://disqus.com/api/3.0/threads/list.json?api_secret=#{API_SECRET}&forum=#{id}"
+      self.class.get(url)
+    end
+  end
+
+  class Post < Base
+    # http://disqus.com/api/docs/posts/create/
+    def create(message)
+      url = "/posts/create.json"
+      self.class.post(url, :body => message.merge({ :api_secret => API_SECRET }))
+    end
+  end
+end
+
+# Secret key from http://disqus.com/api/applications/
+Disqus::API_SECRET = '...'
+```
+    
+
+</div>
             </div>
         </section>
     </main>
@@ -43,4 +86,3 @@
     </script>
 </body>
 </html>
-

@@ -2,23 +2,111 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title></title>
+    <title>A simple and easy to use PHP XML parser</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,900;1,900&amp;display=swap" rel="stylesheet">
     <link href=" https://cdn.jsdelivr.net/npm/destyle.css@4.0.0/destyle.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
     <header class="flex">
-        <h1 class="fadeout"></h1>
+        <h1 class="fadeout">A simple and easy to use PHP XML parser</h1>
     </header>
     <main>
         <section class="flex">
             <div class="flex-item flex-100">
-                <div class="code"></div>
+                <div class="code">The PHP XML parser:
+
+
+```php
+class XML
+{
+	static function parse($data, $handler, $encoding = "UTF-8")
+	{
+		$parser = xml_parser_create($encoding);
+
+		xml_set_object($parser, $handler);
+		
+		xml_set_element_handler($parser,
+			array(&$handler, 'start'),
+			array(&$handler, 'end')
+		);
+			
+		xml_set_character_data_handler(
+			$parser,
+			array($handler, 'content')
+		);
+			
+		$result = xml_parse($parser, $data);
+
+		if(!$result)
+		{
+			$error_string = xml_error_string(xml_get_error_code($parser));
+			$error_line	  = xml_get_current_line_number($parser);
+			$error_column = xml_get_current_column_number($parser);
+			
+			$message = sprintf("XML error '%s' at line %d column %d", $error_string, $error_line, $error_column);
+			
+			throw new Exception($message);
+		}
+
+		xml_parser_free($parser);
+	}
+}
+```
+    
+
+A result handler:
+
+
+```php
+class ResultHandler
+{
+	var $tag;
+
+	function start ($parser, $tagName, $attributes = null)
+	{
+		echo "start";
+		$this->tag .= $tagName; # Use .= to work around bug...
+	}
+
+	function end ($parser, $tagName)
+	{
+		echo "end";
+		$this->tag = null;
+
+	}
+
+	function content ($parser, $content)
+	{
+		echo "$this->tag: $content" ;
+	}
+}
+```
+    
+
+Then in your code:
+
+
+```php
+$xml = "<a>bah</a>";
+XML::parse($xml, new ResultHandler());
+```
+    
+
+Note that HTML/XML entities are considered to be tags by PHP's XML parser, so your start tag handler will be called three times for this tag, once for "really", once for "&" and once for " bad parser":
+
+
+```php
+<data>really &amp;  bad parser</data>
+```
+    
+
+I guess this is a bug... You can
+
+</div>
             </div>
         </section>
     </main>
@@ -43,4 +131,3 @@
     </script>
 </body>
 </html>
-

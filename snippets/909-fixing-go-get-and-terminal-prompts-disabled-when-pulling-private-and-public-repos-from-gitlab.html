@@ -2,23 +2,55 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title></title>
+    <title>Fixing "go get" and "terminal prompts disabled" when pulling private and public repos from gitlab</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,900;1,900&amp;display=swap" rel="stylesheet">
     <link href=" https://cdn.jsdelivr.net/npm/destyle.css@4.0.0/destyle.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
     <header class="flex">
-        <h1 class="fadeout"></h1>
+        <h1 class="fadeout">Fixing "go get" and "terminal prompts disabled" when pulling private and public repos from gitlab</h1>
     </header>
     <main>
         <section class="flex">
             <div class="flex-item flex-100">
-                <div class="code"></div>
+                <div class="code">This frustrating error when running go get can be fixed by following these instructions:
+
+```bash
+go: downloading gitlab.com/christianhellsten/go-xxxx v0.0.0-20200816045911-18af1d03e51a
+cmd/go-xxx/main.go:4:2: gitlab.com/christianhellsten/go-xxx@v0.0.0-20200816045911-18af1d03e51a: verifying module: gitlab.com/christianhellsten/go-xxx@v0.0.0-20200816045911-18af1d03e51a: reading https://sum.golang.org/lookup/gitlab.com/christianhellsten/go-xxx@v0.0.0-20200816045911-18af1d03e51a: 410 Gone
+	server response:
+	not found: gitlab.com/christianhellsten/go-xxx@v0.0.0-20200816045911-18af1d03e51a: invalid version: git fetch -f origin refs/heads/*:refs/heads/* refs/tags/*:refs/tags/* in /tmp/gopath/pkg/mod/cache/vcs/1dd4008ad7804a122a243831f561ea1000480bb532c0388829d0f37bc7349fef: exit status 128:
+		fatal: could not read Username for 'https://gitlab.com': terminal prompts disabled
+```
+
+Make sure you have the latest go and git versions.
+
+Then run the following commands:
+
+```bash
+git config --global url.ssh://git@github.com/.insteadOf https://github.com/
+git config --global url.ssh://git@gitlab.com/.insteadOf https://gitlab.com/
+go env -w GOPRIVATE="gitlab.com/christianhellsten,bitbucket.org/christianhellsten,github.com/christianhellsten"
+```
+
+Specify the Gitlab token in ~/.git-credentials or ~/.netrc.
+
+Now you can enjoy simple things such as pulling your repos from the internet, but you need to remember to set GIT_TERMINAL_PROMPT too:
+
+```bash
+GIT_TERMINAL_PROMPT=1 go get
+```
+
+References:
+
+- https://stackoverflow.com/questions/61152197/invalid-version-and-https-references-when-importing-private-repo-in-golang
+
+- https://stackoverflow.com/questions/60579900/how-to-fix-invalid-version-and-could-not-read-username-in-go-get-of-a-priv
+</div>
             </div>
         </section>
     </main>
@@ -43,4 +75,3 @@
     </script>
 </body>
 </html>
-

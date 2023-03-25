@@ -2,23 +2,42 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title></title>
+    <title>How to fix "Cannot modify SafeBuffer in place"</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,900;1,900&amp;display=swap" rel="stylesheet">
     <link href=" https://cdn.jsdelivr.net/npm/destyle.css@4.0.0/destyle.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
     <header class="flex">
-        <h1 class="fadeout"></h1>
+        <h1 class="fadeout">How to fix "Cannot modify SafeBuffer in place"</h1>
     </header>
     <main>
         <section class="flex">
             <div class="flex-item flex-100">
-                <div class="code"></div>
+                <div class="code">If you get this error:
+
+
+```ruby
+Cannot modify SafeBuffer in place
+ruby/1.8/gems/activesupport-3.0.9/lib/active_support/core_ext/string/output_safety.rb:119:in gsub!'
+ruby/1.8/xmlrpc/create.rb:54:in text'
+```
+    
+
+You might need to upgrade haml, or if that doesn't help you need to convert the SafeBuffer to a String. In this case it's the parameters given to an XML-RPC call that need to be converted to strings:
+
+
+```ruby
+XMLAPI.start(safebuffer_string.to_str)
+```
+    
+
+In other words the solution is to update your gem or use .to\_str.
+
+</div>
             </div>
         </section>
     </main>
@@ -43,4 +62,3 @@
     </script>
 </body>
 </html>
-

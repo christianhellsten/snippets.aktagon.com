@@ -2,23 +2,51 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title></title>
+    <title>How to cache PHP objects to disk with CakePHP</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,900;1,900&amp;display=swap" rel="stylesheet">
     <link href=" https://cdn.jsdelivr.net/npm/destyle.css@4.0.0/destyle.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
     <header class="flex">
-        <h1 class="fadeout"></h1>
+        <h1 class="fadeout">How to cache PHP objects to disk with CakePHP</h1>
     </header>
     <main>
         <section class="flex">
             <div class="flex-item flex-100">
-                <div class="code"></div>
+                <div class="code">CakePHP has a view cache (similar to Rails) that can be used to cache objects. The following snippet shows a CakePHP action that uses the serialize and unserialize functions to cache a tag cloud-- an array containing tags in this case--to disk, and then read it back.
+
+Note that we assign a TTL of 1 hours to the tag cloud, so if it's more than one hour old it will be refreshed from the database.
+
+
+```php
+function index()
+	{
+		$maximum = 100;
+		$cache_key = "tag_cloud_$maximum";
+		$tag_cloud = cache($cache_key, null, '+1 hours');
+		
+		if(empty($tag_cloud))
+		{
+			$tag_cloud = Tag::generate_cloud($maximum);
+			cache($cache_key, serialize($tag_cloud));
+		}
+		else
+		{
+			$tag_cloud = unserialize($tag_cloud);
+		}
+		
+		return $tag_cloud;
+	}
+```
+    
+
+The cache function is defined in $APP\_ROOT/cake/basics.php, which is where you should look if you want to know more about how the caching works...
+
+</div>
             </div>
         </section>
     </main>
@@ -43,4 +71,3 @@
     </script>
 </body>
 </html>
-

@@ -2,23 +2,78 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title></title>
+    <title>How to upload a file with PHP and lib_curl</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,900;1,900&amp;display=swap" rel="stylesheet">
     <link href=" https://cdn.jsdelivr.net/npm/destyle.css@4.0.0/destyle.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
     <header class="flex">
-        <h1 class="fadeout"></h1>
+        <h1 class="fadeout">How to upload a file with PHP and lib_curl</h1>
     </header>
     <main>
         <section class="flex">
             <div class="flex-item flex-100">
-                <div class="code"></div>
+                <div class="code">This is an example of how to upload a file from PHP to another server that may or may not be running PHP.
+
+Note that using Pear's [HTTP\_Request](http://pear.php.net/package/HTTP_Request/) package is probably easier.
+
+
+```php
+<?php
+  require_once('Var_Dump.php');
+  Var_Dump::displayInit(array('display_mode' => 'HTML4_Text'), array('mode' => 'normal','offset' => 4));
+
+  $url = 'www.aktagon.com/upload';
+  $file = '/tmp/file_to_upload';
+  $post_data = array();
+
+  $post_data['username'] = '';
+  $post_data['password'] = '';
+  $post_data['file'] = "@$file";
+
+  $ch = curl_init();
+
+  curl_setopt($ch, CURLOPT_URL, $url);
+  curl_setopt($ch, CURLOPT_HTTPHEADER, array(
+#    'Cookie: xxxx',
+#    'Content-Type: xxxx'
+  ));
+  curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
+  curl_setopt($ch, CURLOPT_POST, true);
+  #curl_setopt($ch, CURLOPT_PROXY, '127.0.0.1:8888');
+
+  curl_setopt($ch, CURLOPT_POSTFIELDS, $post_data);
+
+  $response  = curl_exec($ch);
+  $info      = curl_getinfo($ch); 
+  $http_code = $info['http_code'];
+  $speed     = round($info['speed_upload'] / 1024);
+  $size      = round($info['size_upload'] / 1024);
+
+  if($http_code != 200)
+  {
+    echo "Upload failed with HTTP code $http_code. Uploaded $size kilobytes with $speed kilobytes/s.<br/>";
+    echo "<h1>Response</h1><pre>$response</pre><h1>Debug information</h1>";
+
+    Var_Dump::display($info);
+  }
+  else
+  {
+    echo "Uploaded successful. Uploaded $size kilobytes with $speed kilobytes / s.<br/>";
+    echo "<h1>Response</h1><pre>$response</pre>";
+  }
+  curl_close($ch);
+?>
+```
+    
+
+You can remove the Var\_Dump code (Pear module), if you haven't installed it, or don't need it.
+
+</div>
             </div>
         </section>
     </main>
@@ -43,4 +98,3 @@
     </script>
 </body>
 </html>
-

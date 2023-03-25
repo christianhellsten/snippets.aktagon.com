@@ -2,23 +2,46 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title></title>
+    <title>Fix for empty ident error using older git</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,900;1,900&amp;display=swap" rel="stylesheet">
     <link href=" https://cdn.jsdelivr.net/npm/destyle.css@4.0.0/destyle.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
     <header class="flex">
-        <h1 class="fadeout"></h1>
+        <h1 class="fadeout">Fix for empty ident error using older git</h1>
     </header>
     <main>
         <section class="flex">
             <div class="flex-item flex-100">
-                <div class="code"></div>
+                <div class="code">[In this snippet](http://snippets.aktagon.com/snippets/157-Installing-compiling-and-using-git-with-Ruby-on-Rails-on-Mac-OS-X-Leopard-and-Debian-Linux-) Christian explains how to fix the empty ident error using a bleeding edge git. In older git versions this must be done manually. So if you get this error...
+
+
+```bash
+*** Environment problem:
+*** Your name cannot be determined from your system services (gecos).
+*** You would need to set GIT_AUTHOR_NAME and GIT_COMMITTER_NAME
+*** environment variables; otherwise you won't be able to perform
+*** certain operations because of "empty ident" errors.
+*** Alternatively, you can use user.name configuration variable.
+
+fatal: empty ident  <.....@......com> not allowed
+```
+    
+
+... then add the following parameters to your <sub>/.bashrc\\ file\\ and\\ source\\ it\\ with\\ .</sub>/.bashrc (or relogin, alternatively):
+
+
+```bash
+export GIT_AUTHOR_NAME="Marko Haapala"
+export GIT_COMMITTER_NAME="Marko Haapala"
+```
+    
+
+</div>
             </div>
         </section>
     </main>
@@ -43,4 +66,3 @@
     </script>
 </body>
 </html>
-

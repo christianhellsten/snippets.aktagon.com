@@ -2,23 +2,54 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title></title>
+    <title>Idempotency with Rails and Turbolinks</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,900;1,900&amp;display=swap" rel="stylesheet">
     <link href=" https://cdn.jsdelivr.net/npm/destyle.css@4.0.0/destyle.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
     <header class="flex">
-        <h1 class="fadeout"></h1>
+        <h1 class="fadeout">Idempotency with Rails and Turbolinks</h1>
     </header>
     <main>
         <section class="flex">
             <div class="flex-item flex-100">
-                <div class="code"></div>
+                <div class="code">To achieve idempotency with Rails and Turbolinks you have many options including these:
+
+- Option 1: Destroy DOM elements
+
+Destroy existing elements that were created on the first page load. This works well with most libraries, including D3.js.
+
+The is also the easiest to implement if you put everything under one root DOM element.
+
+- Option 2: Set a flag
+
+Set a flag. Check if the flag is set before running the script. Note that you will have to use delegated event listeners or attach event listeners again. This is hard to do with, for example, D3.js.
+
+```ruby
+document.addEventListener("turbolinks:load", function() {
+  $('.linechart').each(function(_ix, el) {
+    // Option 1: Destroy existing elements that were created on the first page load
+    el = $(el);
+    el.empty(); // empty removes all child elements. Normally this would be put in the script itself
+    linechart(el)
+    // Option 2: Set a flag to avoid calling the script twice 
+    //if(el.attr('data-initialized') == null) {
+    //  console.log("not initialized")
+    //  linechart(el)
+    //} else {
+    //  console.log("initialized")
+    //}
+    // // Attach event listeners again
+    // linechart.attachDelegatedEventListeners(el);
+    //el.attr('data-initialized', true);
+  });
+});
+```
+</div>
             </div>
         </section>
     </main>
@@ -43,4 +74,3 @@
     </script>
 </body>
 </html>
-

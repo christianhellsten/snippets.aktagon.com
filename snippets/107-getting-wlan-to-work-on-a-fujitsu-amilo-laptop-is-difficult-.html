@@ -2,23 +2,107 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title></title>
+    <title>Getting WLAN to work on a Fujitsu Amilo laptop is difficult...</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,900;1,900&amp;display=swap" rel="stylesheet">
     <link href=" https://cdn.jsdelivr.net/npm/destyle.css@4.0.0/destyle.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
     <header class="flex">
-        <h1 class="fadeout"></h1>
+        <h1 class="fadeout">Getting WLAN to work on a Fujitsu Amilo laptop is difficult...</h1>
     </header>
     <main>
         <section class="flex">
             <div class="flex-item flex-100">
-                <div class="code"></div>
+                <div class="code">I fought and won over WLAN drivers and Linux, but later switched to using a Mac, because driver support for WLAN, printers and other hardware is non-existent Linux:
+
+
+```
+apt-get install wpasupplicant
+
+http://ubuntuforums.org/showthread.php?t=313914
+
+vim /etc/wpa_supplicant.conf
+
+ctrl_interface=/var/run/wpa_supplicant
+ctrl_interface_group=0
+eapol_version=1
+ap_scan=2
+fast_reauth=1
+
+
+network={
+    ssid="...yer-ssid..."
+    scan_ssid=1
+    proto=WPA
+    key_mgmt=WPA-PSK
+    psk="...yer-pass..."
+    priority=5
+    pairwise=TKIP
+}
+
+vim /etc/network/interfaces
+
+auto lo
+iface lo inet loopback
+
+auto eth1
+iface eth1 inet dhcp
+   wpa-driver wext
+   wpa-conf /etc/wpa_supplicant.conf
+
+auto wlan0
+iface wlan0 inet dhcp
+
+iface eth0 inet dhcp
+
+auto eth0
+
+vim /etc/init.d/wpasupplicant
+
+#!/bin/sh
+
+PATH=/usr/sbin:/usr/bin:/sbin:/bin
+
+case "$1" in
+        start|restart|force-reload)
+                wpa_supplicant -Dwext -iwlan0 -c/etc/wpa_supplicant.conf -dd -B
+                ;;
+        stop)
+                killall -9 wpa_supplicant
+                ;;
+        *)
+                echo "Usage: $0 {start|stop|restart|force-reload}" >&2
+                exit 3
+                ;;
+esac
+
+exit 0
+
+----------------
+
+chmod +x ...
+cd /etc/rcS.d
+ln -s ../init.d/wpasupplicant S40iwpa
+
+
+-------------
+
+auto lo
+iface lo inet loopback
+
+auto eth1
+iface eth1 inet dhcp
+
+auto wlan0
+iface wlan0 inet dhcp
+```
+    
+
+</div>
             </div>
         </section>
     </main>
@@ -43,4 +127,3 @@
     </script>
 </body>
 </html>
-

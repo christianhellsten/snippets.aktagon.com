@@ -2,23 +2,75 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title></title>
+    <title>How to Test Authentication With Devise+Capybara+Minitest</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,900;1,900&amp;display=swap" rel="stylesheet">
     <link href=" https://cdn.jsdelivr.net/npm/destyle.css@4.0.0/destyle.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
     <header class="flex">
-        <h1 class="fadeout"></h1>
+        <h1 class="fadeout">How to Test Authentication With Devise+Capybara+Minitest</h1>
     </header>
     <main>
         <section class="flex">
             <div class="flex-item flex-100">
-                <div class="code"></div>
+                <div class="code">Testing authentication functionality with Capybara and Devise? See the following checklist:
+
+\* [Use shared connections](https://gist.github.com/josevalim/470808) or disable transactional fixtures.
+\* Set Capybara.default\_host to match config.session\_store.domain or you'll get "401 Unauthorized"
+\* Name of test should end with "integration", e.g. describe "Dashboard Business **integration**" do
+\* Add the following to your integration tests:
+
+
+```ruby
+include Warden::Test::Helpers
+  Warden.test_mode!
+
+  after do
+    Warden.test_reset!
+  end
+```
+    
+
+Full example of integration test with Devise, Capybara, and minitest:
+
+
+```ruby
+class IntegrationSpec < MiniTest::Spec
+  include Rails.application.routes.url_helpers
+  include Capybara::DSL
+  include Warden::Test::Helpers
+  Warden.test_mode!
+
+  before do
+    @routes = Rails.application.routes
+  end
+
+  after do
+    Warden.test_reset!
+  end
+
+  def sign_in(user)
+    login_as(user, scope: :user)
+  end
+
+  def sign_out
+    logout(:user)
+  end
+
+  def default_url_options
+    Rails.configuration.action_mailer.default_url_options
+  end
+end
+
+MiniTest::Spec.register_spec_type( /integration$/, IntegrationSpec )
+```
+    
+
+</div>
             </div>
         </section>
     </main>
@@ -43,4 +95,3 @@
     </script>
 </body>
 </html>
-

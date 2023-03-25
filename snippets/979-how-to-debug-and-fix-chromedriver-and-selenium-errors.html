@@ -2,23 +2,62 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title></title>
+    <title>How to debug and fix chromedriver and selenium errors</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,900;1,900&amp;display=swap" rel="stylesheet">
     <link href=" https://cdn.jsdelivr.net/npm/destyle.css@4.0.0/destyle.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
     <header class="flex">
-        <h1 class="fadeout"></h1>
+        <h1 class="fadeout">How to debug and fix chromedriver and selenium errors</h1>
     </header>
     <main>
         <section class="flex">
             <div class="flex-item flex-100">
-                <div class="code"></div>
+                <div class="code">You an enable the chromedriver log to debug and fix chromedriver and Selenium errors such as "unknown error: net::ERR_CONNECTION_REFUSED".
+
+First start the chromedriver in the background:
+
+```bash
+nohup chromedriver --port=12345 --verbose --log-path=/tmp/chromedriver.log &
+```
+
+Then configure Selenium to use the chromedriver instance:
+
+```bash
+Capybara::Selenium::Driver.new(@app, browser: :chrome, options: ..., url: 'http://localhost:12345')
+```
+
+Next run the tests and inspect the chromedriver log.
+
+In my case the issue was that an unreachable URL, see the unreachableUrl property in the output below:
+
+```bash
+[1659101781.048][DEBUG]: DevTools WebSocket Event: Page.frameNavigated B30A4B9FE0908FDACE0522341267520A {
+   "frame": {
+      "adFrameStatus": {
+         "adFrameType": "none"
+      },
+      "crossOriginIsolatedContextType": "NotIsolated",
+      "domainAndRegistry": "",
+      "gatedAPIFeatures": [  ],
+      "id": "B30A4B9FE0908FDACE0522341267520A",
+      "loaderId": "595BC7FEFD2C1ECCE31157FF7972F889",
+      "mimeType": "text/html",
+      "secureContextType": "InsecureScheme",
+      "securityOrigin": "://",
+      "unreachableUrl": "http://localhost:3030/",
+      "url": "chrome-error://chromewebdata/"
+   },
+   "type": "Navigation"
+}
+```
+
+Thanks: https://makandracards.com/makandra/301588-how-to-enable-chromedriver-logging
+</div>
             </div>
         </section>
     </main>
@@ -43,4 +82,3 @@
     </script>
 </body>
 </html>
-

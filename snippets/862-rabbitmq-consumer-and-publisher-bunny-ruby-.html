@@ -2,23 +2,79 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title></title>
+    <title>RabbitMQ consumer and publisher (Bunny/Ruby)</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,900;1,900&amp;display=swap" rel="stylesheet">
     <link href=" https://cdn.jsdelivr.net/npm/destyle.css@4.0.0/destyle.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
     <header class="flex">
-        <h1 class="fadeout"></h1>
+        <h1 class="fadeout">RabbitMQ consumer and publisher (Bunny/Ruby)</h1>
     </header>
     <main>
         <section class="flex">
             <div class="flex-item flex-100">
-                <div class="code"></div>
+                <div class="code">Create consumer.rb:
+
+```ruby
+require 'bunny'
+bunny = Bunny.new(ENV.fetch('AMQP_URL'))
+bunny.start
+at_exit { bunny.stop }
+channel = bunny.create_channel
+channel.prefetch(1)
+exchange = channel.topic(ENV.fetch('EXCHANGE'), durable: true, passive: true)
+queue = channel.queue(ENV.fetch('QUEUE'), durable: true, passive: true)
+queue.bind(exchange)
+queue.subscribe(manual_ack: true, block: true) do |delivery_info, _metadata, payload|
+  puts "==============="
+  puts payload
+  puts "==============="
+  channel.acknowledge(delivery_info.delivery_tag, false)
+end
+```
+
+Start consumer:
+
+```bash
+$ EXCHANGE=cnn QUEUE=news AMQP_URL=amqp://username:password@localhost:5672 ruby consumer.rb
+```
+ 
+Create publisher.rb:
+
+```ruby
+require "bunny"
+
+class Publisher
+  def self.initialize(amqp_url, exchange:)
+    @@bunny = Bunny.new(amqp_url)
+    @@bunny.start
+    @@channel = @@bunny.create_channel
+    # 'passive = true' means exchange already exists
+    @@exchange = @@bunny.channel.topic(exchange, passive: true)
+    at_exit { @@bunny.stop }
+  end
+
+  def self.send(message, queue:)
+    @@exchange.publish(message, routing_key: queue)
+  end
+end
+
+queue = ENV.fetch('QUEUE')
+Publisher.initialize(ENV.fetch('AMQP_URL'), exchange: ENV.fetch('EXCHANGE'))
+Publisher.send('Ruby is the best programming language', queue: queue)
+Publisher.send('Top 10 silver-bullet solutions in Java', queue: queue)
+```
+
+Start publisher.rb:
+
+```bash
+$ EXCHANGE=cnn QUEUE=news AMQP_URL=amqp://username:password@localhost:5672 ruby publisher.rb
+```
+</div>
             </div>
         </section>
     </main>
@@ -43,4 +99,3 @@
     </script>
 </body>
 </html>
-

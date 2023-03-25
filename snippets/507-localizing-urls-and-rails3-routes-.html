@@ -2,23 +2,38 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title></title>
+    <title>Localizing URLs and Rails3 routes </title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,900;1,900&amp;display=swap" rel="stylesheet">
     <link href=" https://cdn.jsdelivr.net/npm/destyle.css@4.0.0/destyle.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
     <header class="flex">
-        <h1 class="fadeout"></h1>
+        <h1 class="fadeout">Localizing URLs and Rails3 routes </h1>
     </header>
     <main>
         <section class="flex">
             <div class="flex-item flex-100">
-                <div class="code"></div>
+                <div class="code">If you need to support localized URLs in a Rails application, you have at least two plugins to choose from:
+\* [i18n\_routing](https://github.com/kwi/i18n_routing) NOTE: doesn't seem to work with Rails 3.2.8
+\* [rails-translate-routes](https://github.com/francesc/rails-translate-routes)
+
+I recommend the rails-translate-routes plugin because it allows me to create exactly the URLs I need.
+
+For example, if these are the localized URLs I need:
+
+
+```ruby
+http://xxx.com/news
+http://yyy.com/uutiset
+http://zzz.com/nyheter
+```
+    
+
+</div>
             </div>
         </section>
     </main>
@@ -43,4 +58,3 @@
     </script>
 </body>
 </html>
-

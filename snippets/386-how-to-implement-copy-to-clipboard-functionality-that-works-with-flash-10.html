@@ -2,23 +2,44 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title></title>
+    <title>How to implement copy-to-clipboard functionality that works with Flash 10</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,900;1,900&amp;display=swap" rel="stylesheet">
     <link href=" https://cdn.jsdelivr.net/npm/destyle.css@4.0.0/destyle.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
     <header class="flex">
-        <h1 class="fadeout"></h1>
+        <h1 class="fadeout">How to implement copy-to-clipboard functionality that works with Flash 10</h1>
     </header>
     <main>
         <section class="flex">
             <div class="flex-item flex-100">
-                <div class="code"></div>
+                <div class="code">Use mojombo's [Clippy](http://github.com/mojombo/clippy) which can be downloaded from GitHub.
+
+How to create a custom button
+-----------------------------
+
+-   First create your button and save it as a PNG file.
+-   Change library.xml to use your button.
+-   Customize the code behind the button by modifying clippy.hx. You can, for example, remove the "Copy to clipboard" label.
+-   Set the width and height of the button. You have to set it in almost all files (compile.hxml, library.xml, etc).
+-   Compile the SWF file:
+
+
+```
+swfmill simple library.xml library.swf && haxe compile.hxml
+```
+    
+
+Alternatives
+------------
+
+There are no good alternatives that I know of. I tried ZeroClipboard and other solutions, but they were full of bugs and not customizable.
+
+</div>
             </div>
         </section>
     </main>
@@ -43,4 +64,3 @@
     </script>
 </body>
 </html>
-

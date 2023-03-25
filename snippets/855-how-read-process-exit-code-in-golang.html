@@ -2,23 +2,45 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title></title>
+    <title>How read process exit code in Golang</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,900;1,900&amp;display=swap" rel="stylesheet">
     <link href=" https://cdn.jsdelivr.net/npm/destyle.css@4.0.0/destyle.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
     <header class="flex">
-        <h1 class="fadeout"></h1>
+        <h1 class="fadeout">How read process exit code in Golang</h1>
     </header>
     <main>
         <section class="flex">
             <div class="flex-item flex-100">
-                <div class="code"></div>
+                <div class="code">This function returns true if the nz command returns exit code 0:
+
+```go
+package main
+
+import (
+	"os/exec"
+	"strconv"
+)
+
+// IsPortOpen returns a boolean that indicates whether a port is open or closed.
+func IsPortOpen(host string, port int) bool {
+	args := []string{"-z", host, strconv.Itoa(port), "-G", "5"}
+	cmd := exec.Command("/usr/bin/nc", args...)
+	_, err := cmd.Output()
+	if werr, ok := err.(*exec.ExitError); ok {
+		if s := werr.Error(); s != "0" {
+			return false
+		}
+	}
+	return true
+}
+```
+</div>
             </div>
         </section>
     </main>
@@ -43,4 +65,3 @@
     </script>
 </body>
 </html>
-

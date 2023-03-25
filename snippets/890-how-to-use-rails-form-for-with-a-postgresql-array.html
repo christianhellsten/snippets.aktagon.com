@@ -2,23 +2,83 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title></title>
+    <title>How to use Rails' form_for with a PostgreSQL array</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,900;1,900&amp;display=swap" rel="stylesheet">
     <link href=" https://cdn.jsdelivr.net/npm/destyle.css@4.0.0/destyle.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
     <header class="flex">
-        <h1 class="fadeout"></h1>
+        <h1 class="fadeout">How to use Rails' form_for with a PostgreSQL array</h1>
     </header>
     <main>
         <section class="flex">
             <div class="flex-item flex-100">
-                <div class="code"></div>
+                <div class="code">Using Rails' form_for with a PostgreSQL array, for example, user roles can be done as follows:
+
+Migration:
+
+```ruby
+class CreateProjectMembers < ActiveRecord::Migration[6.0]
+  def change
+    create_table :project_members, id: :uuid do |t|
+      ...
+      t.string :roles, array: true, default: []
+```
+
+Model:
+
+```ruby
+class ProjectMember < ApplicationRecord
+  validate :validate_roles
+  ROLES = %w[administrator collaborator].freeze
+
+  def validate_roles
+    return if roles.is_a?(Array) && roles.all? { |d| ROLES.include?(d) }
+
+    errors.add(:roles, :invalid)
+  end
+end
+```
+
+View (slim-lang):
+
+```ruby
+= form @project_member do |f|
+  .form-group
+    = f.label :roles, 'Roles'
+    = f.check_box :roles, { label: 'Administrator', multiple: true }, 'administrator', nil
+    = f.check_box :roles, { label: 'Collaborator', multiple: true }, 'collaborator', nil
+```
+
+Controller:
+
+```ruby
+class ProjectMembersController < ApplicationController
+  ...
+  def update
+    if @project_member.update(project_member_params)
+    ...
+  end
+
+  def project_member_params
+    params.require(:project_member).permit(roles: [])
+  end
+```
+
+Note that if you have a "has_many through" relationship, instead of a PostgreSQL array, you can simply use: 
+
+```ruby
+= f.collection_check_boxes(:locale_ids, Locale.all, :id, :language) do |b|
+  b.check_box
+```
+
+Reference:
+https://apidock.com/rails/v6.0.0/ActionView/Helpers/FormOptionsHelper/collection_check_boxes
+</div>
             </div>
         </section>
     </main>
@@ -43,4 +103,3 @@
     </script>
 </body>
 </html>
-

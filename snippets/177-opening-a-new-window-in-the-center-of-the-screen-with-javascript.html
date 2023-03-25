@@ -2,23 +2,39 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title></title>
+    <title>Opening a new window in the center of the screen with JavaScript</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,900;1,900&amp;display=swap" rel="stylesheet">
     <link href=" https://cdn.jsdelivr.net/npm/destyle.css@4.0.0/destyle.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
     <header class="flex">
-        <h1 class="fadeout"></h1>
+        <h1 class="fadeout">Opening a new window in the center of the screen with JavaScript</h1>
     </header>
     <main>
         <section class="flex">
             <div class="flex-item flex-100">
-                <div class="code"></div>
+                <div class="code">This JavaScript code will open a URL in a new window and center the window on the screen, instead of showing the window in a random place:
+
+
+```javascript
+var url = 'http://google.com/';
+var width  = 640;
+var height = 480;
+   
+var left   = (screen.width / 2) - (width / 2);
+var top    = (screen.height / 2) - (height / 2);
+   
+var xWindow = window.open(url, 'post', 'resizable=1,width=' + width + ',height=' + height + ', top=' + top + ', left=' + left);
+
+xWindow.focus();
+```
+    
+
+</div>
             </div>
         </section>
     </main>
@@ -43,4 +59,3 @@
     </script>
 </body>
 </html>
-

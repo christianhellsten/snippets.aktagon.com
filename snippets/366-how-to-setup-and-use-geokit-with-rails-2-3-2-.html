@@ -2,23 +2,93 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title></title>
+    <title>How to setup and use GeoKit with Rails 2.3.2 </title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,900;1,900&amp;display=swap" rel="stylesheet">
     <link href=" https://cdn.jsdelivr.net/npm/destyle.css@4.0.0/destyle.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
     <header class="flex">
-        <h1 class="fadeout"></h1>
+        <h1 class="fadeout">How to setup and use GeoKit with Rails 2.3.2 </h1>
     </header>
     <main>
         <section class="flex">
             <div class="flex-item flex-100">
-                <div class="code"></div>
+                <div class="code">Install the GeoKit gem and the Rails plugin:
+
+
+```ruby
+sudo gem install geokit
+script/plugin install git://github.com/andre/geokit-rails.git
+```
+    
+
+Edit config/environment.rb:
+
+
+```ruby
+Rails::Initializer.run do |config|
+  config.gem "geokit"
+end
+```
+    
+
+Generate a model and migration file with script/generate model Place:
+
+
+```ruby
+class CreatePlaces < ActiveRecord::Migration
+  def self.up
+    create_table :places do |t|
+      t.string :name
+
+      t.string :external_id
+      t.string :external_type
+
+      t.decimal :latitude,  :precision => 15, :scale => 10
+      t.decimal :longitude, :precision => 15, :scale => 10
+
+      t.timestamps
+    end
+
+    add_index :places, :latitude
+    add_index :places, :longitude
+    add_index :places, [:latitude, :longitude]
+  end
+
+  def self.down
+    drop_table :places
+  end
+end
+```
+    
+
+Configure GeoKit:
+
+
+```ruby
+class Place < ActiveRecord::Base
+  acts_as_mappable :default_units => :kms, 
+                   :default_formula => :sphere, 
+                   :distance_field_name => :distance,
+                   :lat_column_name => :latitude,
+                   :lng_column_name => :longitude
+end
+```
+    
+
+Use your GeoKit enabled model:
+
+
+```ruby
+Place.find_within(105, :origin => Place.last)
+```
+    
+
+</div>
             </div>
         </section>
     </main>
@@ -43,4 +113,3 @@
     </script>
 </body>
 </html>
-

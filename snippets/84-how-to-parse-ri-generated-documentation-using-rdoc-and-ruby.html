@@ -2,23 +2,50 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title></title>
+    <title>How to parse RI generated documentation using RDoc and Ruby</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,900;1,900&amp;display=swap" rel="stylesheet">
     <link href=" https://cdn.jsdelivr.net/npm/destyle.css@4.0.0/destyle.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
     <header class="flex">
-        <h1 class="fadeout"></h1>
+        <h1 class="fadeout">How to parse RI generated documentation using RDoc and Ruby</h1>
     </header>
     <main>
         <section class="flex">
             <div class="flex-item flex-100">
-                <div class="code"></div>
+                <div class="code">RI stores the generated documentation as YAML files. This code uses RDoc to parse the YAML files:
+
+
+```ruby
+require 'yaml'
+require 'find'
+require "rdoc/ri/ri_driver"
+
+dirs = RI::Paths::PATH
+dirs.each do |dir|
+  Find.find(dir) do |fn|
+    next unless File.file?(fn)
+    doc = YAML.load(File.read(fn))
+    next unless doc.respond_to?(:comment)
+    next unless doc.comment
+    
+    # Print name of object
+    puts doc.full_name
+    
+    # Print the body: RDoc comments, but only partial...
+    puts doc.comment.map{|f| f.body if f.respond_to?(:body)}.join("\n")
+  end
+end
+```
+    
+
+Originally from the article [Fun with Ferret](http://datanoise.com/articles/2006/9/5/fun-with-ferret).
+
+</div>
             </div>
         </section>
     </main>
@@ -43,4 +70,3 @@
     </script>
 </body>
 </html>
-

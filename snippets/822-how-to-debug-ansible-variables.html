@@ -2,23 +2,51 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title></title>
+    <title>How to debug Ansible variables</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,900;1,900&amp;display=swap" rel="stylesheet">
     <link href=" https://cdn.jsdelivr.net/npm/destyle.css@4.0.0/destyle.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
     <header class="flex">
-        <h1 class="fadeout"></h1>
+        <h1 class="fadeout">How to debug Ansible variables</h1>
     </header>
     <main>
         <section class="flex">
             <div class="flex-item flex-100">
-                <div class="code"></div>
+                <div class="code">Print all variables for all hosts from the command line:
+
+```bash
+ $ ansible -i inventory/local -m debug -a "var=hostvars" all
+```
+
+Replace hostvars with any of the following to print:
+- ansible_locals
+- groups
+- group_names
+- environment
+- vars
+- ansible_sucks
+
+Print all variables for all hosts from a playbook:
+```yaml
+- hosts: all
+  tasks:
+    -  debug:
+        var: hostvars[inventory_hostname]
+        # -vvv to debug !!!!
+        # verbosity: 4
+```
+
+Print all variables:
+```yaml
+- name: print ansible_local
+  debug: var=ansible_local
+```
+</div>
             </div>
         </section>
     </main>
@@ -43,4 +71,3 @@
     </script>
 </body>
 </html>
-

@@ -1,0 +1,28 @@
+---
+id: '641'
+title: Strip trailing whitespace with vim
+languages:
+tags:
+---
+
+```
+" Strip trailing whitespace
+function! <SID>StripTrailingWhitespaces()
+    " Skip these
+    if &ft =~ '\|slim|haml'
+        return
+    endif
+    " Preparation: save last search, and cursor position.
+    let _s=@/
+    let l = line(".")
+    let c = col(".")
+    " Do the business:
+    %s/\s\+$//e
+    " Clean up: restore previous search history, and cursor position
+    let @/=_s
+    call cursor(l, c)
+endfunction
+autocmd BufWritePre * :call <SID>StripTrailingWhitespaces()
+```
+    
+

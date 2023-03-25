@@ -2,23 +2,148 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title></title>
+    <title>How to use the AWS Command Line Interface</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,900;1,900&amp;display=swap" rel="stylesheet">
     <link href=" https://cdn.jsdelivr.net/npm/destyle.css@4.0.0/destyle.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
     <header class="flex">
-        <h1 class="fadeout"></h1>
+        <h1 class="fadeout">How to use the AWS Command Line Interface</h1>
     </header>
     <main>
         <section class="flex">
             <div class="flex-item flex-100">
-                <div class="code"></div>
+                <div class="code">How to use the [AWS Command Line Interface Documentation](http://aws.amazon.com/documentation/cli/).
+
+AWS CLI doesn't support Cloudfront at the moment, see list of [supported services](http://aws.amazon.com/cli/#Supported_Services) for details.
+
+### Install the Amazon AWS command line client
+
+
+```bash
+$ pip install awscli
+# or
+$ sudo easy_install awscli
+```
+    
+
+Now you need to configure the client:
+
+
+```bash
+$ aws configure
+```
+    
+
+### How to create an S3 bucket
+
+
+```bash
+aws s3 mb s3://xxx
+```
+    
+
+### How to list S3 buckets
+
+
+```bash
+$ aws s3 ls
+```
+    
+
+### How to configure a website
+
+
+```bash
+$ aws s3 website help
+```
+    
+
+### How to configure the index and error documents of a website
+
+
+```bash
+aws s3api put-bucket-website --bucket xxx.com --website-configuration '{
+    "IndexDocument": {
+        "Suffix": "index.html"
+    },
+    "ErrorDocument": {
+        "Key": "404/index.html"
+    }
+}'
+```
+    
+
+### How to set the website policy
+
+
+```bash
+aws s3api put-bucket-policy --bucket www.xxx.com --policy '{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "AddPerm",
+      "Effect": "Allow",
+      "Principal": {
+        "AWS": "*"
+      },
+      "Action": "s3:GetObject",
+      "Resource": "arn:aws:s3:::www.xxx.com/*"
+    }
+  ]
+}'
+```
+    
+
+### How to get the website configuration
+
+
+```bash
+$ aws s3api get-bucket-website --bucket x.com
+```
+    
+
+### How to configure redirection for your website
+
+This creates a redirection from x.com to www.x.com:
+
+
+```bash
+aws s3api put-bucket-website --bucket x.com --website-configuration '{
+    "RedirectAllRequestsTo": {
+        "HostName": "www.x.com"
+    }
+}'
+```
+    
+
+### How to set the error document
+
+
+```bash
+$ aws s3 website s3://xxx --index-document index.html --error-document 404/index.html
+```
+    
+
+### How to upload a website to S3
+
+
+```bash
+$ aws s3 sync ~/xxx s3://xxx --delete --cache-control \"max-age=3600\" --acl public-read --exclude *.txt
+```
+    
+
+Note that the command will:
+\* delete files from S3 that don't exist locally.
+\* set max-age header to 3600
+\* allow anyone to access the files
+\* exclude \*.txt files
+
+</div>
             </div>
         </section>
     </main>
@@ -43,4 +168,3 @@
     </script>
 </body>
 </html>
-

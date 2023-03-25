@@ -2,23 +2,99 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title></title>
+    <title>How to use the html/template package in Golang</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,900;1,900&amp;display=swap" rel="stylesheet">
     <link href=" https://cdn.jsdelivr.net/npm/destyle.css@4.0.0/destyle.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
     <header class="flex">
-        <h1 class="fadeout"></h1>
+        <h1 class="fadeout">How to use the html/template package in Golang</h1>
     </header>
     <main>
         <section class="flex">
             <div class="flex-item flex-100">
-                <div class="code"></div>
+                <div class="code">Features:
+- template reloading
+- view helpers
+- HTML files are embedded in the binary
+
+```go
+package main
+
+import (
+	rice "github.com/GeertJohan/go.rice"
+	"gitlab.com/christianhellsten/go-utils/log"
+	"html/template"
+	"net/http"
+	"os"
+	"path/filepath"
+	"strings"
+)
+
+type renderTemplateFunc func(w http.ResponseWriter, tmpl string, p interface{})
+
+var renderTemplate renderTemplateFunc
+var templates = template.New("").Funcs(templateMap)
+var templateBox *rice.Box
+
+func loadTemplates() {
+	if config.debug {
+		renderTemplate = renderTemplateDev
+	} else {
+		renderTemplate = renderTemplateProd
+		newTemplate := func(path string, _ os.FileInfo, _ error) error {
+			if path == "" {
+				return nil
+			}
+			templateString, err := templateBox.String(path)
+			if err != nil {
+				log.Fatal("Unable to parse: path=%s, err=%s", path, err)
+			}
+			templates.New(filepath.Join("tmpl", path)).Parse(templateString)
+			return nil
+		}
+		// Load and parse templates from binary or disk
+		templateBox = rice.MustFindBox("tmpl")
+		templateBox.Walk("", newTemplate)
+	}
+}
+
+var (
+	templateMap = template.FuncMap{
+		"Upper": func(s string) string {
+			return strings.ToUpper(s)
+		},
+	}
+)
+
+func renderTemplateProd(w http.ResponseWriter, tmpl string, p interface{}) {
+	err := templates.ExecuteTemplate(w, tmpl, p)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
+}
+
+func renderTemplateDev(w http.ResponseWriter, tmpl string, p interface{}) {
+	t, _ := template.ParseFiles(tmpl)
+	t.Execute(w, p)
+}
+```
+
+Usage:
+```bash
+go get
+go get github.com/GeertJohan/go.rice/rice
+rice embed-go
+go build
+```
+
+Reference:
+https://github.com/jmcfarlane/golang-templates-example
+</div>
             </div>
         </section>
     </main>
@@ -43,4 +119,3 @@
     </script>
 </body>
 </html>
-

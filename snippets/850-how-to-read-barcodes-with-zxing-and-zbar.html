@@ -2,23 +2,47 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title></title>
+    <title>How to read barcodes with ZXing and ZBar</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,900;1,900&amp;display=swap" rel="stylesheet">
     <link href=" https://cdn.jsdelivr.net/npm/destyle.css@4.0.0/destyle.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
     <header class="flex">
-        <h1 class="fadeout"></h1>
+        <h1 class="fadeout">How to read barcodes with ZXing and ZBar</h1>
     </header>
     <main>
         <section class="flex">
             <div class="flex-item flex-100">
-                <div class="code"></div>
+                <div class="code">How to read barcodes
+
+- zxing (https://github.com/zxing/zxing)
+
+```bash
+$ java -cp javase.jar:core.jar com.google.zxing.client.j2se.CommandLineRunner barcode.png --try_harder --format=DATA_MATRIX
+```
+
+- zbar (http://zbar.sourceforge.net/)
+
+```bash
+$ zbarimg barcode.png
+```
+
+Note that cropping might improve detection accuracy. For example, crop image to show only the top-right corner using imagemagick's convert (width 1500, height 500):
+
+```bash
+$ convert example.png -gravity northeast -crop 1500x500+0+0 cropped.png
+```
+
+**NOTE**
+
+- if you need data correction (reliability) use a Data Matrix (used on e.g. products), Aztec (used on e.g. tickets), or QR code. These allow up to 30% of the image to be unreadable.
+- do not use a barcode that uses code 39 or 128. There is no error correction in code 39 and 128.
+- SimpleCV can also be used to detect barcodes.
+</div>
             </div>
         </section>
     </main>
@@ -43,4 +67,3 @@
     </script>
 </body>
 </html>
-

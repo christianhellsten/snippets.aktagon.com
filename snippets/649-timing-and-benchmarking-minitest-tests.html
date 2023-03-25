@@ -2,23 +2,67 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title></title>
+    <title>Timing and Benchmarking Minitest Tests</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,900;1,900&amp;display=swap" rel="stylesheet">
     <link href=" https://cdn.jsdelivr.net/npm/destyle.css@4.0.0/destyle.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
     <header class="flex">
-        <h1 class="fadeout"></h1>
+        <h1 class="fadeout">Timing and Benchmarking Minitest Tests</h1>
     </header>
     <main>
         <section class="flex">
             <div class="flex-item flex-100">
-                <div class="code"></div>
+                <div class="code">Put this in test/support/timing.rb:
+
+
+```ruby
+module MiniTestTiming
+  class << self; attr_accessor :failure_threshold end
+
+  def before_setup
+    @start_time = Time.now
+    super
+  end
+
+  def after_teardown
+    super
+    end_time = Time.now
+    duration = (end_time - @start_time).seconds.round(1)
+    time = duration.to_s + "s"
+    name = "#{self.class.name}.#{__name__}"
+    limit = MiniTestTiming.failure_threshold
+    File.open 'log/test_duration.log', 'a' do |f|
+      f << "#{time.ljust(5)}: #{name}\n"
+    end
+    assert duration < limit, "#{name} took too long (#{time} > #{limit}s)"
+  end
+end
+
+# Set threshold for failing tests to 1 second
+MiniTestTiming.failure_threshold = 1
+
+class MiniTest::Test
+  include MiniTestTiming
+end
+```
+    
+
+The time it takes your tests will show up in log/test\_duration.log.
+
+You can also output the time it took to run a test by using the verbose switch:
+
+
+```ruby
+rake test TESTOPTS="--verbose"
+```
+    
+
+</div>
             </div>
         </section>
     </main>
@@ -43,4 +87,3 @@
     </script>
 </body>
 </html>
-

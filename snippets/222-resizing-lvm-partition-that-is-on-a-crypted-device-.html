@@ -2,23 +2,39 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title></title>
+    <title>Resizing LVM partition that is on a crypted device.</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,900;1,900&amp;display=swap" rel="stylesheet">
     <link href=" https://cdn.jsdelivr.net/npm/destyle.css@4.0.0/destyle.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
     <header class="flex">
-        <h1 class="fadeout"></h1>
+        <h1 class="fadeout">Resizing LVM partition that is on a crypted device.</h1>
     </header>
     <main>
         <section class="flex">
             <div class="flex-item flex-100">
-                <div class="code"></div>
+                <div class="code">I installed [sysrescd](http://www.sysresccd.org/Sysresccd-manual-en_How_to_install_SystemRescueCd_on_an_USB-stick) on an USB stick to resize a partition that had too little space on it. The hitch was that it was on an encrypted partition. This is the correct order of the commands that needed to be issued.
+
+sda3 is the encrypted device
+systemvg is the name of the volume group
+lv\_usr is the name of the logical volume
+
+
+```bash
+cryptsetup luksOpen /dev/sda3 crypt
+vgcreate systemvg /dev/mapper/crypt
+lvm vgchange --ignorelockingfailure -P -a y
+lvextend -L+2G /dev/systemvg/lv_usr
+e2fsck -f /dev/systemvg/lv_usr
+resize2fs /dev/systemvg/lv_usr
+```
+    
+
+</div>
             </div>
         </section>
     </main>
@@ -43,4 +59,3 @@
     </script>
 </body>
 </html>
-

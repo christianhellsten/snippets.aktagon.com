@@ -2,23 +2,52 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title></title>
+    <title>"ERROR:  permission denied for schema public" WTF</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,900;1,900&amp;display=swap" rel="stylesheet">
     <link href=" https://cdn.jsdelivr.net/npm/destyle.css@4.0.0/destyle.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
     <header class="flex">
-        <h1 class="fadeout"></h1>
+        <h1 class="fadeout">"ERROR:  permission denied for schema public" WTF</h1>
     </header>
     <main>
         <section class="flex">
             <div class="flex-item flex-100">
-                <div class="code"></div>
+                <div class="code">If you get this error:
+
+```sql
+ERROR:  permission denied for schema history
+```
+
+And, you're running a query such as, for example, this one:
+
+```sql
+SELECT 1 FROM ONLY "history"."dummytafvel" x WHERE "id" OPERATOR(pg_catalog.=) $1 FOR KEY SHARE OF x;
+```
+
+And, your user has been granted access to the schema:
+
+```sql
+GRANT ALL ON history TO myself_and_i;
+```
+
+Then, you might have been hit over the head by the "permission denied for schema even as superuser" feature in PostgreSQL:
+
+> That's a foreign key checking query.FK checks are done as the owner of
+> the target table, not as the user who did the original query. So your
+> problem is that the owner of the table lacks permissions
+> to access the other table (or more specifically, the schema it's in). 
+
+The solution is to grant access to the owner of the foreign keys to the schema in question.
+
+## References
+
+https://sharingtechknowledge.blogspot.com/2012/03/postgresql-foreign-key-checking.html
+</div>
             </div>
         </section>
     </main>
@@ -43,4 +72,3 @@
     </script>
 </body>
 </html>
-

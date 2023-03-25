@@ -2,23 +2,63 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title></title>
+    <title>How to get notified when a Cron job fails</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,900;1,900&amp;display=swap" rel="stylesheet">
     <link href=" https://cdn.jsdelivr.net/npm/destyle.css@4.0.0/destyle.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
     <header class="flex">
-        <h1 class="fadeout"></h1>
+        <h1 class="fadeout">How to get notified when a Cron job fails</h1>
     </header>
     <main>
         <section class="flex">
             <div class="flex-item flex-100">
-                <div class="code"></div>
+                <div class="code">To get notified when a cron script fails you can tell cron to send any errors to you by email.
+
+It already does this by default, but the emails are sent to the Unix account's mailbox:
+
+
+```
+cat /var/spool/mail/<username> | less
+```
+    
+
+To use a different email address use the MAILTO setting as described [here](http://serverfault.com/a/226081):
+
+
+```
+MAILTO=email@example.com
+0 */2 * * * /bin/backup.sh > /dev/null
+```
+    
+
+Cron will now send an email whenever the script (/bin/backup.sh) prints something to stderr.
+
+If the script is printing to stderr without it failing try [Cronic](http://habilis.net/cronic/):
+
+
+```
+0 */2 * * * cronic /bin/backup.sh
+```
+    
+
+You can of course also try to fix the script by not printing to STDERR unless it's really an error.
+
+Check the mail log to see if it's working:
+
+
+```
+sudo tail -f /var/log/mail.log
+```
+    
+
+If you're email server is rejecting emails sent by cron you might need to set the MAILFROM variable. However, only some cron version supports MAILFROM.
+
+</div>
             </div>
         </section>
     </main>
@@ -43,4 +83,3 @@
     </script>
 </body>
 </html>
-

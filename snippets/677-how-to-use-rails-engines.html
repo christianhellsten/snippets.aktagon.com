@@ -2,23 +2,68 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title></title>
+    <title>How to use Rails Engines</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,900;1,900&amp;display=swap" rel="stylesheet">
     <link href=" https://cdn.jsdelivr.net/npm/destyle.css@4.0.0/destyle.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
     <header class="flex">
-        <h1 class="fadeout"></h1>
+        <h1 class="fadeout">How to use Rails Engines</h1>
     </header>
     <main>
         <section class="flex">
             <div class="flex-item flex-100">
-                <div class="code"></div>
+                <div class="code">Create a new engine named x:
+
+
+```ruby
+$ rails plugin new x --mountable
+```
+    
+
+Load the engine by modifying Gemfile:
+
+
+```ruby
+gem 'x', path: 'engines/x'
+```
+    
+
+Mount the engine as root in config/routes.rb:
+
+
+```ruby
+mount X::Engine => ”/”, as: ’root’
+```
+    
+
+Optionally, allow the engine to override views and assets by adding this to config/application.rb:
+
+
+```ruby
+ApplicationController.prepend_view_path Rails.root.join('engines', 'x', 'app', 'views')
+
+%w(stylesheets javascripts images).each do |dir|
+  Rails.configuration.assets.paths.unshift Rails.root.join('engines', 'x', 'app', 'assets', dir)
+end
+```
+    
+
+Resources
+---------
+
+https://github.com/shageman/the\_next\_big\_thing
+http://pivotallabs.com/migrating-from-a-single-rails-app-to-a-suite-of-rails-engines/
+http://pivotallabs.com/unbuilt-rails-dependencies-how-to-design-for-loosely-coupled-highly-cohesive-components-within-a-rails-application/
+http://pivotallabs.com/experience-report-engine-usage-that-didn-t-work/
+http://assets.pivotallabs.com/1439/original/2012\_06\_12\_wrangling\_large\_rails\_codebases.pdf
+http://microservices.io/patterns/monolithic.html
+
+</div>
             </div>
         </section>
     </main>
@@ -43,4 +88,3 @@
     </script>
 </body>
 </html>
-

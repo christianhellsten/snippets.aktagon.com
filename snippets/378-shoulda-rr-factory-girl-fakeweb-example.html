@@ -2,23 +2,79 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title></title>
+    <title>Shoulda+rr+factory_girl+fakeweb example</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,900;1,900&amp;display=swap" rel="stylesheet">
     <link href=" https://cdn.jsdelivr.net/npm/destyle.css@4.0.0/destyle.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
     <header class="flex">
-        <h1 class="fadeout"></h1>
+        <h1 class="fadeout">Shoulda+rr+factory_girl+fakeweb example</h1>
     </header>
     <main>
         <section class="flex">
             <div class="flex-item flex-100">
-                <div class="code"></div>
+                <div class="code">```ruby
+require 'test_helper'
+
+class FeedsControllerTest < ActionController::TestCase
+  def stub_feed_url(url)
+    body = feed_for_url(url)
+    FakeWeb.register_uri(:get, "#{url}", :body => body)
+  end
+
+  def feed_for_url(url)
+    uri = URI.parse(url)
+    File.read("test/fixtures#{uri.path}")
+  end
+
+  context "on POST /subscribe" do
+    context "with an existing feed" do
+      setup do
+        url = "http://dummy/valid-feeds/svd.se.xml"
+        @user = Factory(:user)
+        @feed = Feed.create!(:url => url)
+
+        stub(@controller).current_user { @user }
+
+        stub_feed_url(@feed.url)
+
+        post :subscribe, :url => @feed.url
+      end
+
+      should_assign_to :subscription
+      should_respond_with :success
+      should_render_template :subscribe
+
+      should "create a subscription" do
+        assert_equal @user.subscriptions.size, 1
+      end
+    end
+  end
+end
+```
+    
+
+test\_helper.rb
+
+
+```ruby
+.
+.
+require "rr"
+
+include RR::Adapters::RRMethods
+
+class ActiveSupport::TestCase
+.
+.
+```
+    
+
+</div>
             </div>
         </section>
     </main>
@@ -43,4 +99,3 @@
     </script>
 </body>
 </html>
-

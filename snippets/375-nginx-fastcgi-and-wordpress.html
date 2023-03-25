@@ -2,23 +2,56 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title></title>
+    <title>nginx, fastcgi and wordpress</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,900;1,900&amp;display=swap" rel="stylesheet">
     <link href=" https://cdn.jsdelivr.net/npm/destyle.css@4.0.0/destyle.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
     <header class="flex">
-        <h1 class="fadeout"></h1>
+        <h1 class="fadeout">nginx, fastcgi and wordpress</h1>
     </header>
     <main>
         <section class="flex">
             <div class="flex-item flex-100">
-                <div class="code"></div>
+                <div class="code">Some pitfalls I ran into.
+
+CSS is served up as text/html by fastcgi to nginx. Determine this by turning on "Net" in [Firebug](http://getfirebug.com). Firefox in it's standard compliance isn't able to view the style sheet and therefore any images that may be defined in it. Solution; Serve up static stuff as static stuff through nginx:
+
+
+```bash
+server {
+        # ... abbreviated
+            location ~* ^.+\.(jpg|jpeg|gif|png|ico|css|zip|tgz|gz|rar|bz2|doc|xls|exe|pdf|ppt|txt|tar|mid|midi|wav|bmp|rtf|js|mov)$ {
+                    root /home/wordpress/wordpress;
+            }
+        # ... abbreviated
+    }
+```
+    
+
+You receive the error "The plain HTTP request was sent to HTTPS port". Solution: Turn on HTTPS in fastcgi by sending the follwing parameter to it in nginx.conf.
+
+
+```bash
+server {
+        # ... abbreviated
+            location / {
+                    # ... abbreviated
+                    fastcgi_param HTTPS on;
+                    # ... abbreviated
+            }
+        # ... abbreviated
+    }
+```
+    
+
+You get the FTP dialogue when trying to upload a new theme. Solution: Check that the process which runs fastcgi has write privileges into the wordpress folder.
+
+</div>
             </div>
         </section>
     </main>
@@ -43,4 +76,3 @@
     </script>
 </body>
 </html>
-

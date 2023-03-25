@@ -2,23 +2,71 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title></title>
+    <title>How to back up all MySQL database instances with Ruby</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,900;1,900&amp;display=swap" rel="stylesheet">
     <link href=" https://cdn.jsdelivr.net/npm/destyle.css@4.0.0/destyle.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
     <header class="flex">
-        <h1 class="fadeout"></h1>
+        <h1 class="fadeout">How to back up all MySQL database instances with Ruby</h1>
     </header>
     <main>
         <section class="flex">
             <div class="flex-item flex-100">
-                <div class="code"></div>
+                <div class="code">```ruby
+require 'rubygems'
+require 'sequel'
+require 'expect'
+require 'pty'
+require 'pp'
+
+#$expect_verbose = true 
+
+def exec_pty(cmd)
+  PTY.spawn(cmd) do |reader, writer, pid|
+    reader.expect(/Enter password/) do |line|
+      writer.puts ''
+    end 
+
+    while line=reader.gets
+#      print line
+    end
+  end 
+end
+
+user      = 'fuuuuuck'
+password  = ''
+host      = 'localhost'
+encoding  = 'utf8'
+dir       = '/tmp'
+timestamp = Time.now.strftime('%d-%m-%y')
+
+connection = Sequel.mysql nil, :user => user, :password => password, :host => host, :encoding => encoding
+
+databases = []
+connection['show databases;'].each do |db|
+  databases << db[:Database]
+end
+databases = databases - ['mysql', 'test', 'information_schema']
+
+
+databases.each do |db|
+
+  file = File.join(dir, "#{db}_#{timestamp}.sql")
+  p file
+  cmd = "mysqldump -u#{user} -p#{password} -h#{host} -Q -c -C --add-drop-table --add-locks --quick --lock-tables #{db} > #{file}"
+
+  
+  result = exec_pty(cmd)
+end
+```
+    
+
+</div>
             </div>
         </section>
     </main>
@@ -43,4 +91,3 @@
     </script>
 </body>
 </html>
-

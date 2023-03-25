@@ -2,23 +2,49 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title></title>
+    <title>How to install memcached on OSX Snow Leopard</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,900;1,900&amp;display=swap" rel="stylesheet">
     <link href=" https://cdn.jsdelivr.net/npm/destyle.css@4.0.0/destyle.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
     <header class="flex">
-        <h1 class="fadeout"></h1>
+        <h1 class="fadeout">How to install memcached on OSX Snow Leopard</h1>
     </header>
     <main>
         <section class="flex">
             <div class="flex-item flex-100">
-                <div class="code"></div>
+                <div class="code">These instructions are from [wincent.com](https://wincent.com/wiki/Installing_memcached_1.4.1_on_Mac_OS_X_10.6_Snow_Leopard):
+
+
+```bash
+cd /usr/local/src
+curl -O http://www.monkey.org/~provos/libevent-1.4.12-stable.tar.gz
+tar xzvf libevent-1.4.12-stable.tar.gz 
+cd libevent-1.4.12-stable
+./configure
+make
+make verify
+sudo make install
+
+
+cd /usr/local/src
+curl -O http://memcached.googlecode.com/files/memcached-1.4.1.tar.gz
+tar xzvf memcached-1.4.1.tar.gz 
+ cd memcached-1.4.1
+./configure
+make
+make test
+sudo make install
+
+memcached -d -P pidfile -l 127.0.0.1
+```
+    
+
+</div>
             </div>
         </section>
     </main>
@@ -43,4 +69,3 @@
     </script>
 </body>
 </html>
-

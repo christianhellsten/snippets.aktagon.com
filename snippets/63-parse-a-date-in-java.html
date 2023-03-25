@@ -2,23 +2,72 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title></title>
+    <title>Parse a date in java</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,900;1,900&amp;display=swap" rel="stylesheet">
     <link href=" https://cdn.jsdelivr.net/npm/destyle.css@4.0.0/destyle.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
     <header class="flex">
-        <h1 class="fadeout"></h1>
+        <h1 class="fadeout">Parse a date in java</h1>
     </header>
     <main>
         <section class="flex">
             <div class="flex-item flex-100">
-                <div class="code"></div>
+                <div class="code">A simple class that parses a date given in finnish formats d.m.yyyy, dd.mm.yyyy and ddmmyyyy.
+
+
+```java
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
+
+public class DateParser {
+
+  Calendar calendar = null;
+
+  public DateParser(String dateAsString) {
+    if ( dateAsString == null || dateAsString.length() < 8 ) {
+      throw new RuntimeException("String must be at least 8 characters long and in one of these formats: ddmmyyyy | d.m.yyyy | dd.mm.yyyy");
+    }
+    dateAsString = dateAsString.replaceAll("\\.","");
+    String parseString = "ddMMyyyy";
+    if ( dateAsString.length() < 8 ) {
+      parseString="dMyyyy";
+    }
+    try {
+      Date date = new SimpleDateFormat(parseString).parse(dateAsString);
+      calendar = Calendar.getInstance();
+      calendar.setTime(date);
+    } catch (Exception e) {
+      throw new RuntimeException("String must be at least 8 characters long and in one of these formats: ddmmyyyy | d.m.yyyy | dd.mm.yyyy",e);
+    }
+  }
+
+  public int getDayOfMonth() {
+    return calendar.get(Calendar.DATE);
+  }
+
+  public int getMonth() {
+    return calendar.get(Calendar.MONTH) + 1;
+  }
+
+  public int getYear() {
+    return calendar.get(Calendar.YEAR);
+  }
+
+  public Calendar getTime() {
+    return calendar;
+  }
+
+}
+```
+    
+
+</div>
             </div>
         </section>
     </main>
@@ -43,4 +92,3 @@
     </script>
 </body>
 </html>
-

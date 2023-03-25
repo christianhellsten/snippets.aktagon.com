@@ -2,23 +2,52 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title></title>
+    <title>How to trace Objective-C messages with dtrace in OSX</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,900;1,900&amp;display=swap" rel="stylesheet">
     <link href=" https://cdn.jsdelivr.net/npm/destyle.css@4.0.0/destyle.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
     <header class="flex">
-        <h1 class="fadeout"></h1>
+        <h1 class="fadeout">How to trace Objective-C messages with dtrace in OSX</h1>
     </header>
     <main>
         <section class="flex">
             <div class="flex-item flex-100">
-                <div class="code"></div>
+                <div class="code">First, find the process id:
+
+
+```objectivec
+$ ps -ef|grep Grab
+  501 50335   319   0   0:02.11 ??         0:04.40 /Applications/Utilities/Grab.app/Contents/MacOS/Grab -psn_0_7309048
+```
+    
+
+The pid is 50335 so create a D program that captures the Objective-C calls for that process:
+
+
+```objectivec
+objc50335:::entry
+{
+   printf("%s %s\n", probemod, probefunc);
+}
+```
+    
+
+Save the code in a file called grab.trace.d and start tracing by executing this command:
+
+
+```objectivec
+sudo dtrace -s grab.trace.d > trace.log
+```
+    
+
+Output is sent to the trace.log file.
+
+</div>
             </div>
         </section>
     </main>
@@ -43,4 +72,3 @@
     </script>
 </body>
 </html>
-

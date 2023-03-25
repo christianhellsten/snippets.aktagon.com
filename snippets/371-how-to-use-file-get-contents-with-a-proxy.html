@@ -2,23 +2,42 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title></title>
+    <title>How to use file_get_contents with a proxy</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,900;1,900&amp;display=swap" rel="stylesheet">
     <link href=" https://cdn.jsdelivr.net/npm/destyle.css@4.0.0/destyle.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
     <header class="flex">
-        <h1 class="fadeout"></h1>
+        <h1 class="fadeout">How to use file_get_contents with a proxy</h1>
     </header>
     <main>
         <section class="flex">
             <div class="flex-item flex-100">
-                <div class="code"></div>
+                <div class="code">```php
+$url = 'http://www';
+
+$proxy = 'tcp://xxx:8080';
+
+$context = array(
+	'http' => array(
+		'proxy' => $proxy,
+		'request_fulluri' => True,
+		),
+	);
+	
+$context = stream_context_create($context);
+
+$body = file_get_contents($url, False, $context);
+```
+    
+
+The code was found [here](http://fi2.php.net/file_get_contents). Note that it doesn't seem to work with HTTPS.
+
+</div>
             </div>
         </section>
     </main>
@@ -43,4 +62,3 @@
     </script>
 </body>
 </html>
-

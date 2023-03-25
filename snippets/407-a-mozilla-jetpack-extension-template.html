@@ -2,23 +2,64 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title></title>
+    <title>A Mozilla Jetpack extension template</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,900;1,900&amp;display=swap" rel="stylesheet">
     <link href=" https://cdn.jsdelivr.net/npm/destyle.css@4.0.0/destyle.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
     <header class="flex">
-        <h1 class="fadeout"></h1>
+        <h1 class="fadeout">A Mozilla Jetpack extension template</h1>
     </header>
     <main>
         <section class="flex">
             <div class="flex-item flex-100">
-                <div class="code"></div>
+                <div class="code">Jetpack extension:
+
+
+```javascript
+jetpack.future.import('menu');
+jetpack.future.import('selection');
+ 
+jetpack.menu.context.page.on('img').add(function(target) ({
+  label:   "Post to flickr.com",
+  icon:    "http://xxx/icon.png",
+  command: function() {
+    var url = "http://flickr.com/api?";
+
+    var selectedText = jetpack.selection.text || '';
+    var sourceImage   = target.node.src;
+    var sourcePage = jetpack.tabs.focused.url;
+
+    url += encodeURI('image') + '=' + encodeURI(sourceImage);
+    url += '&' + encodeURI('description') + '=' + encodeURI(selectedText.substr(0, 200));
+
+    jetpack.tabs.open(url).focus(); 
+  }
+}));
+```
+    
+
+Installation page:
+
+
+```javascript
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN">
+<html lang="en">
+<head>
+    <title>The Jetpack Feature</title>
+    <link rel="jetpack" href="/javascripts/jetpack-extension.js" name="com extension" />
+</head>
+<body>
+</body>
+</html>
+```
+    
+
+</div>
             </div>
         </section>
     </main>
@@ -43,4 +84,3 @@
     </script>
 </body>
 </html>
-

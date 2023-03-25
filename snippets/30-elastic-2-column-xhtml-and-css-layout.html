@@ -2,23 +2,90 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title></title>
+    <title>Elastic 2 column XHTML and CSS layout</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,900;1,900&amp;display=swap" rel="stylesheet">
     <link href=" https://cdn.jsdelivr.net/npm/destyle.css@4.0.0/destyle.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
     <header class="flex">
-        <h1 class="fadeout"></h1>
+        <h1 class="fadeout">Elastic 2 column XHTML and CSS layout</h1>
     </header>
     <main>
         <section class="flex">
             <div class="flex-item flex-100">
-                <div class="code"></div>
+                <div class="code">This is a slight modification of Roger Johansson's code that I found while reading [this article](http://www.456bereastreet.com/lab/developing_with_web_standards/csslayout/2-col/). I've modified the code to use ems instead of pixels. [Mike Jolley](http://blue-anvil.com/archives/going-elastic-with-ems-layout-techniques) has written about why ems are preferrable over pixels.
+
+
+```html
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+   "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+  <title></title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <meta name="description" content=""/>
+  <style type="text/css">
+  * {
+    font-size:95%;
+    font-family: georgia,'Times',serif;
+  }
+
+  body {
+    min-width:62em;
+  }
+  
+  #wrap {
+    margin:0 auto;
+    width:60em;
+    border: 1px solid blue;
+  }
+  
+  #content {
+    float:left;
+    width:40em;
+    border: 1px solid blue;
+  }
+
+  #sidebar {
+    float:right;
+    width:19em;
+    border: 1px solid blue;
+  }
+
+  #footer {
+    clear:both;
+    border: 1px solid blue;
+  }
+  </style>
+</head>
+<body>
+  <div id="wrap">
+    <div id="header">
+      Header
+    </div>
+    <div id="nav">
+    Navigation
+    </div>
+    <div id="content">
+      Content
+    </div>
+    <div id="sidebar">
+      Sidebar
+    </div>
+    <div id="footer">
+      Footer
+    </div>
+  </div>
+</body>
+</html>
+```
+    
+
+</div>
             </div>
         </section>
     </main>
@@ -43,4 +110,3 @@
     </script>
 </body>
 </html>
-

@@ -2,23 +2,47 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title></title>
+    <title>Rails silently committing transactions instead of rolling back</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,900;1,900&amp;display=swap" rel="stylesheet">
     <link href=" https://cdn.jsdelivr.net/npm/destyle.css@4.0.0/destyle.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
     <header class="flex">
-        <h1 class="fadeout"></h1>
+        <h1 class="fadeout">Rails silently committing transactions instead of rolling back</h1>
     </header>
     <main>
         <section class="flex">
             <div class="flex-item flex-100">
-                <div class="code"></div>
+                <div class="code">Rails will silently commit transactions instead of rolling back when using return, break, or throw to exit a transaction block.
+
+You will see the following deprecation warning in Rails 6.1 and higher:
+
+```
+DEPRECATION WARNING: Using `return`, `break` or `throw` to exit a transaction block is                                        ] 54% Time: 00:00:02,  ETA: 00:00:02
+deprecated without replacement. If the `throw` came from
+`Timeout.timeout(duration)`, pass an exception class as a second
+argument so it doesn't use `throw` to abort its block. This results
+in the transaction being committed, but in the next release of Rails
+it will rollback.
+```
+
+## Solutions
+
+Possible solutions:
+
+1. Use raise ActiveRecord::Rollback to exit the transaction block. This will rollback earlier changes and continue execution after the transaction block, in other words, the code will not raise an exception. The transaction WILL NOT commit.
+2. Use next to exit the transaction block. Earlier changes will be commited. The transaction WILL commit.
+
+## References:
+
+https://github.com/rails/rails/pull/29333
+
+https://github.com/rails/rails/commit/fc83920383b5f839cd6badbc5c962be9383fe150
+</div>
             </div>
         </section>
     </main>
@@ -43,4 +67,3 @@
     </script>
 </body>
 </html>
-

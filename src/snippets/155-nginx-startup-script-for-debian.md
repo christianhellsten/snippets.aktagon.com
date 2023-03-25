@@ -1,0 +1,96 @@
+---
+id: '155'
+title: nginx startup script for Debian
+languages:
+- bash
+tags:
+---
+
+```bash
+sudo vim /etc/init.d/nginx
+```
+    
+
+Paste in the following (remember to run 'set :paste' in VIM when pasting):
+
+
+```bash
+#! /bin/sh
+##
+# nginx start script
+##
+
+PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
+DAEMON=/usr/local/sbin/nginx
+NAME=nginx
+DESC=nginx
+
+if [ ! -x $DAEMON ]
+then
+   echo "Couldn't find $DAEMON. Please set path to DAEMON."
+   exit 0
+fi
+
+
+# Include nginx defaults if available
+if [ -f /etc/default/nginx ] ; then
+	. /etc/default/nginx
+fi
+
+set -e
+
+case "$1" in
+  start)
+	echo -n "Starting $DESC: "
+	start-stop-daemon --start --pidfile /var/run/$NAME.pid \
+		--exec $DAEMON -- $DAEMON_OPTS
+	echo "$NAME."
+	;;
+  stop)
+	echo -n "Stopping $DESC: "
+	start-stop-daemon --stop --pidfile /var/run/$NAME.pid \
+		--exec $DAEMON
+	echo "$NAME."
+	;;
+  restart|force-reload)
+	echo -n "Restarting $DESC: "
+	start-stop-daemon --stop --pidfile \
+		/var/run/$NAME.pid --exec $DAEMON
+	sleep 1
+	start-stop-daemon --start --pidfile \
+		/var/run/$NAME.pid --exec $DAEMON -- $DAEMON_OPTS
+	echo "$NAME."
+	;;
+  reload)
+      echo -n "Reloading $DESC configuration: "
+      start-stop-daemon --stop --signal HUP --pidfile /var/run/$NAME.pid \
+          --exec $DAEMON
+      echo "$NAME."
+      ;;
+  *)
+	N=/etc/init.d/$NAME
+	echo "Usage: $N {start|stop|restart|force-reload}" >&2
+	exit 1
+	;;
+esac
+
+exit 0
+```
+    
+
+Now make the script executable with this command:
+
+
+```bash
+sudo chmod 755 /etc/init.d/nginx
+```
+    
+
+Lastly, run this command to make the script run when the server starts and stops:
+
+
+```bash
+sudo /usr/sbin/update-rc.d -f nginx defaults
+```
+    
+

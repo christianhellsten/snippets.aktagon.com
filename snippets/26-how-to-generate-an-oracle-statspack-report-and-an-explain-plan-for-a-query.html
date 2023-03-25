@@ -2,23 +2,50 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title></title>
+    <title>How to generate an Oracle statspack report and an explain plan for a query</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,900;1,900&amp;display=swap" rel="stylesheet">
     <link href=" https://cdn.jsdelivr.net/npm/destyle.css@4.0.0/destyle.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
     <header class="flex">
-        <h1 class="fadeout"></h1>
+        <h1 class="fadeout">How to generate an Oracle statspack report and an explain plan for a query</h1>
     </header>
     <main>
         <section class="flex">
             <div class="flex-item flex-100">
-                <div class="code"></div>
+                <div class="code">```sql
+-- Connect
+
+sqlplus <username>/<password>@<database>
+
+-- Generate statspack report
+
+@?/rdbms/admin/spreport.sql
+
+-- Find execution plan for a specific query
+@?/rdbms/admin/sprepsql.sql
+
+Specify the Begin and End Snapshot Ids
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Enter value for begin_snap: 1
+Begin Snapshot Id specified: 1
+
+Enter value for end_snap: 2
+End   Snapshot Id specified: 2
+
+
+Specify the Hash Value
+~~~~~~~~~~~~~~~~~~~~~~
+Enter value for hash_value: 2967942512
+Hash Value specified is: 2967942512
+```
+    
+
+</div>
             </div>
         </section>
     </main>
@@ -43,4 +70,3 @@
     </script>
 </body>
 </html>
-

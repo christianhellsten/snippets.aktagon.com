@@ -2,23 +2,41 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title></title>
+    <title>Bash aliases / functions for kubectl</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,900;1,900&amp;display=swap" rel="stylesheet">
     <link href=" https://cdn.jsdelivr.net/npm/destyle.css@4.0.0/destyle.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
     <header class="flex">
-        <h1 class="fadeout"></h1>
+        <h1 class="fadeout">Bash aliases / functions for kubectl</h1>
     </header>
     <main>
         <section class="flex">
             <div class="flex-item flex-100">
-                <div class="code"></div>
+                <div class="code">Put the following functions in, for example, ~/.bash_aliases:
+
+```bash
+# Open a bash shell in the pod
+function kshell() { kubectl exec -it "$1" -- /bin/bash ;}
+# List pods
+function kpods() { kubectl get po -n default -o wide ;}
+function klogs() { kubectl logs -f "$1" ;}
+function ktail() { kubectl logs --tail=100 -f "$1" ;}
+# Restarts a pod
+function krestart() { kubectl rollout restart "deployment/$1" ;}
+# Stops a pod by scaling it to zero
+function kstop() { kubectl scale --replicas=0 "deployment/$1" ;}
+function kdesc() { kubectl describe pod $1 ;}
+function ksecret() { kubectl get secret $1 -o jsonpath="{.data.$2}" | base64 --decode ;}
+function ksecrets() { kubectl get secret/$1 -o yaml ;}
+```
+
+Your RSI symptoms and cognitive dissonance will disappear in about 6 months.
+</div>
             </div>
         </section>
     </main>
@@ -43,4 +61,3 @@
     </script>
 </body>
 </html>
-

@@ -2,23 +2,70 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title></title>
+    <title>DELETE, PUT, GET and POST with jQuery</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,900;1,900&amp;display=swap" rel="stylesheet">
     <link href=" https://cdn.jsdelivr.net/npm/destyle.css@4.0.0/destyle.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
     <header class="flex">
-        <h1 class="fadeout"></h1>
+        <h1 class="fadeout">DELETE, PUT, GET and POST with jQuery</h1>
     </header>
     <main>
         <section class="flex">
             <div class="flex-item flex-100">
-                <div class="code"></div>
+                <div class="code">Example of how to do DELETE, PUT, GET and POST with jQuery and Rails REST type routing:
+
+
+```javascript
+$.ajax({ 
+	type: 'get', 
+	url: '/subscriptions/' + id,
+	data: "subscription[title]=" + encodeURI(value),
+	dataType: 'script' 
+}); 
+
+$.ajax({ 
+	type: 'POST', 
+	url: '/subscriptions/' + id,
+	data: "subscription[title]=" + encodeURI(value),
+	dataType: 'script' 
+}); 
+
+$.ajax({ 
+	type: 'PUT', 
+	url: '/subscriptions/' + id,
+	data: "subscription[title]=" + encodeURI(value),
+	dataType: 'script' 
+}); 
+
+$.ajax({
+	type: 'DELETE',
+	url: url,
+	data: 'subscription[id]=' + id,
+	dataType: 'script'
+});
+```
+    
+
+The gotcha with DELETE is to specify the ID using the data parameter, otherwise you might get this error; at least with Rails 2.2.2, jQuery 1.3.1, FF 3:
+
+
+```javascript
+/!\ FAILSAFE /!\  Mon Feb 16 13:57:52 +0200 2009
+  Status: 500 Internal Server Error
+  You have a nil object when you didn't expect it!
+You might have expected an instance of ActiveRecord::Base.
+The error occurred while evaluating nil.attributes
+    /usr/lib/ruby/gems/1.8/gems/activesupport-2.2.2/lib/active_support/vendor/xml-simple-1.0.11/xmlsimple.rb:708:in get_attributes'
+    /usr/lib/ruby/gems/1.8/gems/activesupport-2.2.2/lib/active_support/vendor/xml-simple-1.0.11/xmlsimple.rb:462:in collapse'
+```
+    
+
+</div>
             </div>
         </section>
     </main>
@@ -43,4 +90,3 @@
     </script>
 </body>
 </html>
-

@@ -2,23 +2,64 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title></title>
+    <title>How to use PhantomJS to take screenshots</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,900;1,900&amp;display=swap" rel="stylesheet">
     <link href=" https://cdn.jsdelivr.net/npm/destyle.css@4.0.0/destyle.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
     <header class="flex">
-        <h1 class="fadeout"></h1>
+        <h1 class="fadeout">How to use PhantomJS to take screenshots</h1>
     </header>
     <main>
         <section class="flex">
             <div class="flex-item flex-100">
-                <div class="code"></div>
+                <div class="code">```javascript
+page = new WebPage()
+if phantom.args.length < 2 or phantom.args.length > 3
+  console.log "Usage: phantomjs screenshot.coffee URL filename"
+  phantom.exit()
+else
+  address = phantom.args[0]
+  output = phantom.args[1]
+  ua = "User-Agent:Mozilla/5.0 (Macintosh; Intel Mac OS X 10_8_2) AppleWebKit/537.11 (KHTML, like Gecko) Chrome/23.0.1271.101 Safari/537.11"
+  page.settings.userAgent = ua
+  page.customHeaders = "Accept-Language": "sv-SE,sv;q=0.8,en-US;q=0.6,en;q=0.4"
+  page.viewportSize =
+    width: 1024
+    height: 760
+
+  page.open address, (status) ->
+    if status isnt "success"
+      console.log "Unable to load the address!"
+      phantom.exit()
+    else
+      window.setTimeout (->
+        page.clipRect =
+          top: 0
+          left: 0
+          width: 1024
+          height: 760
+
+        page.render output
+        console.log "Exiting"
+        phantom.exit()
+      ), 200
+```
+    
+
+Usage:
+
+
+```javascript
+screenshot.coffee http://google.com google.png
+```
+    
+
+</div>
             </div>
         </section>
     </main>
@@ -43,4 +84,3 @@
     </script>
 </body>
 </html>
-

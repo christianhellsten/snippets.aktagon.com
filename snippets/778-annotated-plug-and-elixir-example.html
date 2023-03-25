@@ -2,23 +2,190 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title></title>
+    <title>Annotated Plug and Elixir Example</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,900;1,900&amp;display=swap" rel="stylesheet">
     <link href=" https://cdn.jsdelivr.net/npm/destyle.css@4.0.0/destyle.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
     <header class="flex">
-        <h1 class="fadeout"></h1>
+        <h1 class="fadeout">Annotated Plug and Elixir Example</h1>
     </header>
     <main>
         <section class="flex">
             <div class="flex-item flex-100">
-                <div class="code"></div>
+                <div class="code">This is an annotated example of a web application written using Elixir and Plug.
+
+Create mix.exs:
+```elixir
+#
+# Mix is a build tool that provides tasks for creating, compiling, and testing
+# Elixir projects, managing its dependencies, and more.
+# https://github.com/hexpm/hex_web/blob/master/mix.exs
+#
+defmodule PlugExample.Mixfile do
+  # In order to configure Mix, a developer needs to use Mix.Project in a module
+  # and define a function named project that returns a keyword list with
+  # configuration.
+  # http://elixir-lang.org/docs/stable/mix/Mix.Project.html
+  use Mix.Project
+
+  # Configure project.
+  def project do
+    [app: :Router,
+      version: "0.0.1",
+      elixir: "~> 1.2",
+      deps: deps]
+  end
+
+  #
+  # Returns applications that should be started.
+  #
+  # In OTP, application denotes a component implementing some specific
+  # functionality, that can be started and stopped as a unit, and which can be
+  # re-used in other systems as well.
+  # http://erlang.org/doc/man/application.html
+  #
+  def application do
+    [
+      applications: [:logger, :plug], # 3rd-party applications
+      mod: {PlugExample.Supervisor, []} # own application
+    ]
+  end
+
+  #
+  # Returns project dependencies:
+  # https://hex.pm/
+  #
+  def deps do
+    [
+      {:cowboy, "~> 1.0.0"}, # Erlang web server
+      {:plug, "~> 1.0"} # Elixir's rack (Ruby), wsgi (Python), servlet (Java) API
+    ]
+  end
+end
+```
+
+Create lib/router.exs
+```elixir
+defmodule PlugExample.Router do
+  #
+  # Plug ships with a router that allows developers to quickly match on
+  # incoming requests and perform some action:
+  # https://hexdocs.pm/plug/readme.html#the-plug-router
+  #
+  use Plug.Router
+  #
+  # This module defines a Plug.Conn struct and the main functions for working with Plug connections.
+  # https://hexdocs.pm/plug/Plug.Conn.html
+  #
+  import Plug.Conn
+  # Logs request to STDOUT
+  plug Plug.Logger
+  # Matches request to a route
+  plug :match
+  # Dispatches request to a route
+  plug :dispatch
+
+  #
+  # Start a GenServer, i.e., a server instance:
+  #
+  # http://elixir-lang.org/getting-started/mix-otp/genserver.html
+  # https://blog.drewolson.org/understanding-gen-server/
+  #
+  def start_link do
+    # Cowboy adapter:
+    # https://hexdocs.pm/plug/Plug.Adapters.Cowboy.html
+    {:ok, _} = Plug.Adapters.Cowboy.http PlugExample.Router, []
+  end
+
+  #
+  # HTTP GET /
+  #
+  # Use conn.private to access route options:
+  #   conn.private[:protected]
+  #
+  get "/", private: %{protected: false} do
+    conn |> send_resp(200, "Hello world")
+  end
+
+  get "/favicon.ico" do
+    conn |> send_resp(200, "LOL")
+  end
+  
+  # Forward /about to another router's get "/" route
+  # forward "/about", to: PlugExample.About
+
+  #
+  # A catch-all route
+  #
+  match _ do
+    conn |> send_resp(404, "Not found")
+  end
+end
+```
+
+Create lib/supervisor.ex
+```elixir
+#
+# A supervisor is a process which supervises other processes, called child
+# processes. Supervisors are used to build a hierarchical process structure
+# called a supervision tree, a nice way to structure fault-tolerant applications.
+#
+# http://elixir-lang.org/docs/stable/elixir/Supervisor.html
+#
+defmodule PlugExample.Supervisor do
+  #
+  # In Elixir (actually, in Erlang/OTP), an application is a component
+  # implementing some specific functionality, that can be started and stopped as a
+  # unit, and which can be re-used in other systems.
+  # http://elixir-lang.org/docs/stable/elixir/Application.html
+  # http://erlang.org/doc/man/application.html
+  # http://erlang.org/doc/design_principles/applications.html
+  #
+  use Application
+
+  #
+  # The type argument passed to start/2 is usually :normal unless in a
+  # distributed setup where application takeovers and failovers are configured.
+  #
+  # start/2 typically returns {:ok, pid} or {:ok, pid, state} where pid
+  # identifies the supervision tree and state is the application state.
+  #
+  def start(_type, _args) do
+    #
+    # Convenience functions for defining a supervision specification.
+    # http://elixir-lang.org/docs/stable/elixir/Supervisor.Spec.html
+    #
+    import Supervisor.Spec, warn: false
+    # A list of children (workers or supervisors) to supervise
+    children = [
+      worker(PlugExample.Router, [])
+    ]
+    #
+    # If a child process terminates, only that process is restarted:
+    # http://elixir-lang.org/docs/stable/elixir/Supervisor.html
+    #
+    opts = [strategy: :one_for_one, name: PlugExample.Supervisor]
+    #
+    # Start supervisor by passing the children to start_link/2.
+    # You may want to use a module-based supervisor.
+    Supervisor.start_link(children, opts)
+  end
+end
+```
+
+Start the server:
+```bash
+$ mix deps.get
+$ iex -S mix
+```
+
+Continue reading: [How to deploy an Elixir web application](http://snippets.aktagon.com/snippets/777-elixir-deployment).
+</div>
             </div>
         </section>
     </main>
@@ -43,4 +210,3 @@
     </script>
 </body>
 </html>
-

@@ -2,23 +2,52 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title></title>
+    <title>Check which of your pages are in the Google supplemental index a.k.a Google hell</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,900;1,900&amp;display=swap" rel="stylesheet">
     <link href=" https://cdn.jsdelivr.net/npm/destyle.css@4.0.0/destyle.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
     <header class="flex">
-        <h1 class="fadeout"></h1>
+        <h1 class="fadeout">Check which of your pages are in the Google supplemental index a.k.a Google hell</h1>
     </header>
     <main>
         <section class="flex">
             <div class="flex-item flex-100">
-                <div class="code"></div>
+                <div class="code">Try this query to find pages that are in Google's supplemental index (trick invented by [Bruce Clay, Inc](http://www.bruceclay.com/blog/archives/2007/08/google_hack_fin.html)):
+
+
+```
+-site:aktagon.com/* +site:aktagon.com/
+```
+    
+
+The query should list all of your pages that are in [Google's supplemental index](http://en.wikipedia.org/wiki/Supplemental_Result) a.k.a [Google hell](http://www.seomoz.org/blog/how-i-escaped-googles-supplemental-hell). These pages lower your Google page rank, so you should tell Google not to bother indexing those pages. This can be done with [robots.txt](http://en.wikipedia.org/wiki/Robots.txt):
+
+
+```
+User-agent:*
+Disallow: /tags/*
+Disallow: /archive/*
+```
+    
+
+Another way of doing it is to add a meta tag:
+
+
+```
+<meta name="robots" content="noindex,follow"/>
+```
+    
+
+This tells search engines to read the page but not index it.
+
+And, be careful with what you put in robots.txt...
+
+</div>
             </div>
         </section>
     </main>
@@ -43,4 +72,3 @@
     </script>
 </body>
 </html>
-

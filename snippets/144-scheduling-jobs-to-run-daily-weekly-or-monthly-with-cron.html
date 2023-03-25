@@ -2,23 +2,64 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title></title>
+    <title>Scheduling jobs to run daily, weekly or monthly with Cron</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,900;1,900&amp;display=swap" rel="stylesheet">
     <link href=" https://cdn.jsdelivr.net/npm/destyle.css@4.0.0/destyle.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
     <header class="flex">
-        <h1 class="fadeout"></h1>
+        <h1 class="fadeout">Scheduling jobs to run daily, weekly or monthly with Cron</h1>
     </header>
     <main>
         <section class="flex">
             <div class="flex-item flex-100">
-                <div class="code"></div>
+                <div class="code">Cron syntax and valid values:
+
+
+```bash
+# +---------------- minute (0 - 59)
+# |  +------------- hour (0 - 23)
+# |  |  +---------- day of month (1 - 31)
+# |  |  |  +------- month (1 - 12)
+# |  |  |  |  +---- day of week (0 - 6) (Sunday=0 or 7)
+# |  |  |  |  |
+  *  *  *  *  *  command to be executed
+```
+    
+
+Below are a few examples on how to run a script every 10 minutes, every 30 minutes, every hour, daily, weekly, monthly.
+
+Execute **crontab -e** and add the following (see **man crontab**):
+
+
+```bash
+# Every 10 minutes
+*/10 * * * * /home/belsebub/delete_old_stuff.sh
+
+# Every 30 minutes
+*/30 * * * * /home/belsebub/delete_old_stuff.sh
+
+# Every 60 minutes
+*/60 * * * * /home/belsebub/delete_old_stuff.sh
+
+# Every day at 00:00
+00 00 * * * /home/belsebub/delete_old_stuff.sh
+
+# Every saturday at 00:00
+00 00 * * 6 /home/belsebub/delete_old_stuff.sh
+
+# First day of every month at 00:00
+00 00 1 * * /home/belsebub/delete_old_stuff.sh
+```
+    
+
+On Debian the configuration goes to **/var/spool/cron/crontabs/username**.
+
+</div>
             </div>
         </section>
     </main>
@@ -43,4 +84,3 @@
     </script>
 </body>
 </html>
-

@@ -1,0 +1,164 @@
+---
+id: '824'
+title: PostgreSQL 10 With Streaming Replication and PITR
+languages:
+- bash
+- sql
+tags:
+---
+Notes on how to configure streaming replication and PITR with PostgreSQL 10:
+https://www.postgresql.org/docs/current/static/warm-standby.html
+
+## Goal
+
+```
+               ┌──────────────────┐                
+               │                  │                
+               │ Web application  │                
+             ┌─│                  │───┐            
+             │ │                  │   │            
+             │ └──────────────────┘   │            
+          Reads                    Writes          
+             │                        │            
+             │                        │            
+             │                        │            
+             ▼                        ▼            
+   ┌──────────────────┐     ┌──────────────────┐   
+   │                  │     │                  │   
+   │      Slave       │     │      Master      │   
+┌─▶│                  │     │                  │──┐
+│  │                  │     │                  │  │
+│  └──────────────────┘     └──────────────────┘  │
+│                                     │           │
+└──────────────Streaming replication──┼───────────┘
+                                      │            
+                                      │            
+                               WAL archiving       
+                                      │            
+              ┌──────────────────┐    │            
+              │                  │    │            
+              │  Network drive   │    │            
+              │                  │◀───┘            
+              │                  │                 
+              └──────────────────┘                 
+```
+
+- Master and slave (warm standby) 
+    - Master database backed up to slave server via streaming replication
+    - WAL files copied from master to a network drive
+- Point-in-time-recovery (PITR) which is useful, for example, if someone deletes a table by mistake
+- Recovery possible even if both master and slave are lost
+  - Daily and weekly backups available on a network drive
+  - WAL files available on a network drive
+  - Network drive backed up
+
+## Steps
+
+1. Install postgres 10 on master and slave
+2. Configure the master
+
+    - wal_level=replica, archive_mode=on, archive_command, wal_keep_segments (optional with replication slots), etc in postgresql.conf
+    - archive_command should copy WAL files to a shared network drive for additional redundancy, or the slave
+    - create a replication slot for each slave, so that WAL files are stored long enough for slaves to receive them:
+    
+```sql 
+SELECT * FROM pg_create_physical_replication_slot('pg-slave-1');
+```
+
+3. Configure the slave
+
+    - hot_standby=on, etc in postgresql.conf (keep slave configuration as identical as possible to master)
+    - primary_slot_name = 'pg-slave-1', standby_mode=on, restore_command, primaryconn_info, trigger_file in recovery.conf
+    - restore_command should use the WAL files on the network drive that are copied there from the master
+
+4. Start primary server, stop the slave
+
+Make sure, e.g., monit does not start the slave immediately again.
+
+5. Copy the master database to the slave with pg_basebackup
+
+Make sure the slave's data directory is empty:
+
+```bash
+psql -c '\db'
+sudo /etc/init.d/postgresql stop
+sudo rm -rf /var/lib/postgresql/10/main
+sudo mkdir /var/lib/postgresql/10/main
+sudo pg_basebackup -h 10.0.0.1 -D /var/lib/postgresql/10/main -P -U replicator -X stream -W
+sudo chown -R postgres:postgres /var/lib/postgresql/10/main
+sudo chmod -R 0700 /var/lib/postgresql/10/main
+```
+
+6. Start slave
+
+```bash
+sudo service postgresql start
+```
+
+7. Set up daily backups
+
+Configure daily backups of PostgreSQL data to a network drive.
+
+8. Backup the backup
+
+Configure daily and weekly backups of network drive.
+
+9. Check replication status
+
+On master:
+
+```sql
+select pg_current_wal_lsn();
+```
+
+On slave:
+
+```sql
+select pg_last_wal_replay_lsn();
+```
+
+Both values should match.
+
+## Scenarios
+
+- Master server is killed
+
+Promote slave to master with *touch /tmp/promote-slave-to-master.trigger*
+
+- Master server is killed, slave replication has fallen behind master
+
+Restore slave from the WAL files located on the network drive. Or use a daily backup plus the WAL files if replication has fallen behind too much.
+
+- Master server and slave are killed
+
+Restore the database from a daily backup and WAL files located on the network drive.
+
+- Master server, slave, and network drive are killed
+
+Restore the database from a daily backup and the WAL files located on another network drive.
+
+- "drop database xxx" was run by mistake
+
+Restore the database with PITR. For example, set recovery_target_time = '2017-06-06 06:06:06' in recovery.conf.
+
+- Additional slaves are needed
+
+Configure the new slave. Remember to create a new replication slot.
+
+- Slave is removed permanently
+
+Delete the replication slot or the WAL archives will keep accumulating until the master's disk is full.
+
+## Troubleshooting
+
+- Replication not working
+
+Is recovery.conf in the data directory? Was it there before the server was started?
+
+## References
+
+- https://www.postgresql.org/docs/current/static/warm-standby.html
+- https://www.postgresql.org/docs/current/static/continuous-archiving.html
+- http://eradman.com/posts/streaming-pg-backups.html
+- https://www.postgresql.org/message-id/CADKbJJWz9M0swPT3oqe8f9+tfD4-F54uE6Xtkh4nERpVsQnjnw@mail.gmail.com
+

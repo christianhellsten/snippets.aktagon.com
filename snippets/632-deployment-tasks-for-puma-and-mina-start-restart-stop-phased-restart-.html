@@ -2,23 +2,65 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title></title>
+    <title>Deployment Tasks for Puma and Mina (Start, Restart, Stop, Phased Restart)</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,900;1,900&amp;display=swap" rel="stylesheet">
     <link href=" https://cdn.jsdelivr.net/npm/destyle.css@4.0.0/destyle.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
     <header class="flex">
-        <h1 class="fadeout"></h1>
+        <h1 class="fadeout">Deployment Tasks for Puma and Mina (Start, Restart, Stop, Phased Restart)</h1>
     </header>
     <main>
         <section class="flex">
             <div class="flex-item flex-100">
-                <div class="code"></div>
+                <div class="code">```ruby
+def puma_conf
+  @puma_conf ||= begin
+    require 'puma/configuration'
+    config = Puma::Configuration.new(config_file: "config/puma.rb.#{rails_env}")
+    config.load
+    OpenStruct.new(config.options)
+  end
+end
+
+set :puma_cmd, 'bundle exec puma'
+set :pumactl_cmd, 'bundle exec pumactl'
+set :puma_state_path, puma_conf.state
+set :puma_start_options, "-q -d -e #{rails_env}  -C config/puma.rb.#{rails_env}"
+
+namespace :puma do
+  desc 'Start puma'
+  task :start => :environment do
+    queue "cd #{full_current_path} && #{puma_cmd} #{puma_start_options}"
+  end
+
+  desc 'Stop puma'
+  task :stop => :environment do
+    queue "cd #{full_current_path} && #{pumactl_cmd} -S #{puma_state_path} stop"
+  end
+
+  desc 'Restart puma'
+  task :restart => :environment do
+    begin
+      queue "cd #{full_current_path} && #{pumactl_cmd} -S #{puma_state_path} restart"
+    rescue => ex
+      puts "Failed to restart puma: #{ex}\nAssuming not started."
+    end
+  end
+
+  desc 'Restart puma (phased restart)'
+  task :phased_restart => :environment do
+    run "cd #{full_current_path} && #{pumactl_cmd} -S #{puma_state_path} phased-restart"
+  end
+end
+```
+    
+
+</div>
             </div>
         </section>
     </main>
@@ -43,4 +85,3 @@
     </script>
 </body>
 </html>
-

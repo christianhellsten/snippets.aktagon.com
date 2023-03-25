@@ -2,23 +2,53 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title></title>
+    <title>Compiling Ruby with OpenSSL, Zlib and Readline support on Debian</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,900;1,900&amp;display=swap" rel="stylesheet">
     <link href=" https://cdn.jsdelivr.net/npm/destyle.css@4.0.0/destyle.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
     <header class="flex">
-        <h1 class="fadeout"></h1>
+        <h1 class="fadeout">Compiling Ruby with OpenSSL, Zlib and Readline support on Debian</h1>
     </header>
     <main>
         <section class="flex">
             <div class="flex-item flex-100">
-                <div class="code"></div>
+                <div class="code">DRAFT... From http://blog.fiveruns.com/2008/3/3/compiling-ruby-rubygems-and-rails-on-ubuntu
+
+Install pre-requisites
+
+
+```ruby
+apt-get -y install build-essential libssl-dev libreadline5-dev zlib1g-dev
+```
+    
+
+Download and install
+
+
+```ruby
+cd /usr/local/src
+
+wget http://ftp.ruby-lang.org/pub/ruby/1.8/ruby-1.8.6.tar.gz
+
+tar zxvf ruby-1.8.6.tar.gz
+
+cd ruby-1.8.6.tar.gz
+
+./configure --prefix=/usr/local --with-openssl-dir=/usr --with-readline-dir=/usr --with-zlib-dir=/usr
+
+make
+make install
+
+ruby -ropenssl -rzlib -rreadline -e "puts :success"
+```
+    
+
+</div>
             </div>
         </section>
     </main>
@@ -43,4 +73,3 @@
     </script>
 </body>
 </html>
-

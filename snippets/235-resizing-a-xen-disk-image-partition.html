@@ -2,23 +2,49 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title></title>
+    <title>Resizing a Xen disk image partition</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,900;1,900&amp;display=swap" rel="stylesheet">
     <link href=" https://cdn.jsdelivr.net/npm/destyle.css@4.0.0/destyle.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
     <header class="flex">
-        <h1 class="fadeout"></h1>
+        <h1 class="fadeout">Resizing a Xen disk image partition</h1>
     </header>
     <main>
         <section class="flex">
             <div class="flex-item flex-100">
-                <div class="code"></div>
+                <div class="code">```bash
+# Stop & backup
+xm shutdown sandbox
+cp -a sandbox/ sandbox.bk
+
+# Verify MD5 sum
+md5sum sandbox/disk.img 
+4976347006df34843d29c939b5fc3742  sandbox/disk.img
+md5sum sandbox.bk/disk.img 
+4976347006df34843d29c939b5fc3742  sandbox.bk/disk.img
+
+# Create a 5Gb temp file
+dd if=/dev/zero of=Tempfile bs=1024 count=5000000
+
+# Append it to the existing image
+cat Tempfile >> disk.img
+rm Tempfile
+
+# Resize the partition
+resize2fs -f disk.img
+
+# Check partition & start domU
+fsck.ext3 disk.img
+xm create -c sandbox.cfg
+```
+    
+
+</div>
             </div>
         </section>
     </main>
@@ -43,4 +69,3 @@
     </script>
 </body>
 </html>
-

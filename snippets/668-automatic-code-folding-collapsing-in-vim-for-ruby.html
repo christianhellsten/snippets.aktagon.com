@@ -2,23 +2,39 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title></title>
+    <title>Automatic Code Folding/Collapsing in Vim for Ruby</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,900;1,900&amp;display=swap" rel="stylesheet">
     <link href=" https://cdn.jsdelivr.net/npm/destyle.css@4.0.0/destyle.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
     <header class="flex">
-        <h1 class="fadeout"></h1>
+        <h1 class="fadeout">Automatic Code Folding/Collapsing in Vim for Ruby</h1>
     </header>
     <main>
         <section class="flex">
             <div class="flex-item flex-100">
-                <div class="code"></div>
+                <div class="code">Add this to your .vimrc to enable automatic code folding for Ruby comments:
+
+
+```
+" Enable automatic code folding for Ruby
+autocmd FileType ruby,eruby
+      \ set foldmethod=expr |
+      \ set foldexpr=getline(v:lnum)=~'^\\s*#'
+```
+    
+
+Open and close folds with zo and zc.
+
+See **:help folding** for details.
+
+[Automatically fold comments in Vim](http://travisjeffery.com/b/2012/01/automatically-fold-comments-in-vim/)
+
+</div>
             </div>
         </section>
     </main>
@@ -43,4 +59,3 @@
     </script>
 </body>
 </html>
-

@@ -2,23 +2,38 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title></title>
+    <title>Simplify and make SQL scripts run faster by using Oracle variables</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,900;1,900&amp;display=swap" rel="stylesheet">
     <link href=" https://cdn.jsdelivr.net/npm/destyle.css@4.0.0/destyle.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
     <header class="flex">
-        <h1 class="fadeout"></h1>
+        <h1 class="fadeout">Simplify and make SQL scripts run faster by using Oracle variables</h1>
     </header>
     <main>
         <section class="flex">
             <div class="flex-item flex-100">
-                <div class="code"></div>
+                <div class="code">[Oracle variables](http://www.orafaq.com/node/515) are a great way of removing duplicate SQL statements from your Oracle SQL scripts. By using a variable, you can store the return value of a query and use it later in another, as this example illustrates:
+
+
+```sql
+COLUMN your_column new_value your_variable;
+
+SELECT DISTINCT (your_column)
+                                 FROM ...
+                                WHERE ...;
+
+SELECT &your_variable FROM dual;
+```
+    
+
+The above example stores the value of the **SELECT DISTINCT** query in a variable named **your\_variable**. You declare the variable with **new\_value**, and set the value by executing an SQL statement that returns one row and column.
+
+</div>
             </div>
         </section>
     </main>
@@ -43,4 +58,3 @@
     </script>
 </body>
 </html>
-

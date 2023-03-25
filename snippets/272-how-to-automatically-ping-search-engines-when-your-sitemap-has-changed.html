@@ -2,23 +2,46 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title></title>
+    <title>How to automatically ping search engines when your sitemap has changed</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,900;1,900&amp;display=swap" rel="stylesheet">
     <link href=" https://cdn.jsdelivr.net/npm/destyle.css@4.0.0/destyle.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
     <header class="flex">
-        <h1 class="fadeout"></h1>
+        <h1 class="fadeout">How to automatically ping search engines when your sitemap has changed</h1>
     </header>
     <main>
         <section class="flex">
             <div class="flex-item flex-100">
-                <div class="code"></div>
+                <div class="code">I prefer letting cron update sitemaps in the background, and at the end of the script I ping search engines to let them know it's been updated:
+
+
+```ruby
+# Recreate sitemap goes here
+
+# Let search engines know about the update
+[ "http://www.google.com/webmasters/tools/ping?sitemap=http://xxx/sitemap.xml",
+  "http://search.yahooapis.com/SiteExplorerService/V1/ping?sitemap=http://xxx/sitemap.xml",
+  "http://submissions.ask.com/ping?sitemap=http://xxx/sitemap.xml",
+  "http://webmaster.live.com/ping.aspx?siteMap=http://xxx/sitemap.xml" ].each do |url|
+  open(url) do |f|
+    if f.status[0] == "200"
+      puts "Sitemap successfully submitted to #{url}"      
+    else
+      puts "Failed to submit sitemap to #{url}"
+    end
+  end
+end
+```
+    
+
+More about sitemaps: http://en.wikipedia.org/wiki/Sitemaps
+
+</div>
             </div>
         </section>
     </main>
@@ -43,4 +66,3 @@
     </script>
 </body>
 </html>
-

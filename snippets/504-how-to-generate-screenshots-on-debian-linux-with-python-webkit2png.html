@@ -2,23 +2,72 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title></title>
+    <title>How to generate screenshots on Debian Linux with python-webkit2png</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,900;1,900&amp;display=swap" rel="stylesheet">
     <link href=" https://cdn.jsdelivr.net/npm/destyle.css@4.0.0/destyle.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
     <header class="flex">
-        <h1 class="fadeout"></h1>
+        <h1 class="fadeout">How to generate screenshots on Debian Linux with python-webkit2png</h1>
     </header>
     <main>
         <section class="flex">
             <div class="flex-item flex-100">
-                <div class="code"></div>
+                <div class="code">Install:
+
+
+```bash
+apt-get install python-qt4 libqt4-webkit
+git clone git://github.com/adamn/python-webkit2png.git
+cd python-webkit2png/
+python setup.py install
+```
+    
+
+Test:
+
+
+```bash
+./webkit2png.py www.google.com
+```
+    
+
+You might get this error:
+
+
+```bash
+webkit2png.py: cannot connect to X server
+```
+    
+
+Fix:
+
+
+```bash
+# install xvbf
+apt-get install xvfb xbase-clients xfonts-base libgtk2.0-0
+# start
+Xvfb :99 -ac
+```
+    
+
+See details [here](http://www.bitwiseim.com/wiki/index.php?title=Trick:_Headless_Routing_Server#Installing_Required_Files)
+
+Take a screenshot:
+
+
+```bash
+./webkit2png.py -o obama.png -x 1024 768 "http://obama.com"
+```
+    
+
+On OSX I would recommend you use [Paparazzi](http://derailer.org/paparazzi/)
+
+</div>
             </div>
         </section>
     </main>
@@ -43,4 +92,3 @@
     </script>
 </body>
 </html>
-

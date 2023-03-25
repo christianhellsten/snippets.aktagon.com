@@ -2,23 +2,56 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title></title>
+    <title>How to generate a series with the start and end dates of months with Postgres</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,900;1,900&amp;display=swap" rel="stylesheet">
     <link href=" https://cdn.jsdelivr.net/npm/destyle.css@4.0.0/destyle.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
     <header class="flex">
-        <h1 class="fadeout"></h1>
+        <h1 class="fadeout">How to generate a series with the start and end dates of months with Postgres</h1>
     </header>
     <main>
         <section class="flex">
             <div class="flex-item flex-100">
-                <div class="code"></div>
+                <div class="code">```sql
+WITH m AS (
+  SELECT generate_series(DATE('2010-01-01'), DATE('2010-12-01'), interval '1 month') AS start
+)
+SELECT m.start, m.start + (interval '1' month) - (interval '1' second) AS end FROM m;
+```
+
+```sql
+┌────────────────────────┬────────────────────────┐
+│         start          │          end           │
+├────────────────────────┼────────────────────────┤
+│ 2010-01-01 00:00:00+02 │ 2010-01-31 23:59:59+02 │
+│ 2010-02-01 00:00:00+02 │ 2010-02-28 23:59:59+02 │
+│ 2010-03-01 00:00:00+02 │ 2010-03-31 23:59:59+03 │
+│ 2010-04-01 00:00:00+03 │ 2010-04-30 23:59:59+03 │
+│ 2010-05-01 00:00:00+03 │ 2010-05-31 23:59:59+03 │
+│ 2010-06-01 00:00:00+03 │ 2010-06-30 23:59:59+03 │
+│ 2010-07-01 00:00:00+03 │ 2010-07-31 23:59:59+03 │
+│ 2010-08-01 00:00:00+03 │ 2010-08-31 23:59:59+03 │
+│ 2010-09-01 00:00:00+03 │ 2010-09-30 23:59:59+03 │
+│ 2010-10-01 00:00:00+03 │ 2010-10-31 23:59:59+02 │
+│ 2010-11-01 00:00:00+02 │ 2010-11-30 23:59:59+02 │
+│ 2010-12-01 00:00:00+02 │ 2010-12-31 23:59:59+02 │
+└────────────────────────┴────────────────────────┘
+```
+
+Same query without the CTE:
+
+```sql
+SELECT start, start + (interval '1' month) - (interval '1' second) AS end FROM (
+  SELECT generate_series(DATE('2010-01-01'), DATE('2010-12-01'), interval '1 month') AS start
+) months;
+```
+
+</div>
             </div>
         </section>
     </main>
@@ -43,4 +76,3 @@
     </script>
 </body>
 </html>
-

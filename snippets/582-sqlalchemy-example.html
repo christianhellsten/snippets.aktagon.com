@@ -2,23 +2,72 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title></title>
+    <title>SQLAlchemy example</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,900;1,900&amp;display=swap" rel="stylesheet">
     <link href=" https://cdn.jsdelivr.net/npm/destyle.css@4.0.0/destyle.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
     <header class="flex">
-        <h1 class="fadeout"></h1>
+        <h1 class="fadeout">SQLAlchemy example</h1>
     </header>
     <main>
         <section class="flex">
             <div class="flex-item flex-100">
-                <div class="code"></div>
+                <div class="code">SQLAlchemy example:
+
+
+```python
+from sqlalchemy import *
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import sessionmaker
+
+engine = create_engine("mysql://username:password@localhost/database_name")
+engine.echo = False
+
+Base = declarative_base()
+
+class Entry(Base):
+    __tablename__ = "entries"
+    id = Column(Integer, primary_key=True)
+    title = Column(String(255))
+    url = Column(String)
+
+    def __repr__(self):
+        return "<Entry('%s', '%s')>" % (self.title, self.url)
+
+# Set up handles
+entry_table = Entry.__table__
+metadata = Base.metadata
+metadata.create_all(engine)
+
+# Start a session
+Session = sessionmaker(bind=engine)
+session = Session()
+ 
+# Query entries
+entries = session.query(Entry) \
+    .filter(Entry.title != 'Zermatt')
+
+# Print all entries
+for entry in entries.all():
+    print entry.update_named_entities()
+
+# Print first entry
+entry = entries.first()
+
+# Update entry
+entry.title = 'Zermatt, Verbier'
+
+# Commit changes
+session.commit()
+```
+    
+
+</div>
             </div>
         </section>
     </main>
@@ -43,4 +92,3 @@
     </script>
 </body>
 </html>
-

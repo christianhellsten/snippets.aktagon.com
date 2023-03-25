@@ -2,23 +2,86 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title></title>
+    <title>My .vimrc configuration</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,900;1,900&amp;display=swap" rel="stylesheet">
     <link href=" https://cdn.jsdelivr.net/npm/destyle.css@4.0.0/destyle.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
     <header class="flex">
-        <h1 class="fadeout"></h1>
+        <h1 class="fadeout">My .vimrc configuration</h1>
     </header>
     <main>
         <section class="flex">
             <div class="flex-item flex-100">
-                <div class="code"></div>
+                <div class="code">```
+set guifont=Monaco:h12
+
+autocmd FileType ruby,eruby set omnifunc=rubycomplete#Complete
+autocmd FileType ruby,eruby let g:rubycomplete_rails = 1
+
+let leader = ","
+
+set grepprg=ack
+set grepformat=%f:%l:%m
+
+set hidden
+set history=1000
+set tabstop=2
+set smarttab
+set shiftwidth=2
+set autoindent
+set expandtab
+set backspace=start,indent
+set ignorecase
+set smartcase
+set scrolloff=3
+set backupdir=~/.vim-tmp,~/.tmp,~/tmp,/var/tmp,/tmp
+set directory=~/.vim-tmp,~/.tmp,~/tmp,/var/tmp,/tmp
+set ruler
+set number
+set hlsearch
+set incsearch " ...dynamically as they are typed.
+set visualbell
+
+nnoremap <C-e> 3<C-e>
+nnoremap <C-y> 3<C-y>
+
+runtime macros/matchit.vim
+
+autocmd FileType make     set noexpandtab
+autocmd FileType python   set noexpandtab
+
+syntax on
+filetype on
+filetype plugin on
+filetype indent on
+
+let g:fuzzy_ignore = "*.log"
+let g:fuzzy_matching_limit = 70
+
+map ,d :execute 'NERDTreeToggle ' . getcwd()<CR>
+map ,t :FuzzyFinderTextMate<CR>
+map ,b :FuzzyFinderBuffer<CR>
+map ,f gg=G
+
+set columns=160                                                     "set width of window off open
+set lines=50                                                        "height of window off open
+
+set gcr=a:blinkwait500-blinkon1300-blinkoff150                      "tune the blinking of the cursor, short on, long off.
+set gcr=i:hor10                                                     "underline cursor. not too thick not too thin. goldielocks style
+set gcr=v:block                                                     "selecting should cover the text
+
+map ,c :ruby finder.rescan!
+
+set fuopt+=maxhorz                      " grow to maximum horizontal width on entering fullscreen mode
+```
+    
+
+</div>
             </div>
         </section>
     </main>
@@ -43,4 +106,3 @@
     </script>
 </body>
 </html>
-

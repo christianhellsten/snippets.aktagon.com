@@ -2,23 +2,59 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title></title>
+    <title>Find the installation directory of a RubyGem package programmatically</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,900;1,900&amp;display=swap" rel="stylesheet">
     <link href=" https://cdn.jsdelivr.net/npm/destyle.css@4.0.0/destyle.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
     <header class="flex">
-        <h1 class="fadeout"></h1>
+        <h1 class="fadeout">Find the installation directory of a RubyGem package programmatically</h1>
     </header>
     <main>
         <section class="flex">
             <div class="flex-item flex-100">
-                <div class="code"></div>
+                <div class="code">This snippet prints the full path to the Rails installation directory--the path is retrieved using the [RubyGems](http://rubygems.org/) API:
+
+
+```ruby
+require 'rubygems'
+puts Gem.cache.search('rails').first.full_gem_path
+# Specify version number
+puts Gem.cache.search('rails', '=1.0.0').first.full_gem_path
+```
+    
+
+Example output:
+
+
+```ruby
+/usr/lib/ruby/gems/1.8/gems/rails-1.0.0
+```
+    
+
+To find the directory where your gems are hiding, use:
+
+
+```ruby
+gem env
+```
+    
+
+There's also the **gem which** command:
+
+
+```ruby
+$ gem which activesupport
+(checking gem activesupport-2.3.2 for activesupport)
+/opt/ruby-enterprise-1.8.6-20090201/lib/ruby/gems/1.8/gems/activesupport-2.3.2/lib/activesupport.rb
+```
+    
+
+</div>
             </div>
         </section>
     </main>
@@ -43,4 +79,3 @@
     </script>
 </body>
 </html>
-

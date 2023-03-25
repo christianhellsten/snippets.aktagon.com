@@ -2,23 +2,32 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title></title>
+    <title>Allowing URL's in a route.</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,900;1,900&amp;display=swap" rel="stylesheet">
     <link href=" https://cdn.jsdelivr.net/npm/destyle.css@4.0.0/destyle.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
     <header class="flex">
-        <h1 class="fadeout"></h1>
+        <h1 class="fadeout">Allowing URL's in a route.</h1>
     </header>
     <main>
         <section class="flex">
             <div class="flex-item flex-100">
-                <div class="code"></div>
+                <div class="code">I wanted to create a route that could accept an URL as a parameter. The problem was that dots and slashes were interpreted as separators for the route. Luckily I managed to find [this](http://www.soulcast.com/post/show/62917/ruby-on-rails-routes) post that explained how it could be bypassed.
+
+
+```ruby
+map.connect ':scale/:text.:format', :controller => 'barcode', :requirements => { :text => /.*/ }
+```
+    
+
+With this route set up I now could catch parameters like this: http://localhost:3000/200x200/http://aktagon.com.png, where 200x200 is :scale, http://aktagon.com is :text and .png is :format.
+
+</div>
             </div>
         </section>
     </main>
@@ -43,4 +52,3 @@
     </script>
 </body>
 </html>
-

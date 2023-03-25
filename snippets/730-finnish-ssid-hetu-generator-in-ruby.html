@@ -2,23 +2,59 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title></title>
+    <title>Finnish SSID/HETU generator in Ruby</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,900;1,900&amp;display=swap" rel="stylesheet">
     <link href=" https://cdn.jsdelivr.net/npm/destyle.css@4.0.0/destyle.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
     <header class="flex">
-        <h1 class="fadeout"></h1>
+        <h1 class="fadeout">Finnish SSID/HETU generator in Ruby</h1>
     </header>
     <main>
         <section class="flex">
             <div class="flex-item flex-100">
-                <div class="code"></div>
+                <div class="code">```ruby
+module Ssid
+  module Fake
+    #
+    # Generates fake Finnish SSIDs (HETU).
+    #
+    # Original Python version:
+    # https://gist.github.com/puumuki/11172310
+    #
+    class Finnish
+      CHECK_KEYS = "0123456789ABCDEFHJKLMNPRSTUVWXY"
+      CENTURIES = { '18' => '+',
+                    '19' => '-',
+                    '20' => 'A' }
+      def self.generate(start_year=1800, end_year=2014)
+        year = start_year + rand(start_year - end_year)
+        month = 1 + rand(12)
+        day = 1 + rand(days_in_month(year, month))
+        century_sep = CENTURIES[year.to_s[0..1]]
+        order_num = 2 + rand(889)
+        check_number = "%02d%02d%s%03d" % [ day, month, year.to_s[0..1], order_num ]
+        check_number_index = check_number.to_i % 31
+        key = CHECK_KEYS[check_number_index]
+        "%02d%02d%s%s%03d%s" % [ day, month, year.to_s[0..1], century_sep, order_num, key ]
+      end
+
+      private
+
+      def self.days_in_month(year, month)
+        (Date.new(year, 12, 31) << (12-month)).day
+      end
+    end
+  end
+end
+```
+    
+
+</div>
             </div>
         </section>
     </main>
@@ -43,4 +79,3 @@
     </script>
 </body>
 </html>
-

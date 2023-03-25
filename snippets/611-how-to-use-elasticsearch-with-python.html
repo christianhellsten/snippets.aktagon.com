@@ -2,23 +2,79 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title></title>
+    <title>How to use ElasticSearch with Python</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,900;1,900&amp;display=swap" rel="stylesheet">
     <link href=" https://cdn.jsdelivr.net/npm/destyle.css@4.0.0/destyle.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
     <header class="flex">
-        <h1 class="fadeout"></h1>
+        <h1 class="fadeout">How to use ElasticSearch with Python</h1>
     </header>
     <main>
         <section class="flex">
             <div class="flex-item flex-100">
-                <div class="code"></div>
+                <div class="code">This is a short example on how to use ElasticSearch with Python.
+
+First install pyes ([pyes documentation](http://pyes.readthedocs.org/en/latest/)).
+
+Then run this code:
+
+
+```python
+# https://pyes.readthedocs.org/en/latest/references/pyes.es.html
+# http://davedash.com/2011/02/25/bulk-load-elasticsearch-using-pyes/
+from pyes import *
+
+index_name = 'xxx'
+type_name = 'car'
+
+conn = ES('127.0.0.1:9200', timeout=3.5)
+
+docs = [
+    {"name":"good",  "id":'1'},
+    {"name":"bad", "id":'2'},
+    {"name":"ugly", "id":'3'}
+]
+
+# Bulk index
+for doc in docs:
+    # index(doc, index, doc_type, id=None, parent=None, force_insert=False, op_type=None, bulk=False, version=None, querystring_args=None)
+    conn.index(doc, index_name, type_name, id=doc['id'], bulk=True)
+
+print conn.refresh()
+
+# Search
+def search(query):
+    q = StringQuery(query, default_operator="AND")
+    result = conn.search(query=q, indices=[index_name])
+    for r in result:
+        print r
+
+
+search("good")
+```
+    
+
+You can also use CURL to verify that it works:
+
+
+```python
+# Show index mapping
+curl -vvv "http://127.0.0.1:9200/xxx/_mapping?pretty=1"
+
+# Delete index
+curl -XDELETE -vvv "http://127.0.0.1:9200/xxx"
+
+# Search
+curl -vvv "http://127.0.0.1:9200/xxx/_search?pretty=1"
+```
+    
+
+</div>
             </div>
         </section>
     </main>
@@ -43,4 +99,3 @@
     </script>
 </body>
 </html>
-

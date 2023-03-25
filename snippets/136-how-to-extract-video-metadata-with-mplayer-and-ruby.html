@@ -2,23 +2,61 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title></title>
+    <title>How to extract video metadata with mplayer and Ruby</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,900;1,900&amp;display=swap" rel="stylesheet">
     <link href=" https://cdn.jsdelivr.net/npm/destyle.css@4.0.0/destyle.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
     <header class="flex">
-        <h1 class="fadeout"></h1>
+        <h1 class="fadeout">How to extract video metadata with mplayer and Ruby</h1>
     </header>
     <main>
         <section class="flex">
             <div class="flex-item flex-100">
-                <div class="code"></div>
+                <div class="code">You can easily extract video metadata into a hash with mplayer and Ruby:
+
+
+```ruby
+class Metadata
+  
+  def self.get(file)
+    command  = "mplayer -vo null -ao null -frames 0 -identify #{file}"
+    metadata = nil
+    
+    Open3.popen3(command) do |input, output, error|
+      metadata = output.readlines.grep(/ID_.*/).collect {|name| name[3..name.length].split('=')}
+      metadata = metadata.inject({}) {|hash, (key, value)| hash[key.to_sym] = value.chomp; hash}
+    end
+    
+    return metadata
+  end
+  
+end
+```
+    
+
+Then in an RSpec test do:
+
+
+```ruby
+it "should support 3gp" do
+    metadata = Metadata.get("videos/sony_ericsson_k850i.3gp")
+    
+    metadata[:DEMUXER].should == 'mov'
+    metadata[:VIDEO_FORMAT].should == 's263'
+    metadata[:VIDEO_WIDTH].should == '176'
+    metadata[:VIDEO_HEIGHT].should == '144'
+  end
+```
+    
+
+Note to self: metadata.demuxer would perhaps be a slightly better syntax.
+
+</div>
             </div>
         </section>
     </main>
@@ -43,4 +81,3 @@
     </script>
 </body>
 </html>
-

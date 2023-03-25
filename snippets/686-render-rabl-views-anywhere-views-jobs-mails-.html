@@ -2,23 +2,47 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title></title>
+    <title>Render Rabl Views Anywhere (views, jobs, mails)</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,900;1,900&amp;display=swap" rel="stylesheet">
     <link href=" https://cdn.jsdelivr.net/npm/destyle.css@4.0.0/destyle.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
     <header class="flex">
-        <h1 class="fadeout"></h1>
+        <h1 class="fadeout">Render Rabl Views Anywhere (views, jobs, mails)</h1>
     </header>
     <main>
         <section class="flex">
             <div class="flex-item flex-100">
-                <div class="code"></div>
+                <div class="code">A helper for rendering Rabl views anywhere, e.g. background jobs, views, mails, etc:
+
+
+```ruby
+def render_rabl(locals, view, options = {})
+  scope = Object.new
+  locals.each do |key, value|
+    scope.instance_variable_set :"@#{key}", value
+  end
+  options = { format: :json, scope: scope }.merge(options)
+  Rabl.render(nil, view, options)
+end
+```
+    
+
+Usage:
+
+
+```ruby
+locals = { users: User.all }
+view = 'users/index'
+render_rabl locals, view
+```
+    
+
+</div>
             </div>
         </section>
     </main>
@@ -43,4 +67,3 @@
     </script>
 </body>
 </html>
-

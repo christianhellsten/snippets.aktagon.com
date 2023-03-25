@@ -2,23 +2,92 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title></title>
+    <title>Go and Postgres Example</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,900;1,900&amp;display=swap" rel="stylesheet">
     <link href=" https://cdn.jsdelivr.net/npm/destyle.css@4.0.0/destyle.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
     <header class="flex">
-        <h1 class="fadeout"></h1>
+        <h1 class="fadeout">Go and Postgres Example</h1>
     </header>
     <main>
         <section class="flex">
             <div class="flex-item flex-100">
-                <div class="code"></div>
+                <div class="code">```go
+package main
+
+import (
+	"database/sql"
+	_ "github.com/lib/pq"
+	"log"
+	"time"
+)
+
+func pollChanges() {
+	var id int
+	var name string
+	rows, err := db.Query("SELECT id, name FROM people")
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer rows.Close()
+	for rows.Next() {
+		err := rows.Scan(&id, &name)
+		if err != nil {
+			log.Fatal(err)
+		}
+		log.Println(id, name)
+	}
+	err = rows.Err()
+	if err != nil {
+		log.Fatal(err)
+	}
+}
+
+var db *sql.DB
+
+func main() {
+	var err error
+	db, err = sql.Open("postgres", "")
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer db.Close()
+	for {
+		time.Sleep(1000 * time.Millisecond)
+		log.Println("Polling for changes...")
+		pollChanges()
+	}
+}
+```
+
+Run:
+```bash
+PGUSER= PGPASSWORD= PGDATABASE=db_xyz PGSSLMODE=disable ./go-app
+```
+
+## Notes
+
+- For a list of available connection parameters and environment variables, see:
+https://www.postgresql.org/docs/9.0/static/libpq-envars.html
+
+- Bind variables are named $1, $2, etc, not ?.
+
+Using question marks instead of, e.g., $1 will result in the following error:
+```
+syntax error at or near ","
+```
+
+- Scan requires a pointer. Forgetting to add an ampersand (Scan(id) vs Scan(&id)) will result in the following error:
+
+```
+Scan error on column index 0: destination not a pointer
+```
+</div>
             </div>
         </section>
     </main>
@@ -43,4 +112,3 @@
     </script>
 </body>
 </html>
-

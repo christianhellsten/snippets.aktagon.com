@@ -2,23 +2,47 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title></title>
+    <title>Error when installing Mongrel from gem</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,900;1,900&amp;display=swap" rel="stylesheet">
     <link href=" https://cdn.jsdelivr.net/npm/destyle.css@4.0.0/destyle.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
     <header class="flex">
-        <h1 class="fadeout"></h1>
+        <h1 class="fadeout">Error when installing Mongrel from gem</h1>
     </header>
     <main>
         <section class="flex">
             <div class="flex-item flex-100">
-                <div class="code"></div>
+                <div class="code">I received the following error when installing Mongrel from the gem repository:
+
+
+```bash
+marko@x61s:$ sudo gem install mongrel
+Updating metadata for 281 gems from http://gems.rubyforge.org
+complete
+Building native extensions.  This could take a while...
+ERROR:  Error installing mongrel:
+	ERROR: Failed to build gem native extension.
+
+/usr/bin/ruby1.8 extconf.rb install mongrel
+extconf.rb:1:in require': no such file to load -- mkmf (LoadError)
+	from extconf.rb:1
+```
+    
+
+The fix is to install the ruby development package:
+
+
+```bash
+sudo apt-get install ruby1.8-dev
+```
+    
+
+</div>
             </div>
         </section>
     </main>
@@ -43,4 +67,3 @@
     </script>
 </body>
 </html>
-

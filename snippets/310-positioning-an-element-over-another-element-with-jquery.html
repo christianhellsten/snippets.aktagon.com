@@ -2,23 +2,91 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title></title>
+    <title>Positioning an element over another element with jQuery</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,900;1,900&amp;display=swap" rel="stylesheet">
     <link href=" https://cdn.jsdelivr.net/npm/destyle.css@4.0.0/destyle.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
     <header class="flex">
-        <h1 class="fadeout"></h1>
+        <h1 class="fadeout">Positioning an element over another element with jQuery</h1>
     </header>
     <main>
         <section class="flex">
             <div class="flex-item flex-100">
-                <div class="code"></div>
+                <div class="code">Positioning an element over another element is a common problem and can be used for creating simple tooltips, inline dialogs, informational messages and so on.
+
+The code is simple:
+
+
+```javascript
+$.fn.positionOn = function(element, align) {
+  return this.each(function() {
+    var target   = $(this);
+    var position = element.position();
+
+    var x      = position.left; 
+    var y      = position.top;
+
+    if(align == 'right') {
+      x -= (target.outerWidth() - element.outerWidth());
+    } else if(align == 'center') {
+      x -= target.outerWidth() / 2 - element.outerWidth() / 2;
+    }
+
+    target.css({
+      position: 'absolute',
+      zIndex:   5000,
+      top:      y, 
+      left:     x
+    });
+  });
+};
+```
+    
+
+Usage:
+
+
+```javascript
+$('selector-for-elements-to-position').positionOn($('selector-for-element-to-position-them-on'))
+```
+    
+
+Normally you would use this code within an event listener such as mouseover or click:
+
+
+```javascript
+$(".add-link").live('click', function(event) {
+      var target = $(this);
+      var dialog = $('#add-link-dialog');
+
+      dialog.positionOn(target, 'center');
+      dialog.show();
+
+      return false;
+    });
+```
+    
+
+More examples:
+
+
+```javascript
+# Default is align with top left corner of given element
+$('#add-link-dialog').positionOn($('.add-link'))
+# But you can align to the right and center
+$('#add-link-dialog').positionOn($('.add-link'), 'right')
+$('#add-link-dialog').positionOn($('.add-link'), 'center')
+```
+    
+
+You'll need the jQuery dimensions plugin for this to work.
+
+</div>
             </div>
         </section>
     </main>
@@ -43,4 +111,3 @@
     </script>
 </body>
 </html>
-

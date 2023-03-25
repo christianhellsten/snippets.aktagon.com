@@ -2,23 +2,44 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title></title>
+    <title>How to configure a no-www redirection on Amazon AWS (S3 and Cloudfront)</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,900;1,900&amp;display=swap" rel="stylesheet">
     <link href=" https://cdn.jsdelivr.net/npm/destyle.css@4.0.0/destyle.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
     <header class="flex">
-        <h1 class="fadeout"></h1>
+        <h1 class="fadeout">How to configure a no-www redirection on Amazon AWS (S3 and Cloudfront)</h1>
     </header>
     <main>
         <section class="flex">
             <div class="flex-item flex-100">
-                <div class="code"></div>
+                <div class="code">How do you configure a site hosted on Amazon AWS, e.g. a static website, to redirect from "www" to the "no-www" domain (aka "naked domain")? The tool for the job is [the AWS CLI](http://docs.aws.amazon.com/cli/latest/reference/s3api/).
+
+For example, this creates a redirection from www.x.com to x.com for a bucket named www.x.com:
+
+
+```bash
+aws s3api put-bucket-website --bucket www.x.com --website-configuration '{
+    "RedirectAllRequestsTo": {
+        "HostName": "x.com"
+    }
+}'
+```
+    
+
+Use this command to check that the configuration is set properly:
+
+
+```bash
+aws s3api get-bucket-website --bucket www.x.com
+```
+    
+
+</div>
             </div>
         </section>
     </main>
@@ -43,4 +64,3 @@
     </script>
 </body>
 </html>
-

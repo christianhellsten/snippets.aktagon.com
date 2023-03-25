@@ -2,23 +2,71 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title></title>
+    <title>SSH "bundle: command not found"</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,900;1,900&amp;display=swap" rel="stylesheet">
     <link href=" https://cdn.jsdelivr.net/npm/destyle.css@4.0.0/destyle.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
     <header class="flex">
-        <h1 class="fadeout"></h1>
+        <h1 class="fadeout">SSH "bundle: command not found"</h1>
     </header>
     <main>
         <section class="flex">
             <div class="flex-item flex-100">
-                <div class="code"></div>
+                <div class="code">Behold ~/.bashrc:
+
+
+```bash
+# If not running interactively, don't do anything 
+[ -z "$PS1" ] && return
+```
+    
+
+Don't put "export PATH" or anything else important below that line containing "return", put it above.
+
+If you're using SSH to execute commands on the server the script will exit on that line, and with Rails bundler you'll then get errors like this:
+
+
+```bash
+bash: bundle: command not found
+```
+    
+
+Still not working? Maybe you're running the command through SSH and bundle (or rbenv/rvm) is not in your PATH variable:
+
+
+```bash
+$ ssh sandbox 'echo $PATH'
+```
+    
+
+Now try this:
+
+
+```bash
+$ ssh sandbox 'source ~/.bashrc && echo $PATH'
+```
+    
+
+Next, figure out why the command is not in your path.
+
+It could be because your .bashrc is missing this:
+
+
+```bash
+export RBENV_ROOT=/usr/local/rbenv
+export PATH="$RBENV_ROOT/bin:$PATH"
+eval "$(rbenv init -)"
+```
+    
+
+It could be something else…
+
+</div>
             </div>
         </section>
     </main>
@@ -43,4 +91,3 @@
     </script>
 </body>
 </html>
-

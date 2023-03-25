@@ -2,23 +2,60 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title></title>
+    <title>Sprockets vs. Webpacker</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,900;1,900&amp;display=swap" rel="stylesheet">
     <link href=" https://cdn.jsdelivr.net/npm/destyle.css@4.0.0/destyle.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
     <header class="flex">
-        <h1 class="fadeout"></h1>
+        <h1 class="fadeout">Sprockets vs. Webpacker</h1>
     </header>
     <main>
         <section class="flex">
             <div class="flex-item flex-100">
-                <div class="code"></div>
+                <div class="code">Which to choose?
+
+> You should choose Webpacker over Sprockets on a new project if you want to use NPM packages and/or want access to the most current JavaScript features and tools. You should choose Sprockets over Webpacker for legacy applications where migration might be costly, if you want to integrate using Gems, or if you have a very small amount of code to package.
+
+Sprockets vs. Webpacker concepts
+
+```
+# sprockets concept = webpacker equivalent
+Gemfile dependencies = npm_modules
+stylesheet_link_tag	= stylesheet_pack_tag
+javascript_include_tag = javascript_pack_tag
+image_path = image_pack_tag
+asset_path = asset_pack_tag
+require = import or require
+```
+
+Webpacker depends on NPM (Node package manager registry) and Yarn. 
+
+Example:
+
+```
+app/javascript:
+  ├── packs:
+  │   # only webpack entry files here
+  │   └── application.js
+  │   └── application.css
+  └── src:
+  │   └── my_component.js
+  └── stylesheets:
+  │   └── my_styles.css
+  └── images:
+      └── logo.svg
+```
+
+If you want to avoid problems, use esbuild.
+
+Reference:
+https://guides.rubyonrails.org/webpacker.html
+</div>
             </div>
         </section>
     </main>
@@ -43,4 +80,3 @@
     </script>
 </body>
 </html>
-

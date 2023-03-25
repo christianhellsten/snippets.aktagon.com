@@ -2,23 +2,62 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title></title>
+    <title>How to set the Expires header with Apache 2 and mod_expires</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,900;1,900&amp;display=swap" rel="stylesheet">
     <link href=" https://cdn.jsdelivr.net/npm/destyle.css@4.0.0/destyle.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
     <header class="flex">
-        <h1 class="fadeout"></h1>
+        <h1 class="fadeout">How to set the Expires header with Apache 2 and mod_expires</h1>
     </header>
     <main>
         <section class="flex">
             <div class="flex-item flex-100">
-                <div class="code"></div>
+                <div class="code">First you need to enable the mod\_expires module:
+
+
+```apacheconf
+a2enmod expires
+```
+    
+
+Next add this to your configuration:
+
+
+```apacheconf
+ExpiresActive On
+# Set Expires header to current time by default
+ExpiresDefault A0
+
+<FilesMatch "\.(flv|ico|pdf|avi|mov|ppt|doc|mp3|wmv|wav)$">
+  ExpiresDefault "access plus 30 days"
+</FilesMatch>
+
+<FilesMatch "\.(jpg|jpeg|png|gif|swf|bmp|)$">
+  ExpiresDefault "access plus 7 days"
+</FilesMatch>
+
+<FilesMatch "\.(txt|xml|js|css)$">
+  ExpiresDefault "access plus 1 day"
+</FilesMatch>
+```
+    
+
+Now restart Apache:
+
+
+```apacheconf
+$ sudo /etc/init.d/apache2 force-reload
+```
+    
+
+Check that the proper headers are set with Firebug, Yahoo YSlow or Google Page speed.
+
+</div>
             </div>
         </section>
     </main>
@@ -43,4 +82,3 @@
     </script>
 </body>
 </html>
-

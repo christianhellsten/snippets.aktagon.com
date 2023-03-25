@@ -2,23 +2,57 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title></title>
+    <title>How to implement callbacks in Objective-C by passing methods as parameters</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,900;1,900&amp;display=swap" rel="stylesheet">
     <link href=" https://cdn.jsdelivr.net/npm/destyle.css@4.0.0/destyle.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
     <header class="flex">
-        <h1 class="fadeout"></h1>
+        <h1 class="fadeout">How to implement callbacks in Objective-C by passing methods as parameters</h1>
     </header>
     <main>
         <section class="flex">
             <div class="flex-item flex-100">
-                <div class="code"></div>
+                <div class="code">Example of a method that takes a callback method, defined as theSelector, as a parameter:
+
+
+```objectivec
+- (void) getURL:(NSString *)theURL theSelector:(SEL)theSelector
+{
+	NSURL *url = [NSURL URLWithString:theURL];
+		
+	ASIHTTPRequest *request = [[[ASIHTTPRequest alloc] initWithURL:url] autorelease];
+	
+	[request setDelegate:self];
+	[request setDidFinishSelector:theSelector];
+	[request setDidFailSelector:@selector(onError:)];
+	
+       [networkQueue addOperation:request];
+	[networkQueue go];
+}
+```
+    
+
+
+```objectivec
+// Don't forget the semicolon
+SEL sel = @selector(onResponseReceived:);
+[self getURL:@"http://www.google.com" selector:sel];
+```
+    
+
+
+```objectivec
+- (void)onResponseReceived:(ASIHTTPRequest *)request {
+}
+```
+    
+
+</div>
             </div>
         </section>
     </main>
@@ -43,4 +77,3 @@
     </script>
 </body>
 </html>
-

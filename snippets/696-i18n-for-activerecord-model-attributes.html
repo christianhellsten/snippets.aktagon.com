@@ -2,23 +2,76 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title></title>
+    <title>I18n for ActiveRecord Model Attributes</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,900;1,900&amp;display=swap" rel="stylesheet">
     <link href=" https://cdn.jsdelivr.net/npm/destyle.css@4.0.0/destyle.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
     <header class="flex">
-        <h1 class="fadeout"></h1>
+        <h1 class="fadeout">I18n for ActiveRecord Model Attributes</h1>
     </header>
     <main>
         <section class="flex">
             <div class="flex-item flex-100">
-                <div class="code"></div>
+                <div class="code">This code will translate the AR model's title attribute using Rails' I18n library:
+
+
+```ruby
+class Link < ActiveRecord::Base
+  I18N_ATTRIBUTES = [ :title ]
+  I18N_ATTRIBUTES.each do |attr|
+    class_eval <<-EORUBY, __FILE__, __LINE__ + 1
+      def #{attr}
+        I18n.t(self[:#{attr}], default: self[:#{attr}])
+      end
+    EORUBY
+  end
+end
+```
+    
+
+If a translation is not defined, the code will fall back to use the attribute's original value.
+
+Example with translation defined:
+---------------------------------
+
+Translation file (config/locales/en.yml):
+
+
+```ruby
+en:
+  views:
+    index:
+      title: Hello
+```
+    
+
+Model code (app/models/link.rb):
+
+
+```ruby
+link.title = 'views.index.title'
+# Uses string from config/locales/en.yml
+link.title => "Hello"
+```
+    
+
+Example without translation defined
+-----------------------------------
+
+
+```ruby
+link = Link.new title: 'Hello'
+# Fall back to specified value, because no translation is defined
+link.title => "Hello"
+```
+    
+
+</div>
             </div>
         </section>
     </main>
@@ -43,4 +96,3 @@
     </script>
 </body>
 </html>
-

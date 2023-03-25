@@ -2,23 +2,75 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title></title>
+    <title>How to fix "(103)Software caused connection abort: proxy: pass request body"</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,900;1,900&amp;display=swap" rel="stylesheet">
     <link href=" https://cdn.jsdelivr.net/npm/destyle.css@4.0.0/destyle.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
     <header class="flex">
-        <h1 class="fadeout"></h1>
+        <h1 class="fadeout">How to fix "(103)Software caused connection abort: proxy: pass request body"</h1>
     </header>
     <main>
         <section class="flex">
             <div class="flex-item flex-100">
-                <div class="code"></div>
+                <div class="code">If you find this in your Apache error logs:
+
+
+```apacheconf
+[error] (103)Software caused connection abort: proxy: pass request body failed to 127.0.0.1:50000 (127.0.0.1)                                                                           
+[error] proxy: pass request body failed to 127.0.0.1:50000 (127.0.0.1) from 1.1.1.1.1 ()
+```
+    
+
+Make sure you have read the [Apache manuals](http://httpd.apache.org/docs/current/mod/mod_proxy.html#proxypass)
+
+Also read the "BalancerMember parameters" and "Balancer parameters" sections, e.g. maxattempts.
+
+Relevant settings to test with your application and configuration might be:
+
+
+```apacheconf
+SetEnv proxy-sendchunked 1
+SetEnv proxy-sendchunks 1
+
+SetEnv downgrade-1.0 1
+SetEnv proxy-sendcl 1
+```
+    
+
+It all depends on where Apache is sending the requests and what features the backend supports.
+
+If you're using Unicorn with e.g. Rails then read:
+http://unicorn.bogomips.org/DESIGN.html
+http://unicorn.bogomips.org/PHILOSOPHY.html
+
+Unicorn doesn't support nokeepalive for a reason, so maybe you should switch to [Rainbows!](http://rainbows.rubyforge.org/), thin and/or nginx.
+
+If changing the server you use is not an option, you could try:
+
+
+```apacheconf
+SetEnv force-proxy-request-1.0 1
+  SetEnv proxy-nokeepalive 1
+```
+    
+
+or e.g.:
+
+
+```apacheconf
+BalancerMember xxx keepalive=Off maxattempts=2
+```
+    
+
+If you have issues with large file uploads and unicorn, [this might help](http://rubyforge.org/pipermail/mongrel-unicorn/2011-September/001195.html).
+</code>
+
+</div>
             </div>
         </section>
     </main>
@@ -43,4 +95,3 @@
     </script>
 </body>
 </html>
-

@@ -2,23 +2,46 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title></title>
+    <title>Example of how to use Ruby's RestClient with POST parameters, basic authorization, HTTP headers, and JSON</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,900;1,900&amp;display=swap" rel="stylesheet">
     <link href=" https://cdn.jsdelivr.net/npm/destyle.css@4.0.0/destyle.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
     <header class="flex">
-        <h1 class="fadeout"></h1>
+        <h1 class="fadeout">Example of how to use Ruby's RestClient with POST parameters, basic authorization, HTTP headers, and JSON</h1>
     </header>
     <main>
         <section class="flex">
             <div class="flex-item flex-100">
-                <div class="code"></div>
+                <div class="code">Example of how to use Ruby's RestClient with POST parameters, basic authorization, HTTP headers, and JSON:
+
+
+```ruby
+response = RestClient::Request.new({
+      method: :post,
+      url: 'https://xyz,
+      user: 'someone',
+      password: 'mybirthday',
+      payload: { post_this: 'some value', post_that: 'other value' },
+      headers: { :accept => :json, content_type: :json }
+    }).execute do |response, request, result|
+      case response.code
+      when 400
+        [ :error, parse_json(response.to_str) ]
+      when 200
+        [ :success, parse_json(response.to_str) ]
+      else
+        fail "Invalid response #{response.to_str} received."
+      end
+    end
+```
+    
+
+</div>
             </div>
         </section>
     </main>
@@ -43,4 +66,3 @@
     </script>
 </body>
 </html>
-

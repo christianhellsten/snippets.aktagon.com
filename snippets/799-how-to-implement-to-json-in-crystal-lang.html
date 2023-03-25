@@ -2,23 +2,57 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title></title>
+    <title>How to implement to_json in Crystal lang</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,900;1,900&amp;display=swap" rel="stylesheet">
     <link href=" https://cdn.jsdelivr.net/npm/destyle.css@4.0.0/destyle.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
     <header class="flex">
-        <h1 class="fadeout"></h1>
+        <h1 class="fadeout">How to implement to_json in Crystal lang</h1>
     </header>
     <main>
         <section class="flex">
             <div class="flex-item flex-100">
-                <div class="code"></div>
+                <div class="code">Tested on version 0.19.4. This is an example of how to implement a generic to_json method in Crystal lang:
+
+```crystal
+class Document
+  def initialize
+    @name = "xyz"
+    ...
+  end
+  
+  # Returns an array containing all instance variables. Implemented with a macro.
+  def instance_vars
+    {{
+      @type.instance_vars.map do |var|
+        [ var.name.stringify, var.id ]
+      end
+    }}
+  end
+
+  # Returns a JSON string containing all instance variables
+  def to_json
+    result = String.build do |io|
+      JSON::PrettyWriter.new(io, indent: "  ").json_object do |object|
+        instance_vars.each do |var|
+          name, value = var
+          case value
+          when XML::Node
+            # skip
+          else
+            object.field name, value
+          end
+        end
+      end
+    end
+  end
+```
+</div>
             </div>
         </section>
     </main>
@@ -43,4 +77,3 @@
     </script>
 </body>
 </html>
-

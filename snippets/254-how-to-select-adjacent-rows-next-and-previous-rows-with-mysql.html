@@ -2,23 +2,58 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title></title>
+    <title>How to select adjacent rows (next and previous rows) with MySQL</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,900;1,900&amp;display=swap" rel="stylesheet">
     <link href=" https://cdn.jsdelivr.net/npm/destyle.css@4.0.0/destyle.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
     <header class="flex">
-        <h1 class="fadeout"></h1>
+        <h1 class="fadeout">How to select adjacent rows (next and previous rows) with MySQL</h1>
     </header>
     <main>
         <section class="flex">
             <div class="flex-item flex-100">
-                <div class="code"></div>
+                <div class="code">I've now packaged this into a Rails plugin called [has\_adjacent\_finders](http://github.com/christianhellsten/has_adjacent_finders/tree/master)
+
+Problem
+-------
+
+Finding the next and previous product is a common task on, for example, e-commerce sites.
+
+Let's say we have a table containing data having the following IDs:
+
+
+```ruby
+201
+202
+203
+204
+205
+206
+207
+208
+```
+    
+
+How do we get the rows adjacent to row 205? We can rely on MySQL sorting&mdash;the primary key in this case&mdash; so these two queries will do the job for us:
+
+
+```ruby
+# Find previous row
+select id from products where id < 205 order by id desc limit 1
+
+# Find next row
+select id from products where id > 205 order by id asc limit 1
+```
+    
+
+The two queries will return 204 and 206 respectively. You can also use other columns, not just ID...
+
+</div>
             </div>
         </section>
     </main>
@@ -43,4 +78,3 @@
     </script>
 </body>
 </html>
-

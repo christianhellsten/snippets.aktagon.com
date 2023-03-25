@@ -2,23 +2,40 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title></title>
+    <title>Fixing how nginx sends request URI to the backend server.</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,900;1,900&amp;display=swap" rel="stylesheet">
     <link href=" https://cdn.jsdelivr.net/npm/destyle.css@4.0.0/destyle.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
     <header class="flex">
-        <h1 class="fadeout"></h1>
+        <h1 class="fadeout">Fixing how nginx sends request URI to the backend server.</h1>
     </header>
     <main>
         <section class="flex">
             <div class="flex-item flex-100">
-                <div class="code"></div>
+                <div class="code">I needed to send an URI through [Nginx](http://wiki.codemongers.com/Main) to the backend servers ([Mongrel](http://mongrel.rubyforge.org/)) intact. However Nginx was constantly unescaping the URI, and removed slashes in the process. That resulted in an invalid URL at the backend server. The fix was **simple**, but extremely hard to find. Just remove the trailing slash from the *proxy\_pass* directive, like below.
+
+Invalid URI is sent to the backend server with this configuration of Nginx.
+
+
+```bash
+proxy_pass         http://backend1:3000/;
+```
+    
+
+Valid, untampered URI is sent with this configuration of Nginx.
+
+
+```bash
+proxy_pass         http://backend1:3000;
+```
+    
+
+</div>
             </div>
         </section>
     </main>
@@ -43,4 +60,3 @@
     </script>
 </body>
 </html>
-

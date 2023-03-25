@@ -2,23 +2,118 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title></title>
+    <title>Installing git without getting screwed over when it's time to uninstall, upgrade or install package maintainer's version</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,900;1,900&amp;display=swap" rel="stylesheet">
     <link href=" https://cdn.jsdelivr.net/npm/destyle.css@4.0.0/destyle.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
     <header class="flex">
-        <h1 class="fadeout"></h1>
+        <h1 class="fadeout">Installing git without getting screwed over when it's time to uninstall, upgrade or install package maintainer's version</h1>
     </header>
     <main>
         <section class="flex">
             <div class="flex-item flex-100">
-                <div class="code"></div>
+                <div class="code">Although [Git](http://git.or.cz/) is one of the better source code managers it has a major drawback if you need to install it from the sources - it's makefile doesn't have an uninstall target as defined in the [GNU coding standards](http://www.gnu.org/prep/standards/html_node/Standard-Targets.html). Therefore you might find your system screwed over when you want to uninstall or upgrade after installing from sources. This is a [workaround](http://kerneltrap.org/mailarchive/git/2007/7/18/251958) that is sufficient enough to make me break my rule of not installing software outside of package management.
+
+Also see [the snippet for an alias for the make command](http://snippets.aktagon.com/snippets/195-Nifty-alias-for-the-make-command-to-create-an-optimal-amount-of-processes-depending-on-the-number-of-CPU-s-you-have) first.
+
+Prequisities
+------------
+
+
+```bash
+sudo apt-get install asciidoc xsltproc xmlto xstow bzip2 build-essential zlib1g-dev tcl8.4
+```
+    
+
+Installation
+------------
+
+
+```bash
+cd /tmp
+wget http://kernel.org/pub/software/scm/git/git-1.5.5.1.tar.bz2
+tar xjvf git-1.5.5.1.tar.bz2
+sudo mv git-1.5.5.1 /usr/src
+sudo ln -s /usr/src/git-1.5.5.1 /usr/src/git
+cd /usr/src/git
+./configure --prefix=/usr/local/stow/git
+make all doc
+sudo make install install-doc
+cd /usr/local/stow
+cat << EOF > /tmp/xstow.ini
+# this is the xtow configuration file
+# see xstow.ini(5) for details
+
+# list of links that will be handled as normal directories
+[traverse-links] 
+keep-targets = true      # add targets of the links to the keep-dirs section
+link = /usr/local/tmp
+link = /usr/local/var
+link = /usr/local/man
+link = /usr/local/share
+link = /usr/local/share/man
+link = /usr/local/doc
+link = /usr/local/info
+add-if-target = /*       # automatic add all absolute links
+
+# directories that never should be removed
+[keep-dirs]
+dir = /usr/local/bin
+dir = /usr/local/sbin
+dir = /usr/local/lib
+dir = /usr/local/include
+dir = /usr/local/share
+
+[matches]
+ignore = *~      # emacs
+ignore = core    # core file
+ignore = core.*  # new style
+ignore = CVS     # CVS directories
+ignore-regex = [0]+README.*
+
+# make other stow dirs public
+[stow-dirs]
+dir = /usr/local/local/stow
+dir = /usr/local/local/stow2
+
+[debug]
+module = ALL
+level  = 0
+
+[config-files]
+in-home = yes
+in-stow-dir = yes
+in-other-stow-dirs = yes
+file = /etc/xstow.ini
+file = /usr/local/local/etc/xstow.ini
+
+[links]
+absolute-paths = false
+EOF
+sudo mv -i /tmp/xstow.ini .
+sudo xstow git
+```
+    
+
+Uninstallation
+--------------
+
+
+```bash
+cd /usr/local/xstow
+xstow -D git
+sudo rm -rf /usr/local/stow/git
+```
+    
+
+Kind of makes one appreciate the work done by package maintainers, doesn't it?
+
+</div>
             </div>
         </section>
     </main>
@@ -43,4 +138,3 @@
     </script>
 </body>
 </html>
-

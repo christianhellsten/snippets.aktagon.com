@@ -2,23 +2,31 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title></title>
+    <title>Fastest way of importing data into PostgreSQL</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,900;1,900&amp;display=swap" rel="stylesheet">
     <link href=" https://cdn.jsdelivr.net/npm/destyle.css@4.0.0/destyle.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
     <header class="flex">
-        <h1 class="fadeout"></h1>
+        <h1 class="fadeout">Fastest way of importing data into PostgreSQL</h1>
     </header>
     <main>
         <section class="flex">
             <div class="flex-item flex-100">
-                <div class="code"></div>
+                <div class="code">The fastest way of importing data into PostgreSQL is to avoid any additional processing, i.e., use PostgreSQL tools instead of writing scripts in Python or other languages.
+
+This will import the file directly from a file into PostgreSQL:
+
+```bash
+unzip -p data.csv.gz | PGOPTIONS=-—client-min-messages=warning psql —-no-psqlrc —-set ON_ERROR_STOP=on <db name> —-command="COPY table from STDIN"
+```
+
+You can also add preprocessing easily, such as removal of data with AWK, by piping commands together into a workflow.
+</div>
             </div>
         </section>
     </main>
@@ -43,4 +51,3 @@
     </script>
 </body>
 </html>
-

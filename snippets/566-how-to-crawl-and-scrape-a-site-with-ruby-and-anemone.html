@@ -2,23 +2,70 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title></title>
+    <title>How to crawl and scrape a site with Ruby and Anemone</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,900;1,900&amp;display=swap" rel="stylesheet">
     <link href=" https://cdn.jsdelivr.net/npm/destyle.css@4.0.0/destyle.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
     <header class="flex">
-        <h1 class="fadeout"></h1>
+        <h1 class="fadeout">How to crawl and scrape a site with Ruby and Anemone</h1>
     </header>
     <main>
         <section class="flex">
             <div class="flex-item flex-100">
-                <div class="code"></div>
+                <div class="code">The code:
+
+
+```ruby
+require 'anemone'
+require 'system_timer'
+
+def spider(url, duration=60)
+  options = { 
+    :accept_cookies => true,
+    :read_timeout => 20,
+    :retry_limit => 0,
+    :verbose => true,
+    :discard_page_bodies => true,
+    :user_agent => 'Mozilla...'
+  }
+  begin
+    # Stop crawl after n seconds
+    SystemTimer.timeout_after(duration) do
+      Anemone.crawl(url, options) do |anemone|
+        #anemone.storage = Anemone::Storage.MongoDB
+        anemone.on_every_page do |page|
+          puts page.url
+          doc = page.doc
+          yield doc if doc
+        end
+      end
+    end
+  rescue Timeout::Error
+  end
+end
+```
+    
+
+How to use it:
+
+
+```ruby
+links = []
+spider('http://cnn.com', 2*60) do |doc|
+  links.concat doc.search('a').map{|e| e.inner_text}
+end
+links.uniq
+```
+    
+
+See <http://anemone.rubyforge.org/information-and-examples.html>
+
+</div>
             </div>
         </section>
     </main>
@@ -43,4 +90,3 @@
     </script>
 </body>
 </html>
-

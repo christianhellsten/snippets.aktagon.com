@@ -2,23 +2,79 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title></title>
+    <title>How to fix "fatal: 'gitosis-admin.git': unable to chdir or not a git archive"</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,900;1,900&amp;display=swap" rel="stylesheet">
     <link href=" https://cdn.jsdelivr.net/npm/destyle.css@4.0.0/destyle.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
     <header class="flex">
-        <h1 class="fadeout"></h1>
+        <h1 class="fadeout">How to fix "fatal: 'gitosis-admin.git': unable to chdir or not a git archive"</h1>
     </header>
     <main>
         <section class="flex">
             <div class="flex-item flex-100">
-                <div class="code"></div>
+                <div class="code">Are the SSH keys valid?
+-----------------------
+
+When, not if, you get this error you most probably have the wrong keys listed in /home/git/.ssh/authorized\_keys:
+
+
+```bash
+$ git  clone git@xxx.com:gitosis-admin.git 
+Initialized empty Git repository in /Users/christian/Documents/Projects/gitosis-admin/.git/
+fatal: 'gitosis-admin.git': unable to chdir or not a git archive
+fatal: The remote end hung up unexpectedly
+```
+    
+
+Try removing the keys in authorized\_keys one by one, and verify that the names of the users match the ones in .gitosis.conf
+
+<http://scie.nti.st/2007/11/14/hosting-git-repositories-the-easy-and-secure-way>
+
+Try using the full path to the repository
+-----------------------------------------
+
+
+```bash
+$ git clone git@xxx.com::/home/git/repositories/xxx.git
+```
+    
+
+Check if the repository exists
+------------------------------
+
+
+```bash
+$ cd /home/git/repositories/xxx.git
+```
+    
+
+
+```bash
+$ git clone /home/git/repositories/xxx.git
+```
+    
+
+What does SSH say?
+------------------
+
+
+```bash
+ssh -v git@xxx.com
+```
+    
+
+Use Google
+----------
+
+http://stackoverflow.com/questions/1264262/connecting-to-gitosis-server-through-an-ssh-tunnel
+http://stackoverflow.com/questions/733057/can-git-work-via-ssh-port-forwarding
+
+</div>
             </div>
         </section>
     </main>
@@ -43,4 +99,3 @@
     </script>
 </body>
 </html>
-

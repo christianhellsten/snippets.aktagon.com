@@ -2,23 +2,46 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title></title>
+    <title>How to debug memory allocation problems in PHP with Xdebug</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,900;1,900&amp;display=swap" rel="stylesheet">
     <link href=" https://cdn.jsdelivr.net/npm/destyle.css@4.0.0/destyle.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
     <header class="flex">
-        <h1 class="fadeout"></h1>
+        <h1 class="fadeout">How to debug memory allocation problems in PHP with Xdebug</h1>
     </header>
     <main>
         <section class="flex">
             <div class="flex-item flex-100">
-                <div class="code"></div>
+                <div class="code">Xdebug is a good tool for finding the root cause of memory allocation problems such as the one shown here:
+
+
+```php
+Fatal error: Allowed memory size of X bytes exhausted (tried to allocate X bytes)
+```
+    
+
+First install Xdebug by following [the Xdebug installation instructions](http://xdebug.org/docs/install).
+
+Next surround the code you suspect is causing the problem with the following function calls:
+
+
+```php
+xdebug_start_trace('/tmp/mytrace');
+...
+Bad bad PHP code
+...
+xdebug_stop_trace();
+```
+    
+
+[Read this blog entry by splitbrain.org for more details](http://www.splitbrain.org/blog/2008-02/21-understanding_php_code_better_with_xdebug)
+
+</div>
             </div>
         </section>
     </main>
@@ -43,4 +66,3 @@
     </script>
 </body>
 </html>
-

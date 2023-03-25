@@ -2,23 +2,50 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title></title>
+    <title>Custom 404 Rails error pages</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,900;1,900&amp;display=swap" rel="stylesheet">
     <link href=" https://cdn.jsdelivr.net/npm/destyle.css@4.0.0/destyle.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
     <header class="flex">
-        <h1 class="fadeout"></h1>
+        <h1 class="fadeout">Custom 404 Rails error pages</h1>
     </header>
     <main>
         <section class="flex">
             <div class="flex-item flex-100">
-                <div class="code"></div>
+                <div class="code">All credit for this snippet is due to [Henrik Nyh](http://henrik.nyh.se/2008/07/rails-404).
+
+Put this in application\_controller.rb:
+
+
+```ruby
+alias_method :rescue_action_locally, :rescue_action_in_public if RAILS_ENV == 'development'
+  
+  def render_optional_error_file(status_code)
+    if status_code == :not_found
+      activate_authlogic
+      render_404
+    else
+      super
+    end
+  end
+
+  def render_404
+    respond_to do |type| 
+      type.html { render :template => "errors/error_404", :layout => 'application', :status => 404 } 
+      type.all  { render :nothing => true, :status => 404 } 
+    end
+
+    true  # so we can do "render_404 and return"
+  end
+```
+    
+
+</div>
             </div>
         </section>
     </main>
@@ -43,4 +70,3 @@
     </script>
 </body>
 </html>
-

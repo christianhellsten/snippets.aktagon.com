@@ -1,0 +1,242 @@
+---
+id: '794'
+title: Mattermost database schema and design
+languages:
+- bash
+- sql
+tags:
+---
+This review was done on Mattermost version 3.4.0.
+
+## Install mattermost
+
+```bash
+docker run --name mattermost-preview -d --publish 8065:8065 mattermost/mattermost-preview
+docker exec -ti mattermost-preview /bin/bash
+...
+mysql -u root -p
+use mattermost_test
+```
+
+Database password is mostest.
+
+## Schema
+
+```sql
+mysql> describe Posts;
++------------+--------------+------+-----+---------+-------+
+| Field      | Type         | Null | Key | Default | Extra |
++------------+--------------+------+-----+---------+-------+
+| Id         | varchar(26)  | NO   | PRI | NULL    |       |
+| CreateAt   | bigint(20)   | YES  | MUL | NULL    |       |
+| UpdateAt   | bigint(20)   | YES  | MUL | NULL    |       |
+| DeleteAt   | bigint(20)   | YES  |     | NULL    |       |
+| UserId     | varchar(26)  | YES  |     | NULL    |       |
+| ChannelId  | varchar(26)  | YES  | MUL | NULL    |       |
+| RootId     | varchar(26)  | YES  | MUL | NULL    |       |
+| ParentId   | varchar(26)  | YES  |     | NULL    |       |
+| OriginalId | varchar(255) | YES  |     | NULL    |       |
+| Message    | text         | YES  | MUL | NULL    |       |
+| Type       | varchar(26)  | YES  |     | NULL    |       |
+| Props      | text         | YES  |     | NULL    |       |
+| Hashtags   | text         | YES  | MUL | NULL    |       |
+| Filenames  | text         | YES  |     | NULL    |       |
++------------+--------------+------+-----+---------+-------+
+14 rows in set (0.00 sec)
+
+mysql> describe Channels;
++---------------+--------------+------+-----+---------+-------+
+| Field         | Type         | Null | Key | Default | Extra |
++---------------+--------------+------+-----+---------+-------+
+| Id            | varchar(26)  | NO   | PRI | NULL    |       |
+| CreateAt      | bigint(20)   | YES  |     | NULL    |       |
+| UpdateAt      | bigint(20)   | YES  |     | NULL    |       |
+| DeleteAt      | bigint(20)   | YES  |     | NULL    |       |
+| TeamId        | varchar(26)  | YES  | MUL | NULL    |       |
+| Type          | varchar(1)   | YES  |     | NULL    |       |
+| DisplayName   | varchar(64)  | YES  |     | NULL    |       |
+| Name          | varchar(64)  | YES  | MUL | NULL    |       |
+| Header        | text         | YES  |     | NULL    |       |
+| Purpose       | varchar(128) | YES  |     | NULL    |       |
+| LastPostAt    | bigint(20)   | YES  |     | NULL    |       |
+| TotalMsgCount | bigint(20)   | YES  |     | NULL    |       |
+| ExtraUpdateAt | bigint(20)   | YES  |     | NULL    |       |
+| CreatorId     | varchar(26)  | YES  |     | NULL    |       |
++---------------+--------------+------+-----+---------+-------+
+
+
+mysql> describe ChannelMembers;
++--------------+-------------+------+-----+---------+-------+
+| Field        | Type        | Null | Key | Default | Extra |
++--------------+-------------+------+-----+---------+-------+
+| ChannelId    | varchar(26) | NO   | PRI | NULL    |       |
+| UserId       | varchar(26) | NO   | PRI | NULL    |       |
+| Roles        | varchar(64) | YES  |     | NULL    |       |
+| LastViewedAt | bigint(20)  | YES  |     | NULL    |       |
+| MsgCount     | bigint(20)  | YES  |     | NULL    |       |
+| MentionCount | bigint(20)  | YES  |     | NULL    |       |
+| NotifyProps  | text        | YES  |     | NULL    |       |
+| LastUpdateAt | bigint(20)  | YES  |     | NULL    |       |
++--------------+-------------+------+-----+---------+-------+
+8 rows in set (0.00 sec)
+
+
+mysql> describe Teams;
++-----------------+--------------+------+-----+---------+-------+
+| Field           | Type         | Null | Key | Default | Extra |
++-----------------+--------------+------+-----+---------+-------+
+| Id              | varchar(26)  | NO   | PRI | NULL    |       |
+| CreateAt        | bigint(20)   | YES  |     | NULL    |       |
+| UpdateAt        | bigint(20)   | YES  |     | NULL    |       |
+| DeleteAt        | bigint(20)   | YES  |     | NULL    |       |
+| DisplayName     | varchar(64)  | YES  |     | NULL    |       |
+| Name            | varchar(64)  | YES  | UNI | NULL    |       |
+| Email           | varchar(128) | YES  |     | NULL    |       |
+| Type            | varchar(255) | YES  |     | NULL    |       |
+| CompanyName     | varchar(64)  | YES  |     | NULL    |       |
+| AllowedDomains  | text         | YES  |     | NULL    |       |
+| InviteId        | varchar(32)  | YES  | MUL | NULL    |       |
+| AllowOpenInvite | tinyint(1)   | YES  |     | NULL    |       |
++-----------------+--------------+------+-----+---------+-------+
+
+mysql> describe TeamMembers;
++----------+-------------+------+-----+---------+-------+
+| Field    | Type        | Null | Key | Default | Extra |
++----------+-------------+------+-----+---------+-------+
+| TeamId   | varchar(26) | NO   | PRI | NULL    |       |
+| UserId   | varchar(26) | NO   | PRI | NULL    |       |
+| Roles    | varchar(64) | YES  |     | NULL    |       |
+| DeleteAt | bigint(20)  | YES  |     | NULL    |       |
++----------+-------------+------+-----+---------+-------+
+4 rows in set (0.00 sec)
+
+
+mysql> describe Users;
++--------------------+--------------+------+-----+---------+-------+
+| Field              | Type         | Null | Key | Default | Extra |
++--------------------+--------------+------+-----+---------+-------+
+| Id                 | varchar(26)  | NO   | PRI | NULL    |       |
+| CreateAt           | bigint(20)   | YES  |     | NULL    |       |
+| UpdateAt           | bigint(20)   | YES  |     | NULL    |       |
+| DeleteAt           | bigint(20)   | YES  |     | NULL    |       |
+| Username           | varchar(64)  | YES  | UNI | NULL    |       |
+| Password           | varchar(128) | YES  |     | NULL    |       |
+| AuthData           | varchar(128) | YES  | UNI | NULL    |       |
+| AuthService        | varchar(32)  | YES  |     | NULL    |       |
+| Email              | varchar(128) | YES  | UNI | NULL    |       |
+| EmailVerified      | tinyint(1)   | YES  |     | NULL    |       |
+| Nickname           | varchar(64)  | YES  |     | NULL    |       |
+| FirstName          | varchar(64)  | YES  |     | NULL    |       |
+| LastName           | varchar(64)  | YES  |     | NULL    |       |
+| Roles              | varchar(64)  | YES  |     | NULL    |       |
+| AllowMarketing     | tinyint(1)   | YES  |     | NULL    |       |
+| Props              | text         | YES  |     | NULL    |       |
+| NotifyProps        | text         | YES  |     | NULL    |       |
+| LastPasswordUpdate | bigint(20)   | YES  |     | NULL    |       |
+| LastPictureUpdate  | bigint(20)   | YES  |     | NULL    |       |
+| FailedAttempts     | int(11)      | YES  |     | NULL    |       |
+| Locale             | varchar(5)   | YES  |     | NULL    |       |
+| MfaActive          | tinyint(1)   | YES  |     | NULL    |       |
+| MfaSecret          | varchar(128) | YES  |     | NULL    |       |
++--------------------+--------------+------+-----+---------+-------+
+23 rows in set (0.00 sec)
+```
+
+## Data
+
+```sql
+mysql> select * from Channels;
++----------------------------+---------------+---------------+----------+----------------------------+------+-------------+--------------------------------------------------------+--------+---------+---------------+---------------+---------------+----------------------------+
+| Id                         | CreateAt      | UpdateAt      | DeleteAt | TeamId                     | Type | DisplayName | Name                                                   | Header | Purpose | LastPostAt    | TotalMsgCount | ExtraUpdateAt | CreatorId                  |
++----------------------------+---------------+---------------+----------+----------------------------+------+-------------+--------------------------------------------------------+--------+---------+---------------+---------------+---------------+----------------------------+
+| 1h3rs83b3bnwzn3xb1ow49rssy | 1474786289480 | 1474786289480 |        0 | chjgwwy9qbbsdcz4ry4a6fbsoy | O    | Town Square | town-square                                            |        |         | 1474786555810 |             2 | 1474786555808 |                            |
+| 1muwbod1hjrmzcr6iukhzqk4dc | 1474786289482 | 1474786289482 |        0 | chjgwwy9qbbsdcz4ry4a6fbsoy | O    | Off-Topic   | off-topic                                              |        |         | 1474786565693 |             2 | 1474786555815 |                            |
+| 3pocxn4za7rd58q6rzcycgerna | 1474786510558 | 1474786510558 |        0 | ehwmnuwmztrujxhtb65kpgq4sy | O    | Off-Topic   | off-topic                                              |        |         | 1474786524398 |             1 | 1474786510570 |                            |
+| f3j13bk4fi8qb8hh4mzgfbmmjc | 1474786769364 | 1474786769364 |        0 |                            | D    |             | abkob7omkjynfqfsc8shkbwkfo__u7s1oanujifg8ywuirnmhk8r3a |        |         | 1474786777955 |             1 | 1474786769364 |                            |
+| g46cuaw3u781bjfyowudtfso7y | 1474786510553 | 1474786510553 |        0 | ehwmnuwmztrujxhtb65kpgq4sy | O    | Town Square | town-square                                            |        |         | 1474786510566 |             0 | 1474786510565 |                            |
+| wi87emmg6786inbhgxzbnfgj3r | 1474786711899 | 1474786711899 |        0 | chjgwwy9qbbsdcz4ry4a6fbsoy | P    | XXX         | XXX                                                    |        |         | 1474786723310 |             1 | 1474786719125 | abkob7omkjynfqfsc8shkbwkfo |
++----------------------------+---------------+---------------+----------+----------------------------+------+-------------+--------------------------------------------------------+--------+---------+---------------+---------------+---------------+----------------------------+
+
+mysql> select * from Posts;
++----------------------------+---------------+---------------+----------+----------------------------+----------------------------+----------------------------+----------------------------+------------+---------------------------------------+-------------------+-------+----------+-----------+
+| Id                         | CreateAt      | UpdateAt      | DeleteAt | UserId                     | ChannelId                  | RootId                     | ParentId                   | OriginalId | Message                               | Type              | Props | Hashtags | Filenames |
++----------------------------+---------------+---------------+----------+----------------------------+----------------------------+----------------------------+----------------------------+------------+---------------------------------------+-------------------+-------+----------+-----------+
+| 1mmp5u8t8fgffkkysrgcddj9oh | 1474786565691 | 1474786565691 |        0 | u7s1oanujifg8ywuirnmhk8r3a | 1muwbod1hjrmzcr6iukhzqk4dc |                            |                            |            | -                                     |                   | {}    |          | []        |
+| 37wm6h78j7fh8dtq6p66uohjyy | 1474786329527 | 1474786329527 |        0 | abkob7omkjynfqfsc8shkbwkfo | 1h3rs83b3bnwzn3xb1ow49rssy | 811nz3334pbg78338ebbjfd8yy | 811nz3334pbg78338ebbjfd8yy |            | -                                     |                   | {}    |          | []        |
+| 5ed5ghxp33gbik9denmqg17w6y | 1474786510566 | 1474786510566 |        0 | u7s1oanujifg8ywuirnmhk8r3a | g46cuaw3u781bjfyowudtfso7y |                            |                            |            | hithere has joined the channel.       | system_join_leave | {}    |          | []        |
+| 811nz3334pbg78338ebbjfd8yy | 1474786320981 | 1474786329530 |        0 | abkob7omkjynfqfsc8shkbwkfo | 1h3rs83b3bnwzn3xb1ow49rssy |                            |                            |            | Hello                                 |                   | {}    |          | []        |
+| anr5wpaoa3yuibqgmruiw98a5o | 1474786555809 | 1474786555809 |        0 | u7s1oanujifg8ywuirnmhk8r3a | 1h3rs83b3bnwzn3xb1ow49rssy |                            |                            |            | hithere has joined the channel.       | system_join_leave | {}    |          | []        |
+| ct7wcfon87rnxkna313esudzhw | 1474786719128 | 1474786719128 |        0 | abkob7omkjynfqfsc8shkbwkfo | wi87emmg6786inbhgxzbnfgj3r |                            |                            |            | hithere added to the channel by hello | system_add_remove | {}    |          | []        |
+| dmt68m5b3fd9zr16g9ci4mpdqc | 1474786777954 | 1474786777954 |        0 | abkob7omkjynfqfsc8shkbwkfo | f3j13bk4fi8qb8hh4mzgfbmmjc |                            |                            |            | -                                     |                   | {}    |          | []        |
+| kss8nustk3nqjnnf9dsrw914my | 1474786311271 | 1474786311271 |        0 | abkob7omkjynfqfsc8shkbwkfo | 1muwbod1hjrmzcr6iukhzqk4dc |                            |                            |            | Hello!                                |                   | {}    |          | []        |
+| maa1ttmi9pri8xwb9jekyci3hw | 1474786723309 | 1474786723309 |        0 | abkob7omkjynfqfsc8shkbwkfo | wi87emmg6786inbhgxzbnfgj3r |                            |                            |            | WTF                                   |                   | {}    |          | []        |
+| soizm5ey3ig3bqkkygxjngodya | 1474786289489 | 1474786289489 |        0 | abkob7omkjynfqfsc8shkbwkfo | 1h3rs83b3bnwzn3xb1ow49rssy |                            |                            |            | hello has joined the channel.         | system_join_leave | {}    |          | []        |
+| yj8aayxz4ir38m9r6b97cxbgco | 1474786524397 | 1474786524397 |        0 | u7s1oanujifg8ywuirnmhk8r3a | 3pocxn4za7rd58q6rzcycgerna |                            |                            |            | Jebus                                 |                   | {}    |          | []        |
++----------------------------+---------------+---------------+----------+----------------------------+----------------------------+----------------------------+----------------------------+------------+---------------------------------------+-------------------+-------+----------+-----------+
+11 rows in set (0.00 sec)
+```
+
+## Notes
+
+- There are 3 types of channels: open, private groups, direct messages
+- Direct messages have no team members. The channel name contains the members, e.g., "user_1__user_2".
+- Search uses database's full-text search by default.
+- Reads are performed on a read-only slave for high-availability: s.GetReplica().Select(&posts, "SELECT * FROM Posts")
+- Writes are performed on the master: s.GetMaster().Exec("Update Channels SET DeleteAt
+- Unread count is calculated using SQL and the cached values (channel.TotalMsgCount - channel_member.MsgCount):
+```sql
+-- unread count for user
+SELECT
+  SUM(CASE
+    WHEN c.Type = 'D' THEN (c.TotalMsgCount - cm.MsgCount)
+    ELSE cm.MentionCount
+  END)
+FROM Channels c
+INNER JOIN ChannelMembers cm
+  ON cm.ChannelId = c.Id
+  AND cm.UserId = :UserId
+  
+-- unread count for user and channel
+SELECT
+  SUM(CASE
+    WHEN c.Type = 'D' THEN (c.TotalMsgCount - cm.MsgCount)
+    ELSE cm.MentionCount
+  END)
+FROM Channels c
+INNER JOIN ChannelMembers cm
+  ON c.Id = :ChannelId
+  AND cm.ChannelId = :ChannelId
+  AND cm.UserId = :UserId
+```
+- Unread count is updated, e.g., when a channel is viewed. This involves storing the "last viewed" timestamp:
+
+```sql
+-- set last viewed at
+UPDATE ChannelMembers
+SET MentionCount = 0,
+    MsgCount = Channels.TotalMsgCount - (SELECT
+      COUNT(*)
+    FROM Posts
+    WHERE ChannelId = :ChannelId
+    AND CreateAt > :NewLastViewedAt),
+    LastViewedAt = :NewLastViewedAt
+FROM Channels
+WHERE Channels.Id = ChannelMembers.ChannelId
+AND UserId = :UserId
+AND ChannelId = :ChannelId
+
+-- update last viewed at (new post, edit post, mark channel unread, etc)
+UPDATE ChannelMembers
+SET MentionCount = 0,
+    MsgCount = Channels.TotalMsgCount,
+    LastViewedAt = Channels.LastPostAt,
+    LastUpdateAt = Channels.LastPostAt
+FROM Channels
+WHERE Channels.Id = ChannelMembers.ChannelId
+AND UserId = :UserId
+AND ChannelId = :ChannelId
+```
+
+## TODO
+
+- Cassandra example: https://blog.discordapp.com/how-discord-stores-billions-of-messages-7fa6ec7ee4c7#.34hryyxvz

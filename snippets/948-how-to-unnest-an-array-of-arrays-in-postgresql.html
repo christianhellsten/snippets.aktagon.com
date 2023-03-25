@@ -2,23 +2,53 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title></title>
+    <title>How to unnest an array of arrays in PostgreSQL</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,900;1,900&amp;display=swap" rel="stylesheet">
     <link href=" https://cdn.jsdelivr.net/npm/destyle.css@4.0.0/destyle.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
     <header class="flex">
-        <h1 class="fadeout"></h1>
+        <h1 class="fadeout">How to unnest an array of arrays in PostgreSQL</h1>
     </header>
     <main>
         <section class="flex">
             <div class="flex-item flex-100">
-                <div class="code"></div>
+                <div class="code">If you try to use unnest with array_agg you will get the following error:
+
+```sql
+SELECT array_agg(unnest(ids)) FROM (
+  SELECT
+    month, array_agg(id) as ids
+  FROM x
+  GROUP BY month
+);
+ERROR:  0A000: aggregate function calls cannot contain set-returning function calls
+LINE 14:   array_agg(unnest(ids)) AS ids,
+                     ^
+HINT:  You might be able to move the set-returning function into a LATERAL FROM item.
+```
+
+You can use jsonb_agg and jsonb_array_elements_text to flatten or unnest an array of arrays in PostgreSQL:
+
+```sql
+SELECT
+  jsonb_array_elements_text(jsonb_agg(array_of_arrays))
+FROM
+  x;
+```
+
+But multiple rows will be returned.
+
+For other solutions, see:
+
+https://stackoverflow.com/a/8142998
+
+https://wiki.postgresql.org/wiki/Unnest_multidimensional_array
+</div>
             </div>
         </section>
     </main>
@@ -43,4 +73,3 @@
     </script>
 </body>
 </html>
-

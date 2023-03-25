@@ -2,23 +2,54 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title></title>
+    <title>bcrypt example in Golang</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,900;1,900&amp;display=swap" rel="stylesheet">
     <link href=" https://cdn.jsdelivr.net/npm/destyle.css@4.0.0/destyle.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
     <header class="flex">
-        <h1 class="fadeout"></h1>
+        <h1 class="fadeout">bcrypt example in Golang</h1>
     </header>
     <main>
         <section class="flex">
             <div class="flex-item flex-100">
-                <div class="code"></div>
+                <div class="code">```go
+package main
+
+import (
+	"golang.org/x/crypto/bcrypt"
+	"log"
+	"os"
+)
+
+// NOTE: You need to escape the dollar signs in the hash with \
+// HASH="xxx" PASSWORD=xxx go run main.go
+func main() {
+	hash, ok := os.LookupEnv("HASH")
+	if !ok {
+		log.Fatal("The HASH environment variable is not set")
+	}
+	password, ok := os.LookupEnv("PASSWORD")
+	if !ok {
+		log.Fatal("The PASSWORD environment variable is not set")
+	}
+	if isMatch(password, hash) {
+		log.Printf("Match '%s' == '%s'", hash, password)
+	} else {
+		log.Printf("Mismatch '%s' != '%s'", hash, password)
+	}
+}
+
+func isMatch(password string, hash string) bool {
+	err := bcrypt.CompareHashAndPassword([]byte(hash), []byte(password))
+	return err == nil
+}
+```
+</div>
             </div>
         </section>
     </main>
@@ -43,4 +74,3 @@
     </script>
 </body>
 </html>
-

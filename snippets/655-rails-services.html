@@ -2,23 +2,92 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title></title>
+    <title>Rails Services</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,900;1,900&amp;display=swap" rel="stylesheet">
     <link href=" https://cdn.jsdelivr.net/npm/destyle.css@4.0.0/destyle.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
     <header class="flex">
-        <h1 class="fadeout"></h1>
+        <h1 class="fadeout">Rails Services</h1>
     </header>
     <main>
         <section class="flex">
             <div class="flex-item flex-100">
-                <div class="code"></div>
+                <div class="code">Put your business logic in a service layer, not in your controllers, helpers, models, or anywhere else.
+
+**app/services/service.rb**:
+
+
+```ruby
+#
+# Base service.
+#
+class Service
+  def self.call(*args)
+    new(*args).call
+  end
+end
+```
+    
+
+**app/services/create\_report.rb**:
+
+
+```ruby
+#
+# Create order user story.
+#
+class CreateOrder < Service
+  def initialize(user, product)
+    @user = user
+    @product = product
+    validate
+  end
+
+  def call
+    Order.transaction do
+      ...
+    end
+  end
+
+  def validate
+    ...
+  end
+end
+```
+    
+
+Usage:
+
+
+```ruby
+class OrdersController # or OrderJob
+  def create
+    ...
+    @order = CreateOrder.call(user, product)
+    ...
+  end
+end
+```
+    
+
+Naming conventions:
+\* app/services/verb\_subject.rb
+\* class VerbSubject
+\* app/services/namespace/verb\_subject.rb
+\* class Namespace::VerbSubject
+
+Benefits:
+\* maintainability
+\* readability
+\* testability
+\* etc
+
+</div>
             </div>
         </section>
     </main>
@@ -43,4 +112,3 @@
     </script>
 </body>
 </html>
-

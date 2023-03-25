@@ -2,23 +2,58 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title></title>
+    <title>Selecting the "top n" or "n latest" rows by group in Postgres</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,900;1,900&amp;display=swap" rel="stylesheet">
     <link href=" https://cdn.jsdelivr.net/npm/destyle.css@4.0.0/destyle.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
     <header class="flex">
-        <h1 class="fadeout"></h1>
+        <h1 class="fadeout">Selecting the "top n" or "n latest" rows by group in Postgres</h1>
     </header>
     <main>
         <section class="flex">
             <div class="flex-item flex-100">
-                <div class="code"></div>
+                <div class="code">This SQL query selects the top 10 transactions for each user:
+
+-   partition the transactions by user_id
+-   order the transactions in each partition by the column created_at
+-   select only first row, i.e. the latest
+
+```sql
+WITH latest_customer_transactions AS (
+  SELECT
+    *, row_number() OVER (PARTITION BY user_id ORDER BY created_at desc) AS rownum
+  FROM
+    transactions
+)
+SELECT
+  id, user_id
+FROM
+  latest_user_transactions
+WHERE
+  rownum <= 10;
+```
+
+Note that if you simply want the first record per group it's probably best to use DISTINCT ON as described here:
+https://www.periscopedata.com/blog/first-row-per-group-5x-faster
+
+```sql
+SELECT DISTINCT ON (user_id) *
+FROM jobs
+ORDER BY user_id,
+         priority DESC,
+         created_at
+```
+
+    
+Note the differences between RANK, ROW_NUMBER, and DENSE_RANK:
+http://blog.jooq.org/2014/08/12/the-difference-between-row_number-rank-and-dense_rank/
+
+</div>
             </div>
         </section>
     </main>
@@ -43,4 +78,3 @@
     </script>
 </body>
 </html>
-

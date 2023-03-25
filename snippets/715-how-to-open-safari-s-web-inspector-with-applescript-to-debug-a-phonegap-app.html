@@ -2,23 +2,64 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title></title>
+    <title>How to Open Safari's Web Inspector With Applescript to Debug a Phonegap App</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,900;1,900&amp;display=swap" rel="stylesheet">
     <link href=" https://cdn.jsdelivr.net/npm/destyle.css@4.0.0/destyle.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
     <header class="flex">
-        <h1 class="fadeout"></h1>
+        <h1 class="fadeout">How to Open Safari's Web Inspector With Applescript to Debug a Phonegap App</h1>
     </header>
     <main>
         <section class="flex">
             <div class="flex-item flex-100">
-                <div class="code"></div>
+                <div class="code">This trick will save years of your life. This applescript will make Safari's Web Inspector connect to a Phonegap application running on my iPhone that was started through XCode:
+
+
+```applescript
+#!/usr/bin/osascript
+
+set device_name to "Christian Hellsten iPhone"
+tell application "Safari"
+	activate
+	tell application "System Events"
+		try
+			click menu item "index.html" of menu device_name of menu item device_name of menu "Utvecklare" of menu bar item "Utvecklare" of menu bar 1 of application process "Safari"
+		end try
+	end tell
+end tell
+```
+    
+
+Save the file, as e.g. open-web-inspector.applescript, then execute it:
+
+
+```applescript
+chmod +x open-web-inspector.applescript
+./open-web-inspector.applescript
+```
+    
+
+For English version, change "Utvecklare" to "Develop".
+
+Troubleshooting
+---------------
+
+1.  [Error -1719](http://stackoverflow.com/questions/10140334/applescript-system-events-error-access-for-assistive-devices-is-disabled) most likely means you need to enable assistive access for iTerm or whatever app you're running the script from.
+
+<!-- -->
+
+1.  Error -10810 means "bad luck" in Applescript. Try restarting the computer.
+
+If all else fails, run the script using the Applescript Editor. Also see, [this script](https://gist.github.com/dts/5771273).
+
+Tested on OSX Yosemite.
+
+</div>
             </div>
         </section>
     </main>
@@ -43,4 +84,3 @@
     </script>
 </body>
 </html>
-

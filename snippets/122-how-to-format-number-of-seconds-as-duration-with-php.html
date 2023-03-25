@@ -2,23 +2,50 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title></title>
+    <title>How to format number of seconds as duration with PHP</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,900;1,900&amp;display=swap" rel="stylesheet">
     <link href=" https://cdn.jsdelivr.net/npm/destyle.css@4.0.0/destyle.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
     <header class="flex">
-        <h1 class="fadeout"></h1>
+        <h1 class="fadeout">How to format number of seconds as duration with PHP</h1>
     </header>
     <main>
         <section class="flex">
             <div class="flex-item flex-100">
-                <div class="code"></div>
+                <div class="code">A very sophisticated algorithm that will display the length of, for example, a video as 12:01:30.
+
+
+```php
+function duration($seconds_count)
+	{
+		$delimiter  = ':';
+		$seconds = $seconds_count % 60;
+		$minutes = floor($seconds_count/60);
+		$hours   = floor($seconds_count/3600);
+
+		$seconds = str_pad($seconds, 2, "0", STR_PAD_LEFT);
+		$minutes = str_pad($minutes, 2, "0", STR_PAD_LEFT).$delimiter;
+
+		if($hours > 0)
+		{
+			$hours = str_pad($hours, 2, "0", STR_PAD_LEFT).$delimiter;
+		}
+		else
+		{
+			$hours = '';
+		}
+
+		return "$hours$minutes$seconds";
+	}
+```
+    
+
+</div>
             </div>
         </section>
     </main>
@@ -43,4 +70,3 @@
     </script>
 </body>
 </html>
-

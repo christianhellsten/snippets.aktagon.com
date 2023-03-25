@@ -2,23 +2,62 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title></title>
+    <title>Sanitizing XML with Go's UnmarshalXML</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,900;1,900&amp;display=swap" rel="stylesheet">
     <link href=" https://cdn.jsdelivr.net/npm/destyle.css@4.0.0/destyle.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
     <header class="flex">
-        <h1 class="fadeout"></h1>
+        <h1 class="fadeout">Sanitizing XML with Go's UnmarshalXML</h1>
     </header>
     <main>
         <section class="flex">
             <div class="flex-item flex-100">
-                <div class="code"></div>
+                <div class="code">Use a custom type to avoid this error when unmarshalling XML with Go:
+
+
+```go
+strconv.ParseInt: parsing "86148865.00": invalid syntax
+```
+    
+
+Example:
+
+
+```go
+import (
+    "encoding/xml"
+    "strconv"
+)
+
+type DogHouse struct {
+    //Count int xml:"dog_house>count" << this code will fail with "invalid syntax"
+    Count sanitizedInt xml:"dog_house>count"
+}
+
+type sanitizedInt int
+
+func (si *sanitizedInt) UnmarshalXML(d *xml.Decoder, start xml.StartElement) error {
+    var value string
+    // Read tag content into value
+    d.DecodeElement(&value, &start)
+    // Remove "crap" and convert to int64
+    i, err := strconv.ParseInt(strings.Replace(value, "crap", "", -1), 0, 64)
+    if err != nil {
+        return err
+    }
+    // Cast int64 to sanitizedInt
+    *si = (sanitizedInt)(i)
+    return nil
+}
+```
+    
+
+</div>
             </div>
         </section>
     </main>
@@ -43,4 +82,3 @@
     </script>
 </body>
 </html>
-

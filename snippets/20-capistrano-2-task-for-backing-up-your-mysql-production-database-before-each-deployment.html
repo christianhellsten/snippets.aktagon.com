@@ -2,23 +2,57 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title></title>
+    <title>Capistrano 2 task for backing up your MySQL production database before each deployment</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,900;1,900&amp;display=swap" rel="stylesheet">
     <link href=" https://cdn.jsdelivr.net/npm/destyle.css@4.0.0/destyle.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
     <header class="flex">
-        <h1 class="fadeout"></h1>
+        <h1 class="fadeout">Capistrano 2 task for backing up your MySQL production database before each deployment</h1>
     </header>
     <main>
         <section class="flex">
             <div class="flex-item flex-100">
-                <div class="code"></div>
+                <div class="code">This Capistrano task connects to your production database and dumps the contents to a file. The file is compressed and put in a directory specified with **set :backup\_dir, "\#{deploy\_to}/backups"**. This is a slight modification of <http://pastie.caboo.se/42574>. All credit to [court3nay](http://pastie.caboo.se/author/court3nay).
+
+
+```ruby
+task :backup, :roles => :db, :only => { :primary => true } do
+  filename = "#{backup_dir}/#{application}.dump.#{Time.now.to_f}.sql.bz2"
+  text = capture "cat #{deploy_to}/current/config/database.yml"
+  yaml = YAML::load(text)
+
+  on_rollback { run "rm #{filename}" }
+  run "mysqldump -u #{yaml['production']['username']} -p #{yaml['production']['database']} | bzip2 -c > #{filename}" do |ch, stream, out|
+    ch.send_data "#{yaml['production']['password']}\n" if out =~ /^Enter password:/
+  end
+end
+```
+    
+
+To automatically backup your data before you deploy a new version add this to **config/deploy.rb**:
+
+
+```ruby
+task :before_deploy do
+    backup
+  end
+```
+    
+
+To restore the backup run the following command:
+
+
+```ruby
+mysql database_name -uroot < filename.sql
+```
+    
+
+</div>
             </div>
         </section>
     </main>
@@ -43,4 +77,3 @@
     </script>
 </body>
 </html>
-

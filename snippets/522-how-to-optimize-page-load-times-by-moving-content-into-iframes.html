@@ -2,23 +2,68 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title></title>
+    <title>How to optimize page load times by moving content into iframes</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,900;1,900&amp;display=swap" rel="stylesheet">
     <link href=" https://cdn.jsdelivr.net/npm/destyle.css@4.0.0/destyle.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
     <header class="flex">
-        <h1 class="fadeout"></h1>
+        <h1 class="fadeout">How to optimize page load times by moving content into iframes</h1>
     </header>
     <main>
         <section class="flex">
             <div class="flex-item flex-100">
-                <div class="code"></div>
+                <div class="code">Optimizing page load times can be done by moving external content, such as banners and ads, into iframes. Iframes, however, make your page load slower which is why it's recommended to create the iframes dynamically.
+
+With jQuery we could do this:
+
+
+```javascript
+function addBanner() {
+  // iframe content affects page load time...
+  $('#banners').html("<iframe frameborder="0" height='120px' scrolling='no' src='/banners.html' width='100%'></iframe>");
+}
+```
+    
+
+But as I found out this doesn't help page load times much as the main page's onload event is triggered after the iframe onload event.
+
+The solution is an [optimization technique described by Aaron Peters](http://www.aaronpeters.nl/blog/iframe-loading-techniques-performance) to create the iframe with plain JavaScript:
+
+
+```javascript
+function addBanner() {
+  // iframe content does not affect page load time...
+  var i = document.createElement("iframe");
+  i.src = "/banners.html";
+  i.scrolling = "auto";
+  i.frameborder = "0";
+  i.width = "100%";
+  i.height = "120px";
+  document.getElementById("banners").appendChild(i);
+}
+```
+    
+
+Now all you have to do is call the addBanner in the onload event of the main page:
+
+
+```javascript
+<script>
+$(document).ready(function() {
+  addBanner();
+}
+</script>
+```
+    
+
+This technique shaved ~2.5 seconds of page load times. Still, this might not be the optimal way to load iframes on your page, so check out the different [optimization techniques on Aaron Peters blog](http://www.aaronpeters.nl/blog/iframe-loading-techniques-performance).
+
+</div>
             </div>
         </section>
     </main>
@@ -43,4 +88,3 @@
     </script>
 </body>
 </html>
-

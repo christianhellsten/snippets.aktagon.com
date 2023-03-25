@@ -2,23 +2,87 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title></title>
+    <title>How to Use Rails I18n With JavaScript/CoffeeScript</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,900;1,900&amp;display=swap" rel="stylesheet">
     <link href=" https://cdn.jsdelivr.net/npm/destyle.css@4.0.0/destyle.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
     <header class="flex">
-        <h1 class="fadeout"></h1>
+        <h1 class="fadeout">How to Use Rails I18n With JavaScript/CoffeeScript</h1>
     </header>
     <main>
         <section class="flex">
             <div class="flex-item flex-100">
-                <div class="code"></div>
+                <div class="code">Option 1: Include all translations
+----------------------------------
+
+Your app/assets/javascripts/i18n.js.coffee.erb file:
+
+
+```javascript
+root = exports ? this
+I18n = <%= I18n.backend.send(:translations).to_json.html_safe %>
+$ ->
+  root.I18n = I18n[$('body').data('lang')]
+```
+    
+
+Option 2: Include a limited set of translations
+-----------------------------------------------
+
+Your app/assets/javascripts/i18n.js.coffee.erb file:
+
+
+```javascript
+root = exports ? this
+
+I18n =
+<%
+I18n.available_locales.each do |lang|
+  I18n.with_locale lang do
+%>
+  <%= lang %>:
+    text: "<%= I18n.t("js.text") %>"
+<%
+  end
+end
+%>
+
+$ ->
+  root.I18n = I18n[$('body').data('lang')]
+```
+    
+
+Include the Selected Locale in the Rails Layout
+-----------------------------------------------
+
+The view defines the user's selected locale:
+
+
+```javascript
+<body data-lang="<%= I18n.locale %>">
+...
+</body>
+```
+    
+
+How to Translate JavaScript Strings
+-----------------------------------
+
+We can now translate strings in a JavaScript file:
+
+
+```javascript
+# remember to use $(document).ready...
+alert(I18n.text)
+```
+    
+
+</div>
             </div>
         </section>
     </main>
@@ -43,4 +107,3 @@
     </script>
 </body>
 </html>
-

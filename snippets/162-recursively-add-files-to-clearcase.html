@@ -2,23 +2,50 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title></title>
+    <title>Recursively add files to ClearCase</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,900;1,900&amp;display=swap" rel="stylesheet">
     <link href=" https://cdn.jsdelivr.net/npm/destyle.css@4.0.0/destyle.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
     <header class="flex">
-        <h1 class="fadeout"></h1>
+        <h1 class="fadeout">Recursively add files to ClearCase</h1>
     </header>
     <main>
         <section class="flex">
             <div class="flex-item flex-100">
-                <div class="code"></div>
+                <div class="code">This script adds all files in the current directory to ClearCase.
+
+Save the following script as add\_recursively.rb in the directory you want to add to ClearCase:
+
+
+```ruby
+%x{cleartool ls -view_only -r -s . > view_private_files.txt}
+
+lines = File.open('view_private_files.txt').readlines.collect{|line| %Q{"#{line.chomp}"} }
+
+# Work around command line length limit in Windows
+while lines.size > 0
+  %x{cleardlg /addtosrc #{lines.slice!(0..100).join(' ')}}
+end
+```
+    
+
+Next open a command line window and execute the script:
+
+
+```ruby
+cd clearcase_vob
+ruby add_recursively.rb
+```
+    
+
+ClearCase sucks, use Mercurial or git instead...
+
+</div>
             </div>
         </section>
     </main>
@@ -43,4 +70,3 @@
     </script>
 </body>
 </html>
-

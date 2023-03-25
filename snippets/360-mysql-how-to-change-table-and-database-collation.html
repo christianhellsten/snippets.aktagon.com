@@ -2,23 +2,81 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title></title>
+    <title>MySQL: How to change table and database collation</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,900;1,900&amp;display=swap" rel="stylesheet">
     <link href=" https://cdn.jsdelivr.net/npm/destyle.css@4.0.0/destyle.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
     <header class="flex">
-        <h1 class="fadeout"></h1>
+        <h1 class="fadeout">MySQL: How to change table and database collation</h1>
     </header>
     <main>
         <section class="flex">
             <div class="flex-item flex-100">
-                <div class="code"></div>
+                <div class="code">Listing table information including collation
+---------------------------------------------
+
+
+```sql
+show table status;
+```
+    
+
+To show all table information use this command:
+
+
+```sql
+show full columns from xxx;
+```
+    
+
+Convert existing columns in a table to a specific collation
+-----------------------------------------------------------
+
+
+```sql
+alter table brands convert to character set utf8 collate utf8_swedish_ci;
+```
+    
+
+This command converts all existing columns to the specified collation.
+
+Change table collation
+----------------------
+
+
+```sql
+alter table posts collate utf8_swedish_ci;
+```
+    
+
+Note that this doesn't change collation of existing columns.
+
+Setting the collation manually
+------------------------------
+
+
+```sql
+set session collation_database=utf8_swedish_ci;
+set session collation_connection=utf8_swedish_ci;
+```
+    
+
+Common collation values
+-----------------------
+
+
+```sql
+utf8_swedish_ci
+utf8_general_ci
+```
+    
+
+</div>
             </div>
         </section>
     </main>
@@ -43,4 +101,3 @@
     </script>
 </body>
 </html>
-

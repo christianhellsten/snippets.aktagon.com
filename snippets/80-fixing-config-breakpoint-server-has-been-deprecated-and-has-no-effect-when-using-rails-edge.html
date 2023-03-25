@@ -2,23 +2,65 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title></title>
+    <title>Fixing "config.breakpoint_server has been deprecated and has no effect" when using Rails Edge</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,900;1,900&amp;display=swap" rel="stylesheet">
     <link href=" https://cdn.jsdelivr.net/npm/destyle.css@4.0.0/destyle.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
     <header class="flex">
-        <h1 class="fadeout"></h1>
+        <h1 class="fadeout">Fixing "config.breakpoint_server has been deprecated and has no effect" when using Rails Edge</h1>
     </header>
     <main>
         <section class="flex">
             <div class="flex-item flex-100">
-                <div class="code"></div>
+                <div class="code">You might get this error if you're using Rails Edge: **config.breakpoint\_server has been deprecated and has no effect**:
+
+To fix the error we need to remove the following from **config/environments/development.rb**:
+
+
+```ruby
+config.breakpoint_server = true
+```
+    
+
+Next install ruby-debug:
+
+
+```ruby
+gem install ruby-debug
+```
+    
+
+Then add this to the end of **config/environments/development.rb**:
+
+
+```ruby
+require 'ruby-debug'
+```
+    
+
+Next, start your server, and the error should be gone...
+
+To debug your code just add a call to **debugger**:
+
+
+```ruby
+class MySillySpace ...
+  def create
+    debugger # add this line
+  end
+```
+    
+
+Now when you access the URL with your browser you'll have access to the debugger from the console window.
+
+To learn how to use ruby-debug, read [this tutorial](http://www.datanoise.com/articles/2006/07/12/tutorial-on-ruby-debug) written by the ruby-debug author.
+
+</div>
             </div>
         </section>
     </main>
@@ -43,4 +85,3 @@
     </script>
 </body>
 </html>
-

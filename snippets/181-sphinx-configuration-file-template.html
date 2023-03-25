@@ -2,23 +2,69 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title></title>
+    <title>Sphinx configuration file template</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,900;1,900&amp;display=swap" rel="stylesheet">
     <link href=" https://cdn.jsdelivr.net/npm/destyle.css@4.0.0/destyle.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
     <header class="flex">
-        <h1 class="fadeout"></h1>
+        <h1 class="fadeout">Sphinx configuration file template</h1>
     </header>
     <main>
         <section class="flex">
             <div class="flex-item flex-100">
-                <div class="code"></div>
+                <div class="code">```
+source feed_items
+{
+        type                    = mysql
+
+        sql_host                = 127.0.0.1
+        sql_user                = root
+        sql_pass                =
+        sql_db                  = xxx_production
+        sql_port                = 3306  # optional, default is 3306
+        sql_sock                = /var/run/mysqld/mysqld.sock
+
+        sql_query_pre           = SET NAMES utf8
+        #sql_query_pre          = SET SESSION query_cache_type=OFF
+
+	# Unique ID should be first column
+        sql_query               = \
+                SELECT i.id, i.title, i.link, f.link, f.title FROM feed_items i LEFT JOIN feeds f ON f.id = i.feed_id
+}
+
+
+index feed_items
+{
+        source                  = feed_items
+        path                    = /var/sphinx/xxx
+        morphology              = libstemmer_sv
+        charset_type            = utf-8
+}
+
+
+indexer
+{
+        mem_limit               = 32M
+}
+
+searchd
+{
+        address                 = 127.0.0.1
+        port                    = 3312
+        log                     = /var/log/sphinx/searchd.log
+        query_log               = /var/log/sphinx/query.log
+        pid_file                = /var/log/searchd.pid
+        max_matches             = 1000
+}
+```
+    
+
+</div>
             </div>
         </section>
     </main>
@@ -43,4 +89,3 @@
     </script>
 </body>
 </html>
-

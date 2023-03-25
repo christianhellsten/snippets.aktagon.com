@@ -2,23 +2,50 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title></title>
+    <title>Converting WMA files to MP3 on Linux</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,900;1,900&amp;display=swap" rel="stylesheet">
     <link href=" https://cdn.jsdelivr.net/npm/destyle.css@4.0.0/destyle.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
     <header class="flex">
-        <h1 class="fadeout"></h1>
+        <h1 class="fadeout">Converting WMA files to MP3 on Linux</h1>
     </header>
     <main>
         <section class="flex">
             <div class="flex-item flex-100">
-                <div class="code"></div>
+                <div class="code">Use this to convert WMA files to MP3 in Linux.
+
+
+```bash
+#!/bin/bash
+# By Marko Haapala
+# converts wma to mp3 recursively. does not delete any static files, so 
+# cleanup and renaming is needed afterwards. 
+#
+# requirements:
+# lame    - http://lame.sourceforge.net/download.php
+# mplayer - apt-get install mplayer or http://www.mplayerhq.hu/design7/dload.html
+
+
+current_directory=$(pwd)
+wma_files=$(find "${current_directory}" -type f -iname "*.wma")
+# Need to change IFS or files with filenames containing spaces will not
+# be handled correctly by for loop
+IFS=$'\n' 
+for wma_file in ${wma_files}; do 
+	mplayer -vo null -vc dummy -af resample=44100 \
+	-ao pcm -ao pcm:waveheader "${wma_file}" && lame -m s \
+	audiodump.wav -o "${wma_file}".mp3
+	rm audiodump.wav
+done
+```
+    
+
+</div>
             </div>
         </section>
     </main>
@@ -43,4 +70,3 @@
     </script>
 </body>
 </html>
-

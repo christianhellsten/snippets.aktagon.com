@@ -2,23 +2,42 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title></title>
+    <title>Installing ImageMagick from sources and using xstow to handle the installation.</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,900;1,900&amp;display=swap" rel="stylesheet">
     <link href=" https://cdn.jsdelivr.net/npm/destyle.css@4.0.0/destyle.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
     <header class="flex">
-        <h1 class="fadeout"></h1>
+        <h1 class="fadeout">Installing ImageMagick from sources and using xstow to handle the installation.</h1>
     </header>
     <main>
         <section class="flex">
             <div class="flex-item flex-100">
-                <div class="code"></div>
+                <div class="code">I really hate installing software outside of the package manager, because that is not the way of a stable system. Xstow helps the agony those times that sourceball installations are necessary (e.g for new features). Here's how to install imagemagick with xstow. If you haven't installed xstow yet, then follow the relevant instructions in [this snippet](http://snippets.aktagon.com/snippets/188-Installing-git-without-getting-screwed-over-when-it-s-time-to-uninstall-upgrade-or-install-package-maintainer-s-version)
+
+
+```bash
+sudo apt-get install libmagick9-dev # needed for sane image support
+cd /tmp
+wget ftp://ftp.sunet.se/pub/multimedia/graphics/ImageMagick/ImageMagick-6.4.2-7.tar.bz2
+tar xjvf ImageMagick-6.4.2-7.tar.bz2
+sudo mv ImageMagick-6.4.2 /usr/src
+cd /usr/src
+sudo ln -s ImageMagick-6.4.2 imagemagick
+cd imagemagick
+./configure --prefix=/usr/local/stow/imagemagick
+make
+sudo make install
+cd /usr/local/stow
+sudo xstow imagemagick
+```
+    
+
+</div>
             </div>
         </section>
     </main>
@@ -43,4 +62,3 @@
     </script>
 </body>
 </html>
-

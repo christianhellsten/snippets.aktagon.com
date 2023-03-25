@@ -2,23 +2,105 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title></title>
+    <title>How to introduce Rubocop in your project</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,900;1,900&amp;display=swap" rel="stylesheet">
     <link href=" https://cdn.jsdelivr.net/npm/destyle.css@4.0.0/destyle.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
     <header class="flex">
-        <h1 class="fadeout"></h1>
+        <h1 class="fadeout">How to introduce Rubocop in your project</h1>
     </header>
     <main>
         <section class="flex">
             <div class="flex-item flex-100">
-                <div class="code"></div>
+                <div class="code">Installation
+------------
+
+Edit Gemfile:
+
+
+```ruby
+group :development do
+  gem 'rubocop' # Style guide checker
+  gem 'guard-rubocop' # Rubocop plugin for Guard
+end
+```
+    
+
+Install:
+
+
+```ruby
+$ bundle
+```
+    
+
+Usage
+-----
+
+Run Rubocop:
+
+
+```ruby
+$ rubocop --auto-gen-config
+```
+    
+
+Tweaking
+--------
+
+Edit .rubocop.yml:
+
+
+```ruby
+inherit_from: .rubocop_todo.yml
+```
+    
+
+Introduce new rules gradually in priority order by enabling and moving rules from .rubocop\_todo.yml to .rubocop.yml.
+
+You can also use the Ruby style-guide's rubocop configuration:
+<https://github.com/bbatsov/rubocop/blob/master/config/default.yml>
+
+Workflow integration
+--------------------
+
+Run:
+
+
+```ruby
+$ guard init rubocop
+```
+    
+
+Edit Guardfile:
+
+
+```ruby
+guard :rubocop, all_on_start: false, cli: ['--format', 'clang', '--rails'] do
+  watch(%r{.+\.rb$})
+  watch(%r{(?:.+/)?\.rubocop\.yml$}) { |m| File.dirname(m[0]) }
+end
+```
+    
+
+Editor Integration
+------------------
+
+Optionally, integrate Rubocop with your editor:
+\* [Textmate](https://github.com/mrdougal/textmate2-rubocop#installation)
+\* [Vim](https://github.com/ngmy/vim-rubocop)
+
+CI integration
+--------------
+
+See [How to introduce rubocop and integrate into Jenkins](https://speakerdeck.com/ma2gedev/how-to-introduce-rubocop-and-integrate-into-jenkins).
+
+</div>
             </div>
         </section>
     </main>
@@ -43,4 +125,3 @@
     </script>
 </body>
 </html>
-

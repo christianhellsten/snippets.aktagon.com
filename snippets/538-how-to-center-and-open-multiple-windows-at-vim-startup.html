@@ -2,23 +2,36 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title></title>
+    <title>How to center and open multiple windows at Vim startup</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,900;1,900&amp;display=swap" rel="stylesheet">
     <link href=" https://cdn.jsdelivr.net/npm/destyle.css@4.0.0/destyle.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
     <header class="flex">
-        <h1 class="fadeout"></h1>
+        <h1 class="fadeout">How to center and open multiple windows at Vim startup</h1>
     </header>
     <main>
         <section class="flex">
             <div class="flex-item flex-100">
-                <div class="code"></div>
+                <div class="code">For maximum productivity I like to split the Vim window into 3 viewports. The main viewport is to the left and two viewports to the right. I also like to maximize the Vim window. Put this in your ~/.vimrc configuration file to make Vim use this setup by default at startup:
+
+
+```
+set columns=180
+set lines=180
+
+:winpos 50 50 " Center window
+vsplit    " Split window vertically. e.g. 100vsplit
+wincmd l  " Move to right window
+split     " Split window horizontally
+```
+    
+
+</div>
             </div>
         </section>
     </main>
@@ -43,4 +56,3 @@
     </script>
 </body>
 </html>
-

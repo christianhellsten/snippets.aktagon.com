@@ -2,23 +2,62 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title></title>
+    <title>How to call JavaScript code from Ruby</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,900;1,900&amp;display=swap" rel="stylesheet">
     <link href=" https://cdn.jsdelivr.net/npm/destyle.css@4.0.0/destyle.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
     <header class="flex">
-        <h1 class="fadeout"></h1>
+        <h1 class="fadeout">How to call JavaScript code from Ruby</h1>
     </header>
     <main>
         <section class="flex">
             <div class="flex-item flex-100">
-                <div class="code"></div>
+                <div class="code">Gemfile:
+
+```ruby
+source 'https://rubygems.org'
+gem "therubyracer"
+# commonjs.rb provides 'require' needed to import modules
+gem 'commonjs'
+```
+
+add_with_javascript.rb:
+
+```javascript
+require 'v8'
+require 'commonjs'
+env = CommonJS::Environment.new(V8::Context.new, path: './node_modules')
+env.require('add.js').add(2, 2)
+```
+
+node_modules/add.js:
+
+```js
+function add(a, b) {
+  // Require works, if the package is available in node_modules
+  // require('xyz');
+  // Console is not available by default
+  // console.log(msg);
+  return a + b;
+}
+
+exports.add = add;
+```
+
+```ruby
+$ bundle exec ruby add_with_javascript.rb
+```
+
+Tested with:
+- commonjs (0.2.7)
+- libv8 (3.16.14.19)
+- therubyracer (0.12.3)
+</div>
             </div>
         </section>
     </main>
@@ -43,4 +82,3 @@
     </script>
 </body>
 </html>
-

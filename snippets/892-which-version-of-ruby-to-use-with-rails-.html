@@ -2,23 +2,31 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title></title>
+    <title>Which version of Ruby to use with Rails?</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,900;1,900&amp;display=swap" rel="stylesheet">
     <link href=" https://cdn.jsdelivr.net/npm/destyle.css@4.0.0/destyle.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
     <header class="flex">
-        <h1 class="fadeout"></h1>
+        <h1 class="fadeout">Which version of Ruby to use with Rails?</h1>
     </header>
     <main>
         <section class="flex">
             <div class="flex-item flex-100">
-                <div class="code"></div>
+                <div class="code">To know which version of Ruby is safe to use with Rails one option is to look at the Travis configuration, for example, Rails 5.2:
+https://github.com/rails/rails/blob/ee1278cc841a883835918fbedb70add96c84543b/.travis.yml#L64-L69
+
+Note the allowed_failures configuration:
+https://github.com/rails/rails/blob/172bb64ca8d3f1cf88ca7daa4f6a58436e577c69/.travis.yml#L145-L148
+
+This works for Rubygems too:
+https://github.com/bblimke/webmock/blob/a3c8de2550122d0998cb47292be0bbd2e3f203bf/.travis.yml#L4-L14
+
+</div>
             </div>
         </section>
     </main>
@@ -43,4 +51,3 @@
     </script>
 </body>
 </html>
-

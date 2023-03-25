@@ -2,23 +2,49 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title></title>
+    <title>NER with Python and NLTK</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,900;1,900&amp;display=swap" rel="stylesheet">
     <link href=" https://cdn.jsdelivr.net/npm/destyle.css@4.0.0/destyle.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
     <header class="flex">
-        <h1 class="fadeout"></h1>
+        <h1 class="fadeout">NER with Python and NLTK</h1>
     </header>
     <main>
         <section class="flex">
             <div class="flex-item flex-100">
-                <div class="code"></div>
+                <div class="code">Code from <https://gist.github.com/322906/90dea659c04570757cccf0ce1e6d26c9d06f9283>
+
+
+```python
+import nltk
+
+def named_entities(text):
+	sentences = nltk.sent_tokenize(text)
+	tokenized_sentences = [nltk.word_tokenize(sentence) for sentence in sentences]
+	tagged_sentences = [nltk.pos_tag(sentence) for sentence in tokenized_sentences]
+	chunked_sentences = nltk.batch_ne_chunk(tagged_sentences, binary=True)
+	def extract_entity_names(t):
+		entity_names = []
+		if hasattr(t, 'node') and t.node:
+			if t.node == 'NE':
+				entity_names.append(' '.join([child[0] for child in t]))
+			else:
+				for child in t:
+					entity_names.extend(extract_entity_names(child))
+		return entity_names
+	entity_names = []
+	for tree in chunked_sentences:
+		entity_names.extend(extract_entity_names(tree))
+	return set(entity_names)
+```
+    
+
+</div>
             </div>
         </section>
     </main>
@@ -43,4 +69,3 @@
     </script>
 </body>
 </html>
-

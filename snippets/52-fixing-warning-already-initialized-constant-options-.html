@@ -2,23 +2,56 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title></title>
+    <title>Fixing "warning: already initialized constant OPTIONS"</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,900;1,900&amp;display=swap" rel="stylesheet">
     <link href=" https://cdn.jsdelivr.net/npm/destyle.css@4.0.0/destyle.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
     <header class="flex">
-        <h1 class="fadeout"></h1>
+        <h1 class="fadeout">Fixing "warning: already initialized constant OPTIONS"</h1>
     </header>
     <main>
         <section class="flex">
             <div class="flex-item flex-100">
-                <div class="code"></div>
+                <div class="code">If you're using Edge Rails and mongrel you might have seen this error:
+
+
+```bash
+warning: already initialized constant OPTIONS
+```
+    
+
+There's a bug report [here](http://dev.rubyonrails.org/ticket/9743) that explains this problem in detail.
+
+The solution for me was to rerun the freeze command:
+
+
+```bash
+rake rails:freeze:edge
+```
+    
+
+You might also get "warning: already initialized constant OPTIONS" error if you haven't installed a gem your software relies on. In the following example openssl should be installed:
+
+
+```bash
+/usr/local/lib/ruby/site_ruby/1.8/rubygems/custom_require.rb:27:in gem_original_require’: no such file to load—openssl (MissingSourceFile)
+```
+    
+
+ActiveResource might also be the problem:
+
+
+```bash
+gem install activeresource --source http://gems.rubyonrails.org
+```
+    
+
+</div>
             </div>
         </section>
     </main>
@@ -43,4 +76,3 @@
     </script>
 </body>
 </html>
-

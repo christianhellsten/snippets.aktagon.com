@@ -2,23 +2,81 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title></title>
+    <title>PassengerPreStart, PassengerFriendlyErrorPages, and PassengerMinInstances  - Three essential configuration parameters in Phusion Passenger 3.0</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,900;1,900&amp;display=swap" rel="stylesheet">
     <link href=" https://cdn.jsdelivr.net/npm/destyle.css@4.0.0/destyle.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
     <header class="flex">
-        <h1 class="fadeout"></h1>
+        <h1 class="fadeout">PassengerPreStart, PassengerFriendlyErrorPages, and PassengerMinInstances  - Three essential configuration parameters in Phusion Passenger 3.0</h1>
     </header>
     <main>
         <section class="flex">
             <div class="flex-item flex-100">
-                <div class="code"></div>
+                <div class="code">Apache
+------
+
+This setting will make your users and the Google bot happy by starting your application as soon as Apache/nginx starts:
+
+
+```ruby
+PassengerPreStart http://aktagon.com/
+```
+    
+
+When combined with the PassengerMinInstances parameter, Passenger will keep at least one instance alive at all times:
+
+
+```ruby
+PassengerMinInstances 1
+```
+    
+
+This setting makes hackers unhappy by disabling Passenger's default error page, which contains sensitive information:
+
+
+```ruby
+PassengerFriendlyErrorPages On
+```
+    
+
+[Read passenger's Apache documentation](http://www.modrails.com/documentation/Users%20guide%20Apache.html) for details.
+
+nginx
+-----
+
+Passenger's nginx module has a slightly different naming convention:
+
+
+```ruby
+passenger_min_instances 1
+passenger_friendly_error_pages on
+```
+    
+
+Plus you need to put the passenger\_pre\_start inside an http directive. I just put them all in passenger.conf:
+
+
+```ruby
+passenger_pre_start http://aktagon.com
+```
+    
+
+If you don't put it where it belongs, you'll get this error:
+
+
+```ruby
+Starting nginx: [emerg]: "passenger_pre_start" directive is not allowed here in /opt/nginx/conf/sites/xxx.com:7
+```
+    
+
+[Read Passenger's nginx documentation](http://www.modrails.com/documentation/Users%20guide%20Nginx.html#PassengerPreStart) for details.
+
+</div>
             </div>
         </section>
     </main>
@@ -43,4 +101,3 @@
     </script>
 </body>
 </html>
-

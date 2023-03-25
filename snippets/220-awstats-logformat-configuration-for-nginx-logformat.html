@@ -2,23 +2,40 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title></title>
+    <title>Awstats LogFormat configuration for nginx LogFormat</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,900;1,900&amp;display=swap" rel="stylesheet">
     <link href=" https://cdn.jsdelivr.net/npm/destyle.css@4.0.0/destyle.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
     <header class="flex">
-        <h1 class="fadeout"></h1>
+        <h1 class="fadeout">Awstats LogFormat configuration for nginx LogFormat</h1>
     </header>
     <main>
         <section class="flex">
             <div class="flex-item flex-100">
-                <div class="code"></div>
+                <div class="code">This is my nginx LogFormat configuration:
+
+
+```
+log_format main '$remote_addr - $remote_user [$time_local] $status '
+                    '"$request" $body_bytes_sent "$http_referer" '
+                    '"$http_user_agent" "http_x_forwarded_for"';
+```
+    
+
+And this is my Awstats LogFormat configuration:
+
+
+```
+LogFormat = "%host - %host_r %time1 %code %methodurl %bytesd %refererquot %uaquot %otherquot"
+```
+    
+
+</div>
             </div>
         </section>
     </main>
@@ -43,4 +60,3 @@
     </script>
 </body>
 </html>
-

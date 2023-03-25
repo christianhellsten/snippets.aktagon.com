@@ -2,23 +2,49 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title></title>
+    <title>Parsing feeds with Ruby and rFeedParser</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,900;1,900&amp;display=swap" rel="stylesheet">
     <link href=" https://cdn.jsdelivr.net/npm/destyle.css@4.0.0/destyle.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
     <header class="flex">
-        <h1 class="fadeout"></h1>
+        <h1 class="fadeout">Parsing feeds with Ruby and rFeedParser</h1>
     </header>
     <main>
         <section class="flex">
             <div class="flex-item flex-100">
-                <div class="code"></div>
+                <div class="code">[rFeedParser](http://github.com/jmhodges/rfeedparser/tree/master) is a Ruby version of the [feedparser Python library](http://feedparser.org), which is probably the best (not fastest) feed parser.
+
+To install it follow the instruction on the [project's GitHub page](http://github.com/jmhodges/rfeedparser/tree/master).
+
+
+```ruby
+require 'rubygems'
+require 'rfeedparser'
+require 'benchmark'
+
+
+seconds = Benchmark.realtime do
+
+	body = File.read('example-feed.xml')
+	
+	for num in (1..500)
+		feed = FeedParser.parse(body) # Can be URL, string, data.
+	end
+	
+end
+
+puts "#{seconds.round} elapsed."
+```
+    
+
+rFeedParser has one problem. In my simple test it was ~3-4 times slower than feed-normalizer and feedparser.org.
+
+</div>
             </div>
         </section>
     </main>
@@ -43,4 +69,3 @@
     </script>
 </body>
 </html>
-

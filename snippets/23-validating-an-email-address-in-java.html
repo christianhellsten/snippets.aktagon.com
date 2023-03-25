@@ -2,23 +2,37 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title></title>
+    <title>Validating an email address in Java</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,900;1,900&amp;display=swap" rel="stylesheet">
     <link href=" https://cdn.jsdelivr.net/npm/destyle.css@4.0.0/destyle.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
     <header class="flex">
-        <h1 class="fadeout"></h1>
+        <h1 class="fadeout">Validating an email address in Java</h1>
     </header>
     <main>
         <section class="flex">
             <div class="flex-item flex-100">
-                <div class="code"></div>
+                <div class="code">The source of the regexp is this site: [Email unlimited](http://www.email-unlimited.com/stuff/email_address_validator.htm). According to [Wikipedia](http://en.wikipedia.org/wiki/E-mail_address) the regexp on the source page validates the email address according to [RFC 2822 - Internet Message Format](http://tools.ietf.org/html/rfc2822). I have still to write a comprehensive test suite, but the tests I do have for this validator pass.
+
+
+```java
+public class EmailValidator {
+  public static boolean validate(final String emailAddress) {
+    if ( emailAddress == null ) return false;
+    String patternStr = "^[-!#$%&'*+/0-9=?A-Z^_a-z{|}~](\\.?[-!#$%&'*+/0-9=?A-Z^_a-z{|}~])*@[a-zA-Z](-?[a-zA-Z0-9])*(\\.[a-zA-Z](-?[a-zA-Z0-9])*)+$";
+    Pattern emailPattern = Pattern.compile(patternStr);
+    return emailPattern.matcher(emailAddress).matches();
+  }
+}
+```
+    
+
+</div>
             </div>
         </section>
     </main>
@@ -43,4 +57,3 @@
     </script>
 </body>
 </html>
-

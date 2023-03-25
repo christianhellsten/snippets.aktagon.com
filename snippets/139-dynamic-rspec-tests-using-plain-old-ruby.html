@@ -2,23 +2,76 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title></title>
+    <title>Dynamic RSpec tests using plain old Ruby</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,900;1,900&amp;display=swap" rel="stylesheet">
     <link href=" https://cdn.jsdelivr.net/npm/destyle.css@4.0.0/destyle.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
     <header class="flex">
-        <h1 class="fadeout"></h1>
+        <h1 class="fadeout">Dynamic RSpec tests using plain old Ruby</h1>
     </header>
     <main>
         <section class="flex">
             <div class="flex-item flex-100">
-                <div class="code"></div>
+                <div class="code">Just happened to stumble upon the following article at caboo.se: [Handy dynamic rspec tip](http://www.caboo.se/articles/2008/1/21/handy-dynamic-rspec-tip#comments).
+
+I immediately found a way of simplifying a test case that involves testing that an ever increasing number of videos can be transcoded:
+
+
+```ruby
+require File.dirname(__FILE__) + '/helper'
+require File.dirname(__FILE__) + '/../lib/transcoder.rb'
+
+context "Transcoder" do
+  
+  Dir.glob('videos/*').each do |video|
+    it "should support #{video}" do
+      Transcoder.convert(video, "site/#{video}.flv")[:file_size].should > 0
+    end
+  end
+end
+```
+    
+
+You can also use it to test model validations:
+
+
+```ruby
+require File.expand_path(File.dirname(__FILE__) + '/../spec_helper')
+
+
+describe "Product" do
+  @@valid_product_attributes = { 
+      :name         => 'WTF',
+      :description  => 'LOL',
+      :price        => '10.0',
+      :tax          => '22.0'  }
+
+  
+  before(:each) do
+
+  end
+
+  it "should create a new instance given valid attributes" do
+    Product.create!(@@valid_product_attributes)
+  end
+  
+  @@valid_product_attributes.each do |name, value|
+    it "should not allow blank #{name}" do
+      lambda do
+        Product.create!(@@valid_product_attributes.except(name))
+      end.should raise_error(ActiveRecord::RecordInvalid)
+    end
+  end
+end
+```
+    
+
+</div>
             </div>
         </section>
     </main>
@@ -43,4 +96,3 @@
     </script>
 </body>
 </html>
-

@@ -2,23 +2,41 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title></title>
+    <title>mDNS and DNS-SD example</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,900;1,900&amp;display=swap" rel="stylesheet">
     <link href=" https://cdn.jsdelivr.net/npm/destyle.css@4.0.0/destyle.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
     <header class="flex">
-        <h1 class="fadeout"></h1>
+        <h1 class="fadeout">mDNS and DNS-SD example</h1>
     </header>
     <main>
         <section class="flex">
             <div class="flex-item flex-100">
-                <div class="code"></div>
+                <div class="code">To advertise the existence of an HTTP service with mDNS, use:
+
+```bash
+dns-sd -R "Service X" _http._tcp . 80 path=/
+```
+
+To find the HTTP services on the local network, run:
+
+```bash
+dns-sd -B _http._tcp
+
+Browsing for _http._tcp
+DATE: ---Wed 03 Mar 2021---
+17:48:45.207  ...STARTING...
+Timestamp     A/R    Flags  if Domain               Service Type         Instance Name
+17:48:45.207  Add        2   9 local.               _http._tcp.          Service X
+```
+
+See /etc/services for a list of valid services.
+</div>
             </div>
         </section>
     </main>
@@ -43,4 +61,3 @@
     </script>
 </body>
 </html>
-

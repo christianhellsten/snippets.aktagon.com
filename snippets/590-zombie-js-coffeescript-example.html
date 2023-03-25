@@ -2,23 +2,72 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title></title>
+    <title>Zombie.js + CoffeeScript example</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,900;1,900&amp;display=swap" rel="stylesheet">
     <link href=" https://cdn.jsdelivr.net/npm/destyle.css@4.0.0/destyle.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
     <header class="flex">
-        <h1 class="fadeout"></h1>
+        <h1 class="fadeout">Zombie.js + CoffeeScript example</h1>
     </header>
     <main>
         <section class="flex">
             <div class="flex-item flex-100">
-                <div class="code"></div>
+                <div class="code">```javascript
+#
+# Run:
+# coffee -w test.coffee http://localhost:3000
+#
+# Installation:
+#
+# npm install coffee zombie
+#
+# Uses:
+#
+# Zombie
+# http://zombie.labnotes.org/API
+#
+# CoffeeScript
+# http://coffeescript.org/documentation/docs/command.html
+#
+# assert:
+# http://nodejs.org/docs/v0.3.1/api/assert.html
+#
+Browser = require("zombie")
+assert = require('assert')
+
+class SignUpTest
+  constructor: (@base_url) ->
+    @url = @base_url + "/users/new"
+    console.log @url
+    this.run()
+  run: ->
+    browser = new Browser()
+    browser.on "error", (error) ->
+      console.error "Error: " + error
+      #console.dir("Errors:", browser.errors)
+    browser.visit @url, (error, browser) =>
+      assert.ok browser.success
+      rand = Math.floor(Math.random() * 10000)
+      email = "jesus#{rand}@localhost"
+      console.log email
+      browser.fill('#input-email', email)
+      browser.fill('#input-password', 'jes')
+      browser.fill('#input-password-confirmation', 'jes')
+      #console.log browser.html()
+      browser.pressButton 'Sign up', ->
+        assert.ok browser.success
+
+url = process.argv[2] # e.g. http://localhost:3000
+new SignUpTest(url)
+```
+    
+
+</div>
             </div>
         </section>
     </main>
@@ -43,4 +92,3 @@
     </script>
 </body>
 </html>
-

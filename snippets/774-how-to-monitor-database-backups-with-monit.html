@@ -2,23 +2,40 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title></title>
+    <title>How to monitor database backups with monit</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,900;1,900&amp;display=swap" rel="stylesheet">
     <link href=" https://cdn.jsdelivr.net/npm/destyle.css@4.0.0/destyle.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
     <header class="flex">
-        <h1 class="fadeout"></h1>
+        <h1 class="fadeout">How to monitor database backups with monit</h1>
     </header>
     <main>
         <section class="flex">
             <div class="flex-item flex-100">
-                <div class="code"></div>
+                <div class="code">## "It's not the backup, it's the restore"
+
+We want to know when our database backup process, including restore, is broken. We can use monit to monitor that our database:
+- is being backed up, i.e., that the backup script is being run periodically
+- can be restored from a backup, i.e., that the backup is not corrupted 
+
+More specifically we want to monitor the following:
+- the backup has been run within last the 24 hours with https://mmonit.com/monit/documentation/monit.html#TIMESTAMP-TESTING
+- the backup size is at least n MB https://mmonit.com/monit/documentation/monit.html#FILE-SIZE-TESTING
+- the backup contains SQL https://mmonit.com/monit/documentation/monit.html#FILE-CONTENT-TESTING
+
+We use monit to monitor the script that restores the database from a backup. For this we need:
+- a script, e.g. written in Ruby, that restores the database from a fresh backup
+    - the script should write to a log file, e.g. /var/log/db-restore.log, after the database has been successfully restored
+    - the script should check facts such as, e.g., number of rows
+    
+- a monit script that checks the script has been run successfully within, e.g., the last 24 hours
+    - this is done by checking the timestamp of the log file, e.g. /var/log/db-restore.log, with: https://mmonit.com/monit/documentation/monit.html#TIMESTAMP-TESTING
+</div>
             </div>
         </section>
     </main>
@@ -43,4 +60,3 @@
     </script>
 </body>
 </html>
-

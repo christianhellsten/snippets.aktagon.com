@@ -2,23 +2,70 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title></title>
+    <title>How to link back to current page with or without same parameters (PHP)</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,900;1,900&amp;display=swap" rel="stylesheet">
     <link href=" https://cdn.jsdelivr.net/npm/destyle.css@4.0.0/destyle.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
     <header class="flex">
-        <h1 class="fadeout"></h1>
+        <h1 class="fadeout">How to link back to current page with or without same parameters (PHP)</h1>
     </header>
     <main>
         <section class="flex">
             <div class="flex-item flex-100">
-                <div class="code"></div>
+                <div class="code">```php
+function link_back($blacklist = array())
+	{
+		$parameters = split("&", $_SERVER['QUERY_STRING']);
+		
+		$uri = array_shift(split("\?", $_SERVER['REQUEST_URI']));
+
+		$index = 0;
+		
+		foreach($parameters as $parameter)
+		{
+			$parameter = split("=", $parameter);
+			
+			$name = $parameter[0];
+			$value = $parameter[1];
+			
+			if(in_array($name, $blacklist))
+			{
+				unset($parameters[$index]);
+			}
+			
+			$index++;
+		}
+		
+		if(count($parameters) > 0)
+		{
+			$parameters = "?".join("&", $parameters);	
+		}
+		else
+		{
+			$parameters = '';
+		}
+		
+		return $uri.$parameters;
+	}
+```
+    
+
+Usage:
+
+
+```php
+# URI is /wow_amazing_code?not_wanted=23&wanted=1
+
+echo link_back(array('not_wanted')); # prints out /wow_amazing_code?wanted=1
+```
+    
+
+</div>
             </div>
         </section>
     </main>
@@ -43,4 +90,3 @@
     </script>
 </body>
 </html>
-

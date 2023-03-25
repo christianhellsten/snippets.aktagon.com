@@ -2,23 +2,66 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title></title>
+    <title>OAuth2 errors</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,900;1,900&amp;display=swap" rel="stylesheet">
     <link href=" https://cdn.jsdelivr.net/npm/destyle.css@4.0.0/destyle.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
     <header class="flex">
-        <h1 class="fadeout"></h1>
+        <h1 class="fadeout">OAuth2 errors</h1>
     </header>
     <main>
         <section class="flex">
             <div class="flex-item flex-100">
-                <div class="code"></div>
+                <div class="code">## OAuth2 errors
+
+The list of OAuth2 errors can be found from the RFC:
+https://www.rfc-editor.org/rfc/rfc6749#section-5.2
+
+```bash
+ invalid_request
+       The request is missing a required parameter, includes an
+       unsupported parameter value (other than grant type),
+       repeats a parameter, includes multiple credentials,
+       utilizes more than one mechanism for authenticating the
+       client, or is otherwise malformed.
+
+ invalid_client
+       Client authentication failed (e.g., unknown client, no
+       client authentication included, or unsupported
+       authentication method).  The authorization server MAY
+       return an HTTP 401 (Unauthorized) status code to indicate
+       which HTTP authentication schemes are supported.  If the
+       client attempted to authenticate via the "Authorization"
+       request header field, the authorization server MUST
+       respond with an HTTP 401 (Unauthorized) status code and
+       include the "WWW-Authenticate" response header field
+       matching the authentication scheme used by the client.
+
+ invalid_grant
+       The provided authorization grant (e.g., authorization
+       code, resource owner credentials) or refresh token is
+       invalid, expired, revoked, does not match the redirection
+       URI used in the authorization request, or was issued to
+       another client.
+
+ unauthorized_client
+       The authenticated client is not authorized to use this
+       authorization grant type.
+
+ unsupported_grant_type
+       The authorization grant type is not supported by the
+       authorization server.
+```
+
+## Solutions
+
+- https://blog.timekit.io/google-oauth-invalid-grant-nightmare-and-how-to-fix-it-9f4efaf1da35
+</div>
             </div>
         </section>
     </main>
@@ -43,4 +86,3 @@
     </script>
 </body>
 </html>
-

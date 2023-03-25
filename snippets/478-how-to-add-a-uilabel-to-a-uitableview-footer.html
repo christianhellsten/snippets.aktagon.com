@@ -2,23 +2,53 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title></title>
+    <title>How to add a UILabel to a UITableView footer</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,900;1,900&amp;display=swap" rel="stylesheet">
     <link href=" https://cdn.jsdelivr.net/npm/destyle.css@4.0.0/destyle.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
     <header class="flex">
-        <h1 class="fadeout"></h1>
+        <h1 class="fadeout">How to add a UILabel to a UITableView footer</h1>
     </header>
     <main>
         <section class="flex">
             <div class="flex-item flex-100">
-                <div class="code"></div>
+                <div class="code">```objectivec
+UILabel *label = [[[UILabel alloc] initWithFrame:CGRectMake(0, 0, 320, 50)] autorelease];
+label.text = @"It was a very long book with many lines...";
+// Colors and font
+label.backgroundColor = [UIColor clearColor];
+label.font = [UIFont systemFontOfSize:13];
+label.shadowColor = [UIColor colorWithWhite:0.8 alpha:0.8];
+label.textColor = [UIColor blackColor];
+// Automatic word wrap
+label.lineBreakMode = UILineBreakModeWordWrap;
+label.textAlignment = UITextAlignmentCenter;
+label.numberOfLines = 0;
+// Autosize
+[label sizeToFit];
+// Add the UILabel to the tableview
+self.tableView.tableFooterView = label;
+```
+    
+
+To add the footer to a specific section use the viewForFooterInSection method:
+
+
+```objectivec
+- (UIView *)tableView:(UITableView *)tableView viewForFooterInSection:(NSInteger)section {
+...
+        [footerView addSubview:xxx];
+...
+}
+```
+    
+
+</div>
             </div>
         </section>
     </main>
@@ -43,4 +73,3 @@
     </script>
 </body>
 </html>
-

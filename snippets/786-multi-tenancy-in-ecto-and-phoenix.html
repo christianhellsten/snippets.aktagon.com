@@ -2,23 +2,64 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title></title>
+    <title>Multi-tenancy in Ecto and Phoenix</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,900;1,900&amp;display=swap" rel="stylesheet">
     <link href=" https://cdn.jsdelivr.net/npm/destyle.css@4.0.0/destyle.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
     <header class="flex">
-        <h1 class="fadeout"></h1>
+        <h1 class="fadeout">Multi-tenancy in Ecto and Phoenix</h1>
     </header>
     <main>
         <section class="flex">
             <div class="flex-item flex-100">
-                <div class="code"></div>
+                <div class="code">## Creating a new tentant
+
+A new tenant requires a namespace, which is a schema in Postgres, and a prefix in Ecto:
+
+```bash
+$ psql -U postgres database_x
+> create schema aktagon; 
+```
+
+## Querying data
+
+```elixir
+import Ecto.Query
+email = "christian@aktagon.com"
+q = from(m in User, where: m.email == ^email)
+Repo.all(%{q | prefix: "aktagon"})
+```
+
+Documentation: https://hexdocs.pm/ecto/Ecto.Query.html#module-query-prefix
+
+## Inserting data
+
+```elixir
+Repo.insert(
+  Ecto.put_meta(
+   %User{ email: "christian@aktagon.com" },
+   prefix: "aktagon"
+  )
+)
+```
+
+## Migrations
+
+```bash
+$ mix ecto.migrate --prefix "aktagon"
+```
+
+## Notes
+
+- (KeyError) key :\_\_meta\_\_ not found
+
+I got this error when passing a changeset to Ecto.put_meta instead of a User struct.
+</div>
             </div>
         </section>
     </main>
@@ -43,4 +84,3 @@
     </script>
 </body>
 </html>
-

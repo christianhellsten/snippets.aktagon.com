@@ -2,23 +2,68 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title></title>
+    <title>Hello Postgres and REST in Crystal</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,900;1,900&amp;display=swap" rel="stylesheet">
     <link href=" https://cdn.jsdelivr.net/npm/destyle.css@4.0.0/destyle.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
     <header class="flex">
-        <h1 class="fadeout"></h1>
+        <h1 class="fadeout">Hello Postgres and REST in Crystal</h1>
     </header>
     <main>
         <section class="flex">
             <div class="flex-item flex-100">
-                <div class="code"></div>
+                <div class="code">NOTE: This does not work with Crystal 0.25.2.
+
+## Install Crystal
+
+```bash
+brew install crystal-lang
+mkdir projects/hello
+shards init
+```
+
+## Set up dependencies
+
+```yaml
+dependencies:
+  pg:
+    github: will/crystal-pg
+    version: "~> 0.5"
+  kemal:
+    github: sdogruyol/kemal
+    version: "~> 0.16.1"
+```
+
+```bash
+shards
+```
+
+## Write a simple REST API
+
+```crystal
+require "kemal"
+require "json"
+require "pg"
+
+PG_URL = "postgres://postgres@localhost:5432/xxx"
+DB     = PG.connect PG_URL
+
+get "/" do |env|
+  env.response.content_type = "application/json"
+  users = DB.exec("SELECT * FROM users")
+  users.to_hash.map do |user|
+    {first_name: user["first_name"].as(String), last_name: user["last_name"].as(String)}
+  end.to_json
+end
+
+Kemal.run(4567)
+```
+</div>
             </div>
         </section>
     </main>
@@ -43,4 +88,3 @@
     </script>
 </body>
 </html>
-

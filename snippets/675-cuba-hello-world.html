@@ -2,23 +2,89 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title></title>
+    <title>Cuba Hello World</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,900;1,900&amp;display=swap" rel="stylesheet">
     <link href=" https://cdn.jsdelivr.net/npm/destyle.css@4.0.0/destyle.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
     <header class="flex">
-        <h1 class="fadeout"></h1>
+        <h1 class="fadeout">Cuba Hello World</h1>
     </header>
     <main>
         <section class="flex">
             <div class="flex-item flex-100">
-                <div class="code"></div>
+                <div class="code"><http://cuba.is/>
+
+app.rb:
+
+
+```ruby
+require "cuba"
+#require "rack/protection"
+
+#Cuba.use Rack::Session::Cookie, :secret => "__a_very_long_string__"
+#Cuba.use Rack::Protection
+
+Cuba.define do
+  # only GET requests
+  on get do
+    # /
+    on root do
+      res.write "Home"
+    end
+  end
+end
+```
+    
+
+config.ru:
+
+
+```ruby
+require "./app"
+require 'sprockets'
+
+map '/assets' do
+  env = Sprockets::Environment.new
+  env.append_path 'assets/javascripts'
+  env.append_path 'assets/stylesheets'
+  env.append_path 'assets/images'
+  run env
+end
+
+run Cuba
+```
+    
+
+Gemfile:
+
+
+```ruby
+source 'https://rubygems.org'
+gem 'cuba'
+gem 'sprockets'
+gem 'puma'
+```
+    
+
+Anonymous hello world benchmark:
+
+
+```ruby
+Node.js - 27 000 req/s
+Ruby cuba - 17 000 req/s
+Ruby hobbit - 17 000 req/s
+Ruby rack - 25 000 req/s
+```
+    
+
+Yes, Ruby is very slow.
+
+</div>
             </div>
         </section>
     </main>
@@ -43,4 +109,3 @@
     </script>
 </body>
 </html>
-

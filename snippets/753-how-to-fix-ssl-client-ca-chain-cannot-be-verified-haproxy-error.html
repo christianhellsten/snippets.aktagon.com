@@ -2,23 +2,66 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title></title>
+    <title>How to fix "SSL client CA chain cannot be verified" haproxy error</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,900;1,900&amp;display=swap" rel="stylesheet">
     <link href=" https://cdn.jsdelivr.net/npm/destyle.css@4.0.0/destyle.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
     <header class="flex">
-        <h1 class="fadeout"></h1>
+        <h1 class="fadeout">How to fix "SSL client CA chain cannot be verified" haproxy error</h1>
     </header>
     <main>
         <section class="flex">
             <div class="flex-item flex-100">
-                <div class="code"></div>
+                <div class="code">Check which client certificates CA names the server accepts
+-----------------------------------------------------------
+
+
+```bash
+$ openssl s_client -connect 127.0.0.1:443 -servername xxx.com
+
+Acceptable client certificate CA names
+/C=FI/ST=Finland/O=Vaestorekisterikeskus TEST/OU=Terveydenhuollon testiammattivarmenteet/CN=VRK TEST CA for Healthcare Professionals
+/C=FI/ST=Finland/O=Vaestorekisterikeskus TEST/OU=Testivarmenteet/CN=VRK CA for Test Purposes
+```
+    
+
+Export client certificate public key to a file
+----------------------------------------------
+
+If needed, export the client certificate's public key to a file, e.g. xyz.pem.
+
+Check who has issued the client certificate:
+--------------------------------------------
+
+
+```bash
+$ openssl x509 -in xyz.pem -text
+
+Issuer: C=FI, ST=Finland, O=Vaestorekisterikeskus TEST, OU=Terveydenhuollon testiammattivarmenteet, CN=VRK TEST CA for Healthcare Professionals
+```
+    
+
+Is the issuer one of the CAs listed in step \#1?
+
+Verify client certificate
+-------------------------
+
+If yes, verify the client certificate against haproxy's ca-file:
+
+
+```bash
+cat xyz.pem | openssl verify -CAfile /etc/ssl/certs/haproxy-ca-file.pem
+```
+    
+
+If validation fails, you probably need to add some root or intermediate certificates to /etc/ssl/certs/haproxy-ca-file.pem.
+
+</div>
             </div>
         </section>
     </main>
@@ -43,4 +86,3 @@
     </script>
 </body>
 </html>
-

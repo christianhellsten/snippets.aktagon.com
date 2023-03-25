@@ -2,23 +2,50 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title></title>
+    <title>Configure Docker to use a private container registry using a self-signed certificate</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,900;1,900&amp;display=swap" rel="stylesheet">
     <link href=" https://cdn.jsdelivr.net/npm/destyle.css@4.0.0/destyle.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
     <header class="flex">
-        <h1 class="fadeout"></h1>
+        <h1 class="fadeout">Configure Docker to use a private container registry using a self-signed certificate</h1>
     </header>
     <main>
         <section class="flex">
             <div class="flex-item flex-100">
-                <div class="code"></div>
+                <div class="code">How to configure Docker to use a private container registry using a self-signed certificate.
+
+Tested on Docker version 18.09.4, build d14af54.
+
+- Copy self-signed certificate from the registry server to the docker server
+
+On your laptop:
+
+```bash
+$ scp christian@registry-server://etc/ssl/certs/selfsigned.crt christian@docker-server://etc/ssl/certs/private-docker-registry.crt
+```
+
+- Restart docker daemon
+
+On the docker server:
+
+```bash
+$ sudo service docker restart
+```
+
+- Login to the registry from the docker server
+
+On the docker server:
+
+```bash
+sudo docker login -u christian registry-server
+> WARNING! Your password will be stored unencrypted in /home/christian/.docker/config.json.
+```
+</div>
             </div>
         </section>
     </main>
@@ -43,4 +70,3 @@
     </script>
 </body>
 </html>
-

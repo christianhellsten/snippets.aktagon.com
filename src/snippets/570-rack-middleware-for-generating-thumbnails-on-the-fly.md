@@ -1,0 +1,96 @@
+---
+id: '570'
+title: Rack middleware for generating thumbnails on-the-fly
+languages:
+- ruby
+tags:
+---
+
+```ruby
+# Rack middleware for creating image thumbnails on the fly when needed. 
+# Depends on ImageMagick and https://github.com/christianhellsten/thumbnail for thumbnail creation. 
+#
+# Use case 1: Allow any image under /images to be resized to any size
+#
+#   # e.g. /images/me-1280x1024.png
+#   use Rack::Thumbnail, :uri => '/images'
+#
+# Use case 2: Allow any image under /images to be resized to 50x50 or 150x150
+#
+#   # e.g. /images/me-150x150.png
+#   use Rack::Thumbnail, :uri => '/images', :dimensions => ['50x50', '150x150']
+#
+# Use case 3: Allow any image under /images to be resized to 50x50 or 150x150. Allow padding or cutting of thumbnails to fit given dimensions.
+#
+#   # e.g. /images/me-50x50-cut.png
+#   use Rack::Thumbnail, :uri => '/images', :dimensions => ['50x50', '150x150'], :methods => { :pad => :pad_to_fit, :cut => :cut_to_fit }
+#
+require 'thumbnail'
+class Rack::Thumbnail
+  def initialize(app, options = {})
+    @app = app
+    @uri = options.fetch(:uri, '/images')
+    @public_dir = options.fetch(:public_dir, 'public')
+    @uri_regex = options.fetch(:uri_regex, /-(\d+)x(\d+)-?(\w+)?/) # Extracts width, height, method
+    @allowed_methods = options.fetch(:methods, {})
+    @allowed_dimensions = options[:dimensions]
+  end
+
+  def allowed_dimension?(width, height)
+    @allowed_dimensions ? @allowed_dimensions.include?([width, 'x', height].join) : true
+  end
+
+  def call(env)
+    path = env["PATH_INFO"]
+    destination = File.join('public', path)
+    if path.match(@uri) && !File.exist?(destination)
+      _, width, height, method = path.match(@uri_regex).to_a
+      if allowed_dimension?(width, height)
+        source = File.join(@public_dir, path.gsub(@uri_regex, ''))
+        Thumbnail.create(
+          :in => source,
+          :out => destination,
+          :method => @allowed_methods.fetch((method || '').to_sym, :pad_to_fit),
+          :width => width.to_i,
+          :height => height.to_i
+        )
+      end
+    end
+    status, headers, response = @app.call(env)
+    [status, headers, response]
+  end
+end
+```
+    
+
+In Sinatra, generate thumbnail URLs with this helper:
+
+
+```ruby
+helpers do
+  # Generates thumbnail URLs.
+  #
+  # Example: 
+  #  
+  #  img uri=thumbnail('/images/me.png', :width => 50, :height => 50)
+  #
+  # uri - URI of source image.
+  # options - hash containing width and height of thumbnail.
+  #
+  def thumbnail(uri, options = {})
+    width = options.fetch(:width, 50)
+    height = options.fetch(:height, 50)
+    method = options[:method]
+    ext = File.extname(uri)
+    base = File.basename(uri, ext)
+    base_uri = File.dirname(uri)
+    unless method
+      "#{dir}/#{base}-#{width}x#{height}#{ext}"
+    else
+      "#{dir}/#{base}-#{width}x#{height}-#{method}#{ext}"
+    end
+  end
+end
+```
+    
+

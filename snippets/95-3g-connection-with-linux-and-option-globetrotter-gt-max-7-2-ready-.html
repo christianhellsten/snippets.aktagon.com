@@ -2,23 +2,310 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title></title>
+    <title>3G connection with Linux and Option Globetrotter GT Max "7.2 ready"</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,900;1,900&amp;display=swap" rel="stylesheet">
     <link href=" https://cdn.jsdelivr.net/npm/destyle.css@4.0.0/destyle.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
     <header class="flex">
-        <h1 class="fadeout"></h1>
+        <h1 class="fadeout">3G connection with Linux and Option Globetrotter GT Max "7.2 ready"</h1>
     </header>
     <main>
         <section class="flex">
             <div class="flex-item flex-100">
-                <div class="code"></div>
+                <div class="code">The installation instructions for the software are Debian specific. The configuration files are specific to Saunalahti Mobiililaajakaista (Saunalahti mobile broadband) in Finland.
+
+Installation
+------------
+
+Install *wvdial* and *pppd*
+
+
+```bash
+apt-get install wvdial pppd
+```
+    
+
+Create and edit */etc/ppp/peers/wvdial*
+
+
+```bash
+usepeerdns
+plugin passwordfd.so
+noauth
+name wvdial
+defaultroute
+replacedefaultroute
+noipdefault
+novj
+nobsdcomp
+```
+    
+
+Edit */etc/wvdial.conf*
+
+
+```bash
+[Dialer Defaults]
+Modem = /dev/ttyUSB0
+Baud = 115200
+Init1 = ATZ
+Init2 = ATQ0 V1 E1 S0=0 &C1 &D2
+Init3 = AT+CFUN=1;+CGDCONT=1,"IP","internet.saunalahti"
+Area Code =
+Phone = *99#
+Username = saunalahti
+Password = saunalahti
+Ask Password = 0
+Dial Command = ATD
+FlowControl=NOFLOW
+Stupid Mode = 1
+Compuserve = 0
+Force Address =
+Idle Seconds = 3000
+DialMessage1 =
+DialMessage2 =
+ISDN = 0
+Auto DNS = 1
+```
+    
+
+Run *wvdial*
+
+
+```bash
+sudo wvdial
+```
+    
+
+You should now be connected. If you aren't then check for potential solutions below.
+
+Troubleshooting
+---------------
+
+### Kernel modules
+
+Check that modules *USB\_SERIAL\_OPTION* and *USB\_SERIAL* are built as modules or into the kernel.
+
+### Conflicting drivers
+
+This is identified by a rapidly flashing purple light in your modem. You must disable and blacklist the usb\_storage module, because it interferes with the built in modem.
+
+Disable *usb\_storage* module
+
+
+```bash
+rmmod usb_storage
+cat /etc/modprobe.d/blacklist | grep "blacklist usb_storage" || echo "blacklist usb_storage" >> /etc/modprobe.d/blacklist
+pccardctl eject
+pccardctl insert
+```
+    
+
+### Device in wrong state
+
+If you completely fail to get a response from the modem then you probably need to run the [usb\_modeswitch](http://frederick-reid.com/usb_modeswitch/index.html) utility. You can check if this is the problem using *lsusb*. Below are the correct and incorrect values.
+
+Correct value of *lsusb* (no need to run *usb\_modeswitch*). Notice the row containing "0af0:6701 Option".
+
+
+```bash
+marko@x61s:~$ lsusb
+Bus 008 Device 003: ID 0af0:6701 Option 
+Bus 008 Device 001: ID 0000:0000  
+Bus 007 Device 001: ID 0000:0000  
+Bus 006 Device 001: ID 0000:0000  
+Bus 001 Device 001: ID 0000:0000  
+Bus 005 Device 001: ID 0000:0000  
+Bus 002 Device 003: ID 0483:2016 SGS Thomson Microelectronics Fingerprint Reader
+Bus 002 Device 002: ID 0a5c:2110 Broadcom Corp. 
+Bus 002 Device 001: ID 0000:0000  
+Bus 004 Device 001: ID 0000:0000  
+Bus 003 Device 001: ID 0000:0000
+```
+    
+
+Incorrect value of *lsusb* (you should run *usb\_modeswitch*). Notice the row containing "05c6:1000 Qualcomm, Inc.".
+
+
+```bash
+marko@x61s:~$ lsusb
+Bus 008 Device 002: ID 05c6:1000 Qualcomm, Inc. 
+Bus 008 Device 001: ID 0000:0000  
+Bus 007 Device 001: ID 0000:0000  
+Bus 006 Device 001: ID 0000:0000  
+Bus 001 Device 001: ID 0000:0000  
+Bus 005 Device 001: ID 0000:0000  
+Bus 002 Device 003: ID 0483:2016 SGS Thomson Microelectronics Fingerprint Reader
+Bus 002 Device 002: ID 0a5c:2110 Broadcom Corp. 
+Bus 002 Device 001: ID 0000:0000  
+Bus 004 Device 001: ID 0000:0000  
+Bus 003 Device 001: ID 0000:0000
+```
+    
+
+Compile *usb\_modeswitch*
+
+
+```bash
+wget "http://frederick-reid.com/usb_modeswitch/usb_modeswitch-0.9.1beta.tar.bz2"
+tar xjvf usb_modeswitch-0.9.1beta.tar.bz2 -C /usr/src
+cd /usr/src/usb_modeswitch-0.9.1beta
+gcc -l usb -o usb_modeswitch usb_modeswitch.c
+mv -i usb_modeswitch /usr/bin
+```
+    
+
+Create */etc/usb\_modeswitch.conf* with the following contents (NOTE: if you need to revert back then swap the values of "Default" and "Target").
+
+
+```bash
+DefaultVendor=  0x05c6
+DefaultProduct= 0x1000
+
+TargetVendor=   0x0af0
+TargetProduct=  0x6600
+
+MessageEndpoint=0x05
+MessageContent="55534243706ede860000000000000601000000000000000000000000000000"
+```
+    
+
+Finally run usb\_modeswitch
+
+
+```bash
+usb_modeswitch
+```
+    
+
+### PPPD dying
+
+If you start connecting, but lose it with pppd dying (like below), then re-check your /etc/wvdial.conf file. Your card may need a [pin](http://www.pharscape.org/content/view/29/#_Toc83808116) before it can be used. Or, as in my case, I had a typo where I had written "internet.saunalahti" instead of "saunalahti.internet" :)
+
+
+```bash
+marko@x61s:~$ sudo wvdial
+--> WvDial: Internet dialer version 1.56
+--> Cannot get information for serial port.
+--> Initializing modem.
+--> Sending: ATZ
+ATZ
+OK
+--> Sending: ATQ0 V1 E1 S0=0 &C1 &D2
+ATQ0 V1 E1 S0=0 &C1 &D2
+OK
+--> Sending: AT+CFUN=1;+CGDCONT=1,"IP","saunalahti.internet"
+AT+CFUN=1;+CGDCONT=1,"IP","saunalahti.internet"
+OK
+--> Modem initialized.
+--> Idle Seconds = 3000, disabling automatic reconnect.
+--> Sending: ATD*99#
+--> Waiting for carrier.
+ATD*99#
+CONNECT 3600000
+--> Carrier detected.  Starting PPP immediately.
+--> Starting pppd at Sat Oct 20 21:49:26 2007
+--> Pid of pppd: 6010
+--> Using interface ppp0
+--> pppd: �+
+--> pppd: �+
+--> pppd: �+
+--> pppd: �+
+--> pppd: �+
+--> pppd: �+
+--> Disconnecting at Sat Oct 20 21:49:28 2007
+--> The PPP daemon has died: A modem hung up the phone (exit code = 16)
+--> man pppd explains pppd error codes in more detail.
+--> Try again and look into /var/log/messages and the wvdial and pppd man pages for
+```
+    
+
+### No device found
+
+If your */dev/ttyUSBn* devices don't exist you might need to create them.
+
+Create ttyUSBn devices
+
+
+```bash
+mknod /dev/ttyUSB0 c 188 0
+mknod /dev/ttyUSB1 c 188 1
+mknod /dev/ttyUSB2 c 188 2
+chmod g+w /dev/ttyUSB?
+chown root.dialout /dev/ttyUSB?
+```
+    
+
+### Permission errors
+
+If you get permission errors then you aren't running wvdial with leveraged privileges. Adding yourself to groups *dialout* and *dip* will get you a bit further, but the initial connection still needs to be run as root as files */etc/ppp/chap-secrets* and */etc/ppp/pap-secrets* are only writable to root. There is a guide for gentoo for setting up [ppp access as non-root](http://gentoo-wiki.com/HOWTO_Setup_a_Dialup_Connection#PPP_and_root_pivileges), but I have yet to try it myself.
+
+Add yourself to groups *dialup* and *dip*
+
+
+```bash
+usermod -a -G dialout,dip marko
+```
+    
+
+A successful connection
+-----------------------
+
+This is what a successful connection will look like.
+
+
+```bash
+x61s:# sudo wvdial
+--> WvDial: Internet dialer version 1.56
+--> Cannot get information for serial port.
+--> Initializing modem.
+--> Sending: ATZ
+ATZ
+OK
+--> Sending: ATQ0 V1 E1 S0=0 &C1 &D2
+ATQ0 V1 E1 S0=0 &C1 &D2
+OK
+--> Sending: AT+CFUN=1;+CGDCONT=1,"IP","internet.saunalahti"
+AT+CFUN=1;+CGDCONT=1,"IP","internet.saunalahti"
+OK
+--> Modem initialized.
+--> Idle Seconds = 3000, disabling automatic reconnect.
+--> Sending: ATD*99#
+--> Waiting for carrier.
+ATD*99#
+CONNECT 3600000
+--> Carrier detected.  Starting PPP immediately.
+--> Starting pppd at Sat Oct 20 22:13:05 2007
+--> Pid of pppd: 9174
+--> Using interface ppp0
+--> pppd: �+
+--> pppd: �+
+--> pppd: �+
+--> pppd: �+
+--> pppd: �+
+--> pppd: �+
+--> pppd: �+
+--> pppd: �+
+--> pppd: �+
+--> local  IP address 8x.7x.2xx.6x
+--> pppd: �+
+--> remote IP address 10.xx.xx.xx
+--> pppd: �+
+--> primary   DNS address 19x.19x.5x.10x
+--> pppd: �+
+--> secondary DNS address 19x.7x.0.4x
+--> pppd: �+
+rm --> pppd: �+
+--> Connect time 44.9 minutes.
+```
+    
+
+</div>
             </div>
         </section>
     </main>
@@ -43,4 +330,3 @@
     </script>
 </body>
 </html>
-

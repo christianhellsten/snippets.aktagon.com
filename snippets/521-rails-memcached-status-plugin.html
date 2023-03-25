@@ -2,23 +2,87 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title></title>
+    <title>Rails Memcached Status Plugin</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,900;1,900&amp;display=swap" rel="stylesheet">
     <link href=" https://cdn.jsdelivr.net/npm/destyle.css@4.0.0/destyle.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
     <header class="flex">
-        <h1 class="fadeout"></h1>
+        <h1 class="fadeout">Rails Memcached Status Plugin</h1>
     </header>
     <main>
         <section class="flex">
             <div class="flex-item flex-100">
-                <div class="code"></div>
+                <div class="code">Use this Rack Middleware to check the status of memcached:
+
+
+```ruby
+require 'socket'
+
+class MemcachedStatus
+  def initialize(app, uri)
+    @app = app
+    @uri = uri
+  end
+
+  def call(env)
+    if env['PATH_INFO'] == @uri
+      status 
+    else
+      @app.call(env)
+    end
+  end
+  
+  def status
+    socket = TCPSocket.open('localhost', '11211')
+    socket.send("stats\r\n", 0)
+
+    statistics = []
+    loop do
+      data = socket.recv(4096)
+      if !data || data.length == 0
+        break
+      end
+      statistics << data
+      if statistics.join.split(/\n/)[-1] =~ /END/
+        break
+      end
+    end
+
+    out = "
+<html>
+<body>
+<pre>
+#{statistics.join}
+</pre>
+</body>
+</html>
+"
+    [200, {"Content-Type" => "text/html"}, [out]]
+  ensure
+    socket.close
+  end
+end
+```
+    
+
+Add the following to config/application.rb:
+
+
+```ruby
+config.middleware.use "MemcachedStatus", "/memcached_status"
+```
+    
+
+Access status from http://localhost/memcached\_status
+
+Socket code from <http://barkingiguana.com/2009/03/04/memcache-statistics-from-the-command-line/>
+
+</div>
             </div>
         </section>
     </main>
@@ -43,4 +107,3 @@
     </script>
 </body>
 </html>
-

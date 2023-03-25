@@ -2,23 +2,48 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title></title>
+    <title>How to draw driving directions on a Google map (API V3)</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,900;1,900&amp;display=swap" rel="stylesheet">
     <link href=" https://cdn.jsdelivr.net/npm/destyle.css@4.0.0/destyle.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
     <header class="flex">
-        <h1 class="fadeout"></h1>
+        <h1 class="fadeout">How to draw driving directions on a Google map (API V3)</h1>
     </header>
     <main>
         <section class="flex">
             <div class="flex-item flex-100">
-                <div class="code"></div>
+                <div class="code">This snippet gives you the driving directions from the center of the map to Dubai:
+
+
+```javascript
+var directionsDisplay = new google.maps.DirectionsRenderer();
+var directionsService = new google.maps.DirectionsService();
+
+var request = {
+  origin:  map.getCenter(), 
+  destination: 'Dubai',
+  travelMode: google.maps.DirectionsTravelMode.DRIVING
+};
+
+directionsService.route(request, function(result, status) {
+  if (status == google.maps.DirectionsStatus.OK) {
+     // Display the distance:
+     $('#distance').html(result.routes[0].legs[0].distance.value + " meters");
+     // Display the duration:
+     $('#duration').html(result.routes[0].legs[0].duration.value + " seconds");
+    directionsDisplay.setDirections(result);
+    directionsDisplay.setMap(map);
+  }
+});
+```
+    
+
+</div>
             </div>
         </section>
     </main>
@@ -43,4 +68,3 @@
     </script>
 </body>
 </html>
-

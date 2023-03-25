@@ -2,23 +2,115 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title></title>
+    <title>How to fetch URLs in parallell with EventMachine and Ruby</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,900;1,900&amp;display=swap" rel="stylesheet">
     <link href=" https://cdn.jsdelivr.net/npm/destyle.css@4.0.0/destyle.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
     <header class="flex">
-        <h1 class="fadeout"></h1>
+        <h1 class="fadeout">How to fetch URLs in parallell with EventMachine and Ruby</h1>
     </header>
     <main>
         <section class="flex">
             <div class="flex-item flex-100">
-                <div class="code"></div>
+                <div class="code">Save time by doing things in parallell:
+
+
+```ruby
+require 'rubygems'
+require 'eventmachine'
+require 'open-uri'
+require 'pp'
+require 'thread'
+require 'benchmark'
+
+class Worker
+  include EM::Deferrable
+
+  def run
+    get_google
+    set_deferred_status :succeeded
+  end
+end
+
+def get_google
+  # sorry for spamming you
+  open('http://www.google.com/') do |f|
+    #pp f.meta
+  end
+end
+
+def asynchronous(i)
+  worker = Worker.new
+  # on success
+  worker.callback do
+    p "#{Thread.current} done #{i}!"
+  end 
+  worker.errback do 
+    p "Unexpected error"    
+    EM.stop  
+  end
+  #
+  Thread.new do
+    worker.run
+    EM.stop
+  end 
+  #puts "scheduling done!"
+end
+
+def synchronous(i)
+  get_google
+end
+
+# on error
+EM.error_handler do |e|  
+  p "Unexpected error: #{e}" 
+end
+
+EM.run do
+  seconds = Benchmark.realtime do
+    50.times do |i|
+      asynchronous i
+    end
+  end
+  p "With EventMachine: #{seconds} elapsed..."
+
+  seconds = Benchmark.realtime do
+    50.times do |i|
+      synchronous i
+    end
+  end
+  p "Without EventMachine: #{seconds} elapsed..."
+end
+```
+    
+
+Output:
+
+
+```ruby
+With EventMachine: 9.05974316596985 elapsed...
+Without EventMachine: 19.1381118297577 elapsed...
+```
+    
+
+Conclusion
+----------
+
+\* Speeds up blocking operations.
+\* EventMachine is currently limited to one CPU core (native thread) per process.
+
+References
+\* <http://ujihisa.blogspot.com/2009/08/try-eventmachine.html>
+\* <http://www.scribd.com/doc/21017871/Event-Machine-Presentation>
+\* <http://www.scribd.com/doc/25939580/Event-Machine>
+------------------------------------------------------------------
+
+</div>
             </div>
         </section>
     </main>
@@ -43,4 +135,3 @@
     </script>
 </body>
 </html>
-

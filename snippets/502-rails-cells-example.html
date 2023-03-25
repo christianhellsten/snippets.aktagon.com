@@ -2,23 +2,66 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title></title>
+    <title>Rails Cells Example</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,900;1,900&amp;display=swap" rel="stylesheet">
     <link href=" https://cdn.jsdelivr.net/npm/destyle.css@4.0.0/destyle.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
     <header class="flex">
-        <h1 class="fadeout"></h1>
+        <h1 class="fadeout">Rails Cells Example</h1>
     </header>
     <main>
         <section class="flex">
             <div class="flex-item flex-100">
-                <div class="code"></div>
+                <div class="code">This [Rails Cells](http://cells.rubyforge.org/) example demonstrates how to:
+\* access the request
+\* access the controller
+\* access the session
+\* access the request parameters
+\* cache data
+\* use dynamic cache keys
+\* access cell parameters
+\* use helpers
+
+
+```ruby
+class MenuCell < Cell::Rails
+  helper :menu
+  cache :display, :cache_conf, :expires_in => 1.day
+
+  def display
+    @selected = options[:selected]
+    @posts ||= Post.paginate(options[:posts])
+    render
+  end
+
+  protected
+    def cache_conf
+      # parent_controller.controller_name
+      # parent_controller.request or request
+      # parent_controller.session
+      # parent_controller.params
+      { :path => request.fullpath }
+    end
+end
+```
+    
+
+The cell is rendered by calling:
+
+
+```ruby
+<%= render_cell :menu, :display, :selected => controller.controller_name %>
+```
+    
+
+See [Cells the change log](https://github.com/apotonick/cells/blob/master/CHANGES.textile) for details.
+
+</div>
             </div>
         </section>
     </main>
@@ -43,4 +86,3 @@
     </script>
 </body>
 </html>
-

@@ -2,23 +2,45 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title></title>
+    <title>How to use Font Awesome in iOS/Phonegap apps</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,900;1,900&amp;display=swap" rel="stylesheet">
     <link href=" https://cdn.jsdelivr.net/npm/destyle.css@4.0.0/destyle.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
     <header class="flex">
-        <h1 class="fadeout"></h1>
+        <h1 class="fadeout">How to use Font Awesome in iOS/Phonegap apps</h1>
     </header>
     <main>
         <section class="flex">
             <div class="flex-item flex-100">
-                <div class="code"></div>
+                <div class="code">First, install Font Awesome:
+
+1.  Download the latest [Font Awesome](http://fortawesome.github.io/Font-Awesome/) version
+2.  Double-click fontawesome-webfont.ttf and install it on your laptop/desktop (optional)
+3.  Copy fontawesome.css to www/css
+4.  Remove the references to font files in fontawesome.css, i.e. remove @font-face declaration
+
+Then in Xcode:
+
+1.  Copy fontawesome-webfont.ttf into "Your Project/Resources/fonts/fontawesome-webfont.ttf"
+2.  Add Font Awesome to the .plist file by selecting the "Info" tab
+3.  Add a new property named "Fonts provided by application" and set the value to "fontawesome-webfont.ttf"
+
+Clean and build your project. Font Awesome is now ready to be used.
+
+Phonegap example:
+
+
+```
+<i class="fa fa-cog"/>
+```
+    
+
+</div>
             </div>
         </section>
     </main>
@@ -43,4 +65,3 @@
     </script>
 </body>
 </html>
-

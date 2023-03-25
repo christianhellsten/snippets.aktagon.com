@@ -2,23 +2,204 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title></title>
+    <title>Ruby TCP socket with read, write, and connect timeout</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,900;1,900&amp;display=swap" rel="stylesheet">
     <link href=" https://cdn.jsdelivr.net/npm/destyle.css@4.0.0/destyle.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
     <header class="flex">
-        <h1 class="fadeout"></h1>
+        <h1 class="fadeout">Ruby TCP socket with read, write, and connect timeout</h1>
     </header>
     <main>
         <section class="flex">
             <div class="flex-item flex-100">
-                <div class="code"></div>
+                <div class="code">See Ruby's Net::Protocol implementation for an example on how to implement connect, read, and write timeouts:
+
+- https://github.com/ruby/ruby/blob/634e0a97eb82ab259c7f7a35d0486baebe77df0f/lib/net/protocol.rb#L40-L56
+
+- https://github.com/ruby/ruby/blob/master/lib/net/protocol.rb#L210-L229
+
+Or, write your own custom TCP socket implementation that supports read, write, and connect timeouts (warning, not tested):
+
+```ruby
+require 'socket'
+require 'timeout'
+
+class TCPSocketWithTimeout
+  class Error < StandardError; end
+  class Timeout < StandardError; end
+  class ReadTimeout < Timeout; end
+  class WriteTimeout < Timeout; end
+  attr_reader :host, :port, :tls, :read_timeout, :write_timeout, :connect_timeout, :socket
+
+  def initialize(host:, port:, tls: false, connect_timeout: 5, read_timeout: 5, write_timeout: 5)
+    @tls = tls
+    @host = host
+    @port = port
+    @write_timeout = write_timeout
+    @read_timeout = read_timeout
+    @connect_timeout = connect_timeout
+  end
+  
+  def ssl_context
+    ctx = OpenSSL::SSL::SSLContext.new
+    ctx.ssl_version = :TLSv1_2
+    ctx.ca_file = ca_file if ca_file
+    ctx.verify_mode = OpenSSL::SSL::VERIFY_PEER
+    ctx
+  end
+
+  # NOTE: Upgrading Ruby 2.7 might change the Ruby's socket API
+  def init_socket
+    if tls
+      sock = OpenSSL::SSL::SSLSocket.new(
+        TCPSocket.open(host, port), # opens connection to server
+        ssl_context
+      )
+      # Close both socket and encrypted layer
+      sock.sync_close = true
+    else
+      sock = Socket.new(:INET, :STREAM, 0)
+    end
+    sock.setsockopt(Socket::IPPROTO_TCP, Socket::TCP_NODELAY, 1)
+    sock
+  end
+
+  def connect(timeout: CONNECT_TIMEOUT)
+    @socket = init_socket
+    deadline = Time.now.utc + timeout
+    non_blocking(socket, deadline) do
+      # NOTE: different method arity for non-SSL
+      if tls
+        socket.connect_nonblock
+      else
+        socket_address = Socket.pack_sockaddr_in(port, host)
+        socket.connect_nonblock(socket_address)
+      end
+    end
+  rescue Errno::EISCONN
+    # Connection established
+  rescue Timeout, Errno::ETIMEDOUT => e
+    raise ConnectTimeout, "Connection timeout after #{timeout} seconds trying to connect to '#{host}:#{port}': #{e.class}: #{e.message}"
+  rescue SystemCallError, IOError => e
+    raise Error, "Connection failure while connecting to '#{host}:#{port}': #{e.class}: #{e.message}"
+  end
+
+  def read(timeout: READ_TIMEOUT, length: 1024)
+    deadline = Time.now.utc + timeout
+    non_blocking(socket, deadline) do
+      socket.read_nonblock(length)
+    end
+  rescue Timeout
+    raise ReadTimeout, "Timeout after #{timeout}s while reading data from #{host}:#{port}"
+  rescue SystemCallError, IOError => e
+    raise Error, "Connection error while reading data from #{host}:#{port} #{e.class}: #{e.message}"
+  end
+
+  def write(data, timeout: WRITE_TIMEOUT)
+    deadline = Time.now.utc + timeout
+    length = data.bytesize
+    total_count = 0
+    non_blocking(socket, deadline) do
+      loop do
+        count = socket.write_nonblock(data)
+        total_count += count
+        return total_count if total_count >= length
+
+        data = data.byteslice(count..-1)
+      end
+    end
+  rescue Timeout
+    raise WriteTimeout, "Timeout after #{timeout}s while writing data to #{host}:#{port}"
+  rescue SystemCallError, IOError => e
+    raise Error, "Connection error while writing data to #{host}:#{port} #{e.class}: #{e.message}"
+  end
+
+  def disconnect
+    socket&.close
+  end
+
+  def non_blocking(socket, deadline)
+    raise Error, "Socket #{host}:#{port} is closed" if closed?
+
+    yield
+  rescue IO::WaitReadable => e
+    time_remaining = calculate_remaining_time(deadline)
+    raise Timeout, e unless IO.select([socket], nil, nil, time_remaining)
+
+    retry
+  rescue IO::WaitWritable => e
+    time_remaining = calculate_remaining_time(deadline)
+    raise Timeout, e unless IO.select(nil, [socket], nil, time_remaining)
+
+    retry
+  end
+
+  def calculate_remaining_time(deadline)
+    time_remaining = deadline - Time.now.utc
+    raise Timeout if time_remaining.negative?
+
+    time_remaining
+  end
+end
+
+sock = TCPSocketWithTimeout.new(host: 'localhost', port: 8888)
+sock.write "HELLO"
+puts "Writing done"
+```
+
+
+Reference:
+
+https://ruby-doc.org/core-2.6.2/IO.html#method-c-select
+https://workingwithruby.com/wwtcps/nonblocking/
+
+
+A basic TCP server that can be used to test the client:
+
+```ruby
+require 'socket'
+
+server = TCPServer.open(8888)
+
+while client = server.accept
+  puts "Accepted"
+  puts "Received #{client.read}"
+  puts "Wrote #{client.write('Hello back')}"
+  client.close
+end
+```
+
+## Notes
+
+Use non-blocking methods and IO.select to implement timeouts using non-blocking methods.
+
+Use TCPSocket with TLS connections.
+
+Use Socket with SSL connections.
+
+TCPSocket in Ruby version 3 and greater includes a connect_timeout parameter in the constructor:
+https://ruby-doc.org/stdlib-3.0.0/libdoc/socket/rdoc/TCPSocket.html
+
+Ruby's socket API is a work in progress...
+
+## References
+
+Socket connection timeout in Ruby:
+https://spin.atomicobject.com/2013/09/30/socket-connection-timeout-ruby/
+
+Working with TCP sockets:
+https://workingwithruby.com/downloads/Working%20With%20TCP%20Sockets.pdf
+
+Ruby's socket API and related documentation is not that great, so you might need to read the source:
+https://github.com/ruby/ruby/blob/v2_7_6/ext/socket/tcpsocket.c
+https://github.com/ruby/ruby/blob/v2_7_6/ext/socket/socket.c
+https://github.com/ruby/ruby/blob/v2_7_6/test/openssl/test_ssl.rb
+</div>
             </div>
         </section>
     </main>
@@ -43,4 +224,3 @@
     </script>
 </body>
 </html>
-

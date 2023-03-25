@@ -2,23 +2,71 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title></title>
+    <title>How to capture photos/videos with iSight and Objective-C</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,900;1,900&amp;display=swap" rel="stylesheet">
     <link href=" https://cdn.jsdelivr.net/npm/destyle.css@4.0.0/destyle.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
     <header class="flex">
-        <h1 class="fadeout"></h1>
+        <h1 class="fadeout">How to capture photos/videos with iSight and Objective-C</h1>
     </header>
     <main>
         <section class="flex">
             <div class="flex-item flex-100">
-                <div class="code"></div>
+                <div class="code">There are plenty of resources online that explain how to access iSight:
+
+-   [How to access iSight](http://ebbinghaushq.blogspot.com/2006/10/how-to-access-isight.html)
+
+This article explains how to use QuartzComposer for capturing images with iSight. The benefit of using QuartzComposer is that you don't have to write a lot of code to capture an image. All you have to do is setup a QCView with IB and bind it to an outlet, then to get the snapshot you call this method:
+
+
+```objectivec
+NSImage *screenshot = [isightView snapshotImage];
+```
+    
+
+Alternatively, you could also use:
+
+
+```objectivec
+- (id) createSnapshotImageOfType:(NSString*)type
+```
+    
+
+The code in the article didn't work for me:
+
+
+```objectivec
+NSImage *currentImage = [qcView valueForOutputKey:@"ImageOutput"];
+```
+    
+
+The article also forgot to mention that you have to import and link to the following frameworks:
+
+
+```objectivec
+#import <QuartzCore/QuartzCore.h>
+#import <Quartz/Quartz.h>
+```
+    
+
+-   [CocoaSequenceGrabber](http://www.skyfell.org/cocoasequencegrabber.html)
+
+Haven't tried this one yet.
+
+-   [Integrating iSight into your cocoa application…](http://iloveco.de/adding-isight/)
+
+This example is not complete.
+
+-   [QTCaptureView](http://developer.apple.com/DOCUMENTATION/quicktime/Reference/QTCaptureView_Class/Reference/Reference.html)
+
+Have a look at one of the demos like [StillMotion](http://developer.apple.com/samplecode/StillMotion/index.html)
+
+</div>
             </div>
         </section>
     </main>
@@ -43,4 +91,3 @@
     </script>
 </body>
 </html>
-

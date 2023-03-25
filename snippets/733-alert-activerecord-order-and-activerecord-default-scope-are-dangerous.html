@@ -2,23 +2,76 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title></title>
+    <title>ALERT: ActiveRecord#order and ActiveRecord#default_scope are dangerous</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,900;1,900&amp;display=swap" rel="stylesheet">
     <link href=" https://cdn.jsdelivr.net/npm/destyle.css@4.0.0/destyle.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
     <header class="flex">
-        <h1 class="fadeout"></h1>
+        <h1 class="fadeout">ALERT: ActiveRecord#order and ActiveRecord#default_scope are dangerous</h1>
     </header>
     <main>
         <section class="flex">
             <div class="flex-item flex-100">
-                <div class="code"></div>
+                <div class="code">Consider this model:
+
+
+```ruby
+class Transaction
+  default_scope -> { order("created_at ASC") }
+
+  def self.latest
+    order('created_at DESC')
+  end
+
+   def self.approved_for_customer(customer)
+    where('approved is not null and customer_id = ?', customer).order('approved_at DESC')
+  end
+end
+```
+    
+
+And this controller:
+
+
+```ruby
+class TransactionsWorker
+   def perform(...)
+      transaction = Transaction.approved_for_customer.latest # WTF!
+   end
+end
+```
+    
+
+The order will be "ORDER BY created\_at ASC, approved\_at DESC, created\_at DESC", not "created\_at DESC".
+
+Solutions:
+
+-   Don't return an instead of ActiveRecord::Relation if you use order, return an array (.all, .first, etc)
+-   Don't use order and default\_scope at all in models, ordering usually belongs in the business-logic layer.
+-   Use reorder as the last method call if chaining ActiveRecord::Relation, e.g. Transaction.where('...').reorder(:approved\_at)
+
+A safer model:
+
+
+```ruby
+class Transaction
+   def self.latest
+    order('created_at DESC').all
+  end
+
+   def self.for_customer(customer)
+    where('approved is not null and customer_id = ?', customer).order('approved_at DESC').all
+  end
+end
+```
+    
+
+</div>
             </div>
         </section>
     </main>
@@ -43,4 +96,3 @@
     </script>
 </body>
 </html>
-

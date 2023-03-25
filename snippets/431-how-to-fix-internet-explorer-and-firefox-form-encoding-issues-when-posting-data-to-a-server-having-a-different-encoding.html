@@ -2,23 +2,46 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title></title>
+    <title>How to fix Internet Explorer and Firefox form encoding issues when posting data to a server having a different encoding</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,900;1,900&amp;display=swap" rel="stylesheet">
     <link href=" https://cdn.jsdelivr.net/npm/destyle.css@4.0.0/destyle.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
     <header class="flex">
-        <h1 class="fadeout"></h1>
+        <h1 class="fadeout">How to fix Internet Explorer and Firefox form encoding issues when posting data to a server having a different encoding</h1>
     </header>
     <main>
         <section class="flex">
             <div class="flex-item flex-100">
-                <div class="code"></div>
+                <div class="code">This snippet explains how to fix Internet Explorer and Firefox form encoding issues when posting data to a server having a different encoding than the source system.
+
+This happens, for example, when you host a form on a server using ISO-8859-1 that posts data to a server using UTF-8.
+
+The fix for Firefox (and Opera and other sensible browsers) is to use the accept-charset attribute:
+
+
+```html
+<form ...  accept-charset="utf-8">
+```
+    
+
+The fix for Internet Explorer is to use a hack:
+
+
+```html
+<form ...  accept-charset="utf-8">
+  <input type="hidden" name="enc" value="&#153;">
+</form>
+```
+    
+
+The hidden input field will make Internet Explorer understand that you want it [to support UTF-8](http://stackoverflow.com/questions/153527/setting-the-character-encoding-in-form-submit-for-internet-explorer).
+
+</div>
             </div>
         </section>
     </main>
@@ -43,4 +66,3 @@
     </script>
 </body>
 </html>
-

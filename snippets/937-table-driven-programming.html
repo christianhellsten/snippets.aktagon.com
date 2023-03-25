@@ -2,23 +2,87 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title></title>
+    <title>Table-driven Programming</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,900;1,900&amp;display=swap" rel="stylesheet">
     <link href=" https://cdn.jsdelivr.net/npm/destyle.css@4.0.0/destyle.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
     <header class="flex">
-        <h1 class="fadeout"></h1>
+        <h1 class="fadeout">Table-driven Programming</h1>
     </header>
     <main>
         <section class="flex">
             <div class="flex-item flex-100">
-                <div class="code"></div>
+                <div class="code">You can use if statements to run a function when the state of your application matches specific criteria.
+
+However, if statements don't scale as they are hard to understand and maintain:
+
+```python
+if state_x and state_y and state_z:
+    do_xyz()
+
+if state_x and state_z:
+    do_xz()
+
+if state_x and state_y and not state_z:
+    do_xy_not_z()
+```
+
+Table-driven programming is an alternative that sometimes is easier to maintain:
+
+```python
+rules = (
+    # x, y, z, function
+    (True, True, True, do_xyz),
+    (True, True, False, do_xy_not_z),
+    (True, False, True, do_xz),
+    (True, True, True, do_xz),
+)
+for rule in rules:
+    rule_x = rule[0]
+    rule_y = rule[1]
+    rule_z = rule[2]
+    doit = rule[3]
+    if rule_x == state_x and rule_y == state_y and rule_z == state_z:
+        doit()
+    else:
+        print("Skipping")
+```
+
+Or, more succinctly:
+
+```python
+def matching_rules(rules, params):
+    for criterion, func in rules:
+        if all(params[ix] == criteria for ix, criteria in enumerate(criterion)):
+            yield func
+
+# The table of rules
+rules = (
+    # x, y, z, function
+    ((True, True, True), do_xyz),
+    ((True, True, False), do_xy_not_z),
+    ((True, False, True), do_xz),
+    (True, True, True, do_xz),
+)
+params = (state_x, state_y, state_z)
+for func in matching_rules(rules, params):
+    func()
+```
+
+In summary, a function is run only when the criteria match.
+
+Pattern matching is also an alternative:
+https://www.python.org/dev/peps/pep-0635/
+
+However, the first-to-match rule requires the order to be correct and prevents multiple function calls.
+
+State machines and Prolog are also options...
+</div>
             </div>
         </section>
     </main>
@@ -43,4 +107,3 @@
     </script>
 </body>
 </html>
-

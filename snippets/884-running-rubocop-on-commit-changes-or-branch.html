@@ -2,23 +2,49 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title></title>
+    <title>Running Rubocop on commit, changes, or branch</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,900;1,900&amp;display=swap" rel="stylesheet">
     <link href=" https://cdn.jsdelivr.net/npm/destyle.css@4.0.0/destyle.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
     <header class="flex">
-        <h1 class="fadeout"></h1>
+        <h1 class="fadeout">Running Rubocop on commit, changes, or branch</h1>
     </header>
     <main>
         <section class="flex">
             <div class="flex-item flex-100">
-                <div class="code"></div>
+                <div class="code">- To RuboCop the current commit
+
+```
+git diff-tree --no-commit-id --name-only -r HEAD --diff-filter AMT | xargs bundle exec rubocop
+```
+
+- To RuboCop the working tree changes
+
+```
+git diff --name-only --diff-filter AMT | xargs bundle exec rubocop
+```
+
+- To RuboCop all of the changes from the branch
+
+```
+git diff --name-only master --diff-filter AMT | xargs bundle exec rubocop
+```
+
+From https://about.gitlab.com/handbook/tools-and-tips/rubocop/
+
+Also see:
+
+- https://github.com/danger/danger
+- https://github.com/danger/awesome-danger
+- https://github.com/prontolabs/pronto
+- https://github.com/prontolabs/pronto#runners
+- https://github.com/danger/danger-gitlab-gem
+</div>
             </div>
         </section>
     </main>
@@ -43,4 +69,3 @@
     </script>
 </body>
 </html>
-

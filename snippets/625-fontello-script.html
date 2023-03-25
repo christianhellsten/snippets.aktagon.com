@@ -2,23 +2,77 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title></title>
+    <title>Fontello script</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,900;1,900&amp;display=swap" rel="stylesheet">
     <link href=" https://cdn.jsdelivr.net/npm/destyle.css@4.0.0/destyle.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
     <header class="flex">
-        <h1 class="fadeout"></h1>
+        <h1 class="fadeout">Fontello script</h1>
     </header>
     <main>
         <section class="flex">
             <div class="flex-item flex-100">
-                <div class="code"></div>
+                <div class="code">Easily download and install Fontello font icons with this makefile; no more manual downloading and copying:
+
+
+```makefile
+#
+# Easily download and install Fontello font icons.
+#
+# Original version:
+# https://gist.github.com/puzrin/5537065
+#
+ 
+# Note this directory will be deleted
+TMP_DIR      ?= ./tmp/fontello
+# The Fontello config.json file
+CONF_FILE    ?= ./config/fontello.json
+# Where do you want the font files to be?
+FONT_DIR     ?= ./public/font
+# Where do you want the CSS files to be?
+CSS_DIR      ?= ./app/css/vendor
+ 
+### Don't edit below ###
+ 
+FONTELLO_HOST ?= http://fontello.com
+ 
+download:
+	@if test ! which curl ; then \
+		echo 'Install curl first.' >&2 ; \
+		exit 128 ; \
+		fi
+	curl --silent --show-error --fail --output .fontello \
+		--form "config=@${CONF_FILE}" \
+		${FONTELLO_HOST}
+	open ${FONTELLO_HOST}/cat .fontello
+
+install:
+	@if test ! which unzip ; then \
+		echo 'Install unzip first.' >&2 ; \
+		exit 128 ; \
+		fi
+	@if test ! -e .fontello ; then \
+		echo 'Run make fontopen first.' >&2 ; \
+		exit 128 ; \
+		fi
+	rm -rf ${TMP_DIR} .fontello.zip
+	curl --silent --show-error --fail --output .fontello.zip \
+		${FONTELLO_HOST}/cat .fontello/get
+	unzip .fontello.zip -d ${TMP_DIR}
+	mkdir -p ${FONT_DIR}
+	mkdir -p ${CSS_DIR}
+	cp -R ${TMP_DIR}/*/font/* ${FONT_DIR}
+	cp -R ${TMP_DIR}/*/css/* ${CSS_DIR}
+	rm -rf ${TMP_DIR} .fontello.zip
+```
+    
+
+</div>
             </div>
         </section>
     </main>
@@ -43,4 +97,3 @@
     </script>
 </body>
 </html>
-

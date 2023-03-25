@@ -2,23 +2,82 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title></title>
+    <title>Writing a DSL in Ruby</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,900;1,900&amp;display=swap" rel="stylesheet">
     <link href=" https://cdn.jsdelivr.net/npm/destyle.css@4.0.0/destyle.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
     <header class="flex">
-        <h1 class="fadeout"></h1>
+        <h1 class="fadeout">Writing a DSL in Ruby</h1>
     </header>
     <main>
         <section class="flex">
             <div class="flex-item flex-100">
-                <div class="code"></div>
+                <div class="code">When defining a simple DSL instance\_eval and instance\_exec is your friend:
+
+
+```ruby
+class Worker
+  attr_reader :where
+  def call(where, &block)
+    @where = where
+    instance_eval &block
+  end
+
+  def cut_trees
+    puts "Cutting trees"
+  end
+
+  def make_planks
+    puts "Making planks"
+  end
+
+  def i(what, &block)
+    instance_eval &block
+  end
+end
+
+def work where, &block
+  puts "Working #{where}"
+  Worker.new.(where, &block)
+  puts "Going home"
+end
+```
+    
+
+Use the DSL like this:
+
+
+```ruby
+work "in the woods" do
+  cut_trees
+  make_planks
+  i "take a coffee break" do
+    puts "Cooking coffee #{where}"
+  end
+end
+```
+    
+
+Output is:
+
+
+```ruby
+Working in the woods
+Cutting trees
+Making planks
+Cooking coffee in the woods
+Going home
+```
+    
+
+instance\_exec method allows you to pass arguments to your blocks, which instance\_eval doesn't allow.
+
+</div>
             </div>
         </section>
     </main>
@@ -43,4 +102,3 @@
     </script>
 </body>
 </html>
-

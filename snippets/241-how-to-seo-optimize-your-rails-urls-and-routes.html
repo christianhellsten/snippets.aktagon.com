@@ -2,23 +2,68 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title></title>
+    <title>How to SEO optimize your Rails URLs and routes</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,900;1,900&amp;display=swap" rel="stylesheet">
     <link href=" https://cdn.jsdelivr.net/npm/destyle.css@4.0.0/destyle.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
     <header class="flex">
-        <h1 class="fadeout"></h1>
+        <h1 class="fadeout">How to SEO optimize your Rails URLs and routes</h1>
     </header>
     <main>
         <section class="flex">
             <div class="flex-item flex-100">
-                <div class="code"></div>
+                <div class="code">My idea for achieving optimal content crawlability and SEO optimized URLs is to use permalinks instead of ids and the default Rails routes. The permalinks can contain whatever you decide is optimal from a SEO point of view.
+
+As an example, let's take a recipe site that has a recipe at http://xxx/recipes/asia/china/beijing-duck.html.
+
+First let's configure the .html extension to be handled by the RecipesController:
+
+
+```ruby
+map.connect 'recipes/*permalink.html', :controller => 'recipes', :action => 'show'
+```
+    
+
+In the code we use the URI, which is the permalink of the recipe, to retrieve the recipe from the database:
+
+
+```ruby
+class RecipesController
+  def show
+    @product = Recipe.find_by_permalink(request.path)
+  end
+end
+```
+    
+
+To handle the categories and subcategories, we use the following route:
+
+
+```ruby
+map.connect 'recipes/*permalink/', :controller => 'categories', :action => 'show'
+```
+    
+
+And create the CategoriesController:
+
+
+```ruby
+class CategoriesController
+  def show
+    @category = Category.find_by_permalink(request.path)
+  end
+end
+```
+    
+
+Now what's left is for you to figure out how to generate the permalinks... I recommend having a look at permalink\_fu.
+
+</div>
             </div>
         </section>
     </main>
@@ -43,4 +88,3 @@
     </script>
 </body>
 </html>
-

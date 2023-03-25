@@ -2,23 +2,85 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title></title>
+    <title>How to make a clickable link inside a NSTextField and Cocoa</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,900;1,900&amp;display=swap" rel="stylesheet">
     <link href=" https://cdn.jsdelivr.net/npm/destyle.css@4.0.0/destyle.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
     <header class="flex">
-        <h1 class="fadeout"></h1>
+        <h1 class="fadeout">How to make a clickable link inside a NSTextField and Cocoa</h1>
     </header>
     <main>
         <section class="flex">
             <div class="flex-item flex-100">
-                <div class="code"></div>
+                <div class="code">From [How do I embed a hyperlink inside an NSTextField or NSTextView?](http://developer.apple.com/qa/qa2006/qa1487.html)
+
+NSAttributedString+Hyperlink.h
+
+
+```objectivec
+#import <Cocoa/Cocoa.h>
+
+@interface NSAttributedString (Hyperlink)
++(id)hyperlinkFromString:(NSString*)inString withURL:(NSURL*)aURL;
+@end
+```
+    
+
+NSAttributedString+Hyperlink.m:
+
+
+```objectivec
+#import "NSAttributedString+Hyperlink.h"
+
+
+@implementation NSAttributedString (Hyperlink)
++(id)hyperlinkFromString:(NSString*)inString withURL:(NSURL*)aURL
+{
+    NSMutableAttributedString* attrString = [[NSMutableAttributedString alloc] initWithString: inString];
+    NSRange range = NSMakeRange(0, [attrString length]);
+	
+    [attrString beginEditing];
+    [attrString addAttribute:NSLinkAttributeName value:[aURL absoluteString] range:range];
+	
+    // make the text appear in blue
+    [attrString addAttribute:NSForegroundColorAttributeName value:[NSColor blueColor] range:range];
+	
+    // next make the text appear with an underline
+    [attrString addAttribute:
+	 NSUnderlineStyleAttributeName value:[NSNumber numberWithInt:NSSingleUnderlineStyle] range:range];
+	
+    [attrString endEditing];
+	
+    return [attrString autorelease];
+}
+@end
+```
+    
+
+This code sets the contents of the NSTextField to a URL:
+
+
+```objectivec
+#import "NSAttributedString+Hyperlink.h"
+
+[textURL setAllowsEditingTextAttributes: YES];
+[textURL setSelectable: YES];
+	
+NSURL* url = [NSURL URLWithString:@"http://www.apple.com"];
+	
+NSMutableAttributedString* string = [[NSMutableAttributedString alloc] init];
+[string appendAttributedString: [NSAttributedString hyperlinkFromString:@"Apple Computer" withURL:url]];
+	
+[textURL setAttributedStringValue: string];
+```
+    
+
+</div>
             </div>
         </section>
     </main>
@@ -43,4 +105,3 @@
     </script>
 </body>
 </html>
-

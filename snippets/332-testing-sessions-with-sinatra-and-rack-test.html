@@ -2,23 +2,56 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title></title>
+    <title>Testing sessions with Sinatra and Rack::Test</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,900;1,900&amp;display=swap" rel="stylesheet">
     <link href=" https://cdn.jsdelivr.net/npm/destyle.css@4.0.0/destyle.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
     <header class="flex">
-        <h1 class="fadeout"></h1>
+        <h1 class="fadeout">Testing sessions with Sinatra and Rack::Test</h1>
     </header>
     <main>
         <section class="flex">
             <div class="flex-item flex-100">
-                <div class="code"></div>
+                <div class="code">You need support for testing sessions when, for example, testing authentication. The only way I've managed to get sessions to work with Sinatra and Rack::Test is by going through the whole stack, in other words calling the authentication controller as shown here:
+
+
+```ruby
+@user = Factory(:user) # create a dummy user
+User.expects(:authenticate).with(any_parameters).returns(@user) # make authenticate return the dummy user
+post "/sign-in", {:email => @user.email, :password => @user.password} # login to the application and set a session variable.
+```
+    
+
+After this the session populated and we're logged in when accessing the application again:
+
+
+```ruby
+post "/articles", {:title => 'Sessions suck', :body => '...'}
+```
+    
+
+On a side note, there are two ways of specifying sessions that used to work, but which no longer work with Sinatra 1.0:
+
+
+```ruby
+get '/', :env => { :session => {:abc => 'adf'} }
+get '/', {}, :session => {:abc => 'adf'}
+get '/', {}, "rack.session" => {:abc => 'adf'}
+```
+    
+
+The session is always empty.
+
+There are many discussions about sessions and Rack::Test, but not one of them has a solution that works for me:
+\* [rack.session variable is missing env under test environment](https://sinatra.lighthouseapp.com/projects/9779/tickets/314-racksession-variable-is-missing-env-under-test-environment)
+\* [Sessions with rspec and Rack.Test](http://groups.google.com/group/sinatrarb/browse_thread/thread/a9de4f690631b3a1)
+
+</div>
             </div>
         </section>
     </main>
@@ -43,4 +76,3 @@
     </script>
 </body>
 </html>
-

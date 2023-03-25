@@ -2,23 +2,61 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title></title>
+    <title>Simple Mongrel HTTP server and custom Mongrel handler example</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,900;1,900&amp;display=swap" rel="stylesheet">
     <link href=" https://cdn.jsdelivr.net/npm/destyle.css@4.0.0/destyle.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
     <header class="flex">
-        <h1 class="fadeout"></h1>
+        <h1 class="fadeout">Simple Mongrel HTTP server and custom Mongrel handler example</h1>
     </header>
     <main>
         <section class="flex">
             <div class="flex-item flex-100">
-                <div class="code"></div>
+                <div class="code">```ruby
+# http://mongrel.rubyforge.org/rdoc/index.html
+# gem install -y mongrel
+require 'rubygems'
+require 'mongrel'
+
+# Usage: ruby mongrel_http_server.rb <host> <port> <docroot>
+host    = ARGV[0] || "127.0.0.1"
+port    = ARGV[1] || 80
+docroot = ARGV[2] || "html/"
+
+# Simple Mongrel handler that prints the current date and time
+class HandlerExample < Mongrel::HttpHandler
+   def process(request, response)
+      response.start(200) do |head, out|
+         head["Content-Type"] = "text/html"
+         out.write Time.now
+      end
+   end
+end
+
+# Configure Mongrel and handlers
+config = Mongrel::Configurator.new :host => host, :port => port do
+  listener do
+    uri "/",              :handler => Mongrel::DirHandler.new(docroot)
+    uri "/handler_example", :handler => HandlerExample.new, :in_front => true
+  end
+
+  # CTRL+C to stop server
+  trap("INT") { stop }
+  run
+end
+
+# Start Mongrel
+puts "Mongrel listening on '#{host}:#{port}', serving documents from '#{docroot}'."
+config.join
+```
+    
+
+</div>
             </div>
         </section>
     </main>
@@ -43,4 +81,3 @@
     </script>
 </body>
 </html>
-

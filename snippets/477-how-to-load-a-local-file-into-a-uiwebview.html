@@ -2,23 +2,46 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title></title>
+    <title>How to load a local file into a UIWebView</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,900;1,900&amp;display=swap" rel="stylesheet">
     <link href=" https://cdn.jsdelivr.net/npm/destyle.css@4.0.0/destyle.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
     <header class="flex">
-        <h1 class="fadeout"></h1>
+        <h1 class="fadeout">How to load a local file into a UIWebView</h1>
     </header>
     <main>
         <section class="flex">
             <div class="flex-item flex-100">
-                <div class="code"></div>
+                <div class="code">First you'll need to setup a UIWebView in for example Interface Builder. Then in the controller you add this incredible piece of code:
+
+
+```objectivec
+NSString *path = [[NSBundle mainBundle] pathForResource:@"about" ofType:@"html" inDirectory:@"html"];
+NSLog(@"%@", path);
+NSURL *url = [NSURL fileURLWithPath:path];
+NSURLRequest *request = [NSURLRequest requestWithURL:url];
+[webView loadRequest:request];
+```
+    
+
+This beautiful piece of code will look for a file named about.html in a folder called html. Now go create that folder and the file with your favorite tools.
+
+Next drag that folder under your application in Groups & Files in XCode. Now to make XCode happy you have to make sure you select Create Folder References for any added folders.
+
+That's it. If you get this error it means the file couldn't be found, and that you didn't import the files correctly:
+
+
+```objectivec
+Terminating app due to uncaught exception 'NSInvalidArgumentException', reason: '*** -[NSURL initFileURLWithPath:]: nil string parameter'
+```
+    
+
+</div>
             </div>
         </section>
     </main>
@@ -43,4 +66,3 @@
     </script>
 </body>
 </html>
-

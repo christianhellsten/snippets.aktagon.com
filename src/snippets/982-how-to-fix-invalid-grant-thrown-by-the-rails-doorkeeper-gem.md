@@ -1,0 +1,57 @@
+---
+id: '982'
+title: How to fix "invalid_grant" thrown by the Rails doorkeeper gem
+languages:
+- bash
+- ruby
+tags:
+---
+The doorkeeper gem is throwing invalid_grant in your face and you don't know why. Fixing it will be easier if we add some debug statements to the doorkeeper gem.
+
+To find the relevant code, we run this from the CLI:
+
+```bash
+bundle exec gem which doorkeeper
+```
+
+This gives us the location of the doorkeeper code.
+
+By reading or running grep on the doorkeeper code we can see that the code that raises the invalid_grant error is one of these lines in Doorkeeper::OAuth::AuthorizationCodeRequest:
+
+```ruby
+  validate :grant,        error: :invalid_grant
+  # @see https://datatracker.ietf.org/doc/html/rfc6749#section-5.2
+  validate :redirect_uri, error: :invalid_grant
+  validate :code_verifier, error: :invalid_grant
+```
+
+For details, see:
+https://github.com/doorkeeper-gem/doorkeeper/blob/bfc132f58455052db7b0c7f936fb72ffd033130d/lib/doorkeeper/oauth/authorization_code_request.rb#L8-L11
+
+Add a debugger statement (binding.pry) to each validation method in gems/doorkeeper-5.5.4/lib/doorkeeper/oauth/authorization_code_request.rb:
+
+```ruby
+
+    78: def validate_redirect_uri
+    79:   binding.pry
+ => 80:   Helpers::URIChecker.valid_for_authorization?(
+    81:     redirect_uri,
+    82:     grant.redirect_uri,
+    83:   )
+    84: end
+```
+
+The debugger will stop when we try to authenticate again, and we find out that the problem in this case is an extra query parameters in the redirect_uri:
+
+```ruby
+[1] pry(#<Doorkeeper::OAuth::AuthorizationCodeRequest>)> redirect_uri
+=> "http://localhost:3000/app/oauth_session?source=password"
+[2] pry(#<Doorkeeper::OAuth::AuthorizationCodeRequest>)> grant.redirect_uri
+=> "http://localhost:3000/app/oauth_session?xxx=yyy&source=password"
+```
+
+By reading the OAuth specification we find that parameters are not allowed:
+- https://datatracker.ietf.org/doc/id/draft-ietf-oauth-security-topics-18.html#name-protecting-redirect-based-f
+- https://datatracker.ietf.org/doc/id/draft-ietf-oauth-security-topics-18.html#name-countermeasures
+
+The solution is to remove any extra parameters, in this case xxx, from the client application's redirect URI.

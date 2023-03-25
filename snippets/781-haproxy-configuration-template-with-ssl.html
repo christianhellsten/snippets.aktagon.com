@@ -2,23 +2,109 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title></title>
+    <title>Haproxy configuration template with SSL</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,900;1,900&amp;display=swap" rel="stylesheet">
     <link href=" https://cdn.jsdelivr.net/npm/destyle.css@4.0.0/destyle.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
     <header class="flex">
-        <h1 class="fadeout"></h1>
+        <h1 class="fadeout">Haproxy configuration template with SSL</h1>
     </header>
     <main>
         <section class="flex">
             <div class="flex-item flex-100">
-                <div class="code"></div>
+                <div class="code">```
+# HAProxy documentation:
+# http://cbonte.github.io/haproxy-dconv/configuration-1.7.html
+#
+# Inspiration:
+# https://gist.github.com/nateware/3987720
+# https://serversforhackers.com/using-ssl-certificates-with-haproxy
+# https://developers.livechatinc.com/blog/speeding-up-our-api/
+#
+global
+  # syslog
+  log               /dev/log local0
+  log               127.0.0.1 local1 notice
+  # run as haproxy
+  user              haproxy
+  group             haproxy
+  # total number of allowed open connections
+  maxconn           50000
+  pidfile           /var/run/haproxy.pid
+  # random health checks
+  spread-checks     5
+  # run in background
+  daemon
+  # SSL certificates are found here
+  ca-base           /etc/ssl/certs
+  crt-base          /etc/ssl/private
+  # SSL hardening, see https://www.ssllabs.com/ssltest/analyze.html
+  tune.ssl.default-dh-param   2048
+  ssl-default-bind-options    no-sslv3
+  ssl-default-bind-ciphers    ECDH+AESGCM:DH+AESGCM:ECDH+AES256:DH+AES256:ECDH+AES128:DH+AES:ECDH+3DES:DH+3DES:RSA+AESGCM:RSA+AES:RSA+3DES:!aNULL:!MD5:!DSS
+  ssl-default-server-options  no-sslv3
+  ssl-default-server-ciphers  ECDH+AESGCM:DH+AESGCM:ECDH+AES256:DH+AES256:ECDH+AES128:DH+AES:ECDH+3DES:DH+3DES:RSA+AESGCM:RSA+AES:RSA+3DES:!aNULL:!MD5:!DSS
+  # uncomment to debug
+  #debug
+
+# defaults apply to all servers
+defaults
+  log               global
+  # requests use HTTP protocol
+  mode              http
+  # log HTTP requests
+  option            httplog
+  # keep alive connections between client and balancer. Close connections between balancer and backend
+  option            http-server-close
+  # X-Forwarded-For header
+  option            forwardfor
+  # Client closed connection, abort request
+  option            abortonclose
+  # if request fails, resend request to up to 2 servers
+  retries           3
+  # request can be handled by any server in case of failure
+  option            redispatch
+  # total number of allowed open connections per server
+  maxconn           25000
+  # health check fails it takes longer than this to respond
+  timeout check     5s
+  timeout client    30s
+  timeout connect   30s
+  timeout server    30s
+
+#
+# Define frontends (haproxy)
+#
+frontend http
+  bind            *:80
+  # redirect HTTP to HTTPS
+  redirect scheme https if !{ ssl_fc }
+  default_backend http-backend
+
+frontend https
+  bind            *:443 ssl crt www.xxx.com.pem
+  default_backend http-backend
+
+#
+# Define backends (Rails, Go, Elixir, etc)
+#
+backend http-backend
+  balance         roundrobin
+  # health check is done by fetching /
+  option          httpchk HEAD / HTTP/1.1
+  # Define two backend servers
+  server          http1 10.0.0.1:9000 check #inter 5s rise 18 fall 2
+  server          http2 10.0.0.2:9001 check #inter 5s rise 18 fall 2
+  # Set HTTP headers
+  http-request    set-header X-Forwarded-Port %[dst_port]
+  http-request    add-header X-Forwarded-Proto https if { ssl_fc }
+```
+</div>
             </div>
         </section>
     </main>
@@ -43,4 +129,3 @@
     </script>
 </body>
 </html>
-

@@ -2,23 +2,97 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title></title>
+    <title>Combining CSS and JavaScript files with PHP to reduce page load time</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,900;1,900&amp;display=swap" rel="stylesheet">
     <link href=" https://cdn.jsdelivr.net/npm/destyle.css@4.0.0/destyle.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
     <header class="flex">
-        <h1 class="fadeout"></h1>
+        <h1 class="fadeout">Combining CSS and JavaScript files with PHP to reduce page load time</h1>
     </header>
     <main>
         <section class="flex">
             <div class="flex-item flex-100">
-                <div class="code"></div>
+                <div class="code">This is a very simple utility class that I created which combines multiple files into one&mdash;in contrast to all other PHP scripts I've found elsewhere, which all work badly and are a million lines long, this one is simple to understand and maintain:
+
+
+```php
+<?php
+class Files
+{
+	private static function process($files, $output, $base_dir = '')
+	{
+		$contents 	= '';
+		
+		# If this is a string then it's a search pattern
+		if(is_string($files))
+		{
+			$files = glob($files);
+		}
+		
+		foreach ($files as $file) 
+		{
+			$contents .= file_get_contents($base_dir.$file) . "\n\n";
+		}
+	
+		# TODO locking 
+		if ($fp = fopen($output, 'wb')) 
+		{
+			fwrite($fp, $contents);
+			fclose($fp);
+		}
+	
+		return $contents;
+	}
+	
+	#
+	# Combine all CSS files in the css directory:
+	#
+	#	echo Files::combine("css/*.css", "css/all.css");
+	#
+	# Combine only specified files in the given order:
+	#
+	#	echo Files::combine(array("css/core.css", "css/default.css"), "css/all.css");
+	#
+	#
+	static function combine($files, $output_filename, $base_dir = '')
+	{
+		# Combine the files
+		if(!file_exists($output_filename))
+		{
+			self::process($files, $output_filename, $base_dir);
+		}
+	}
+}
+?>
+```
+    
+
+The call to Files::combine should go in a file that is called on each request. On the first request to this file, the files are combined into one, on subsequent requests nothing is done, the only overhead is a call to file\_exists.
+
+Ideally the name of the output filename should contain a version number, so that an updated CSS file is not taken from the browser cache. This can easily be supported by reading the build number from somewhere and appending it to the output filename:
+
+
+```php
+Files::combine("css/*.css", "css/all-v$version.css");
+```
+    
+
+Now all you have to do is add this to your HTML:
+
+
+```php
+<link rel="stylesheet" type="text/css" href="/css/all-v<?php echo $version ?>.css" media="screen" />
+```
+    
+
+This also works for JavaScript files. Note that I don't make an effort to minify anything as GZIP usually does a great job at minimizing bandwidth costs.
+
+</div>
             </div>
         </section>
     </main>
@@ -43,4 +117,3 @@
     </script>
 </body>
 </html>
-

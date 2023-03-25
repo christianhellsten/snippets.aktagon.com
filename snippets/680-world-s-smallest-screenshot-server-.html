@@ -2,23 +2,64 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title></title>
+    <title>World's Smallest Screenshot Server?</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,900;1,900&amp;display=swap" rel="stylesheet">
     <link href=" https://cdn.jsdelivr.net/npm/destyle.css@4.0.0/destyle.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
     <header class="flex">
-        <h1 class="fadeout"></h1>
+        <h1 class="fadeout">World's Smallest Screenshot Server?</h1>
     </header>
     <main>
         <section class="flex">
             <div class="flex-item flex-100">
-                <div class="code"></div>
+                <div class="code">```ruby
+require 'base64'
+require 'selenium-webdriver'
+
+class ScreenshotMiddleware
+  def initialize(app)
+    @app = app
+  end
+
+  def screenshot(url, width, height, file)
+    begin
+      driver = Selenium::WebDriver.for :firefox
+      driver.manage.window.resize_to(width, height)
+      driver.navigate.to url
+      driver.save_screenshot("screenshots/#{file}")
+      file
+    ensure
+      driver.quit
+    end
+  end
+
+  def call(env)
+    req = Rack::Request.new(env)
+    width = req.params.fetch('width') { 1024 }
+    height = req.params.fetch('height') { 768 }
+    url = req.params.fetch('url')
+    file = Base64.urlsafe_encode64(req.params.inspect) + ".png"
+    screenshot(url, width, height, file)
+    env['PATH_INFO'] = "/#{file}"
+    @app.call(env)
+  end
+end
+
+use ScreenshotMiddleware
+run Rack::URLMap.new  "/" => Rack::Directory.new('screenshots')
+```
+    
+
+Also see [How to capture screenshots with Selenium, Ruby and Firefox](http://snippets.aktagon.com/snippets/505-how-to-capture-screenshots-with-selenium-ruby-and-firefox).
+
+[Screenshot server API](https://github.com/christianhellsten/screenshot-server)
+
+</div>
             </div>
         </section>
     </main>
@@ -43,4 +84,3 @@
     </script>
 </body>
 </html>
-

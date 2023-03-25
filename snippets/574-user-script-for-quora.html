@@ -2,23 +2,44 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title></title>
+    <title>User script for Quora</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,900;1,900&amp;display=swap" rel="stylesheet">
     <link href=" https://cdn.jsdelivr.net/npm/destyle.css@4.0.0/destyle.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
     <header class="flex">
-        <h1 class="fadeout"></h1>
+        <h1 class="fadeout">User script for Quora</h1>
     </header>
     <main>
         <section class="flex">
             <div class="flex-item flex-100">
-                <div class="code"></div>
+                <div class="code">```javascript
+// ==UserScript==
+// @name       Quora Deblur
+// @namespace  http://quora.com/
+// @version    0.1
+// @description  Deblur
+// @match      http://www.quora.com/*
+// @copyright  2012+, You, me, the internet
+// ==/UserScript==
+
+function getEl (s, a) { return document["querySelector"+(a?"All":"")](s) }
+function removeNode (n) { n.parentNode.removeChild(n) }
+var forEach = Array.prototype.forEach;
+
+removeNode(getEl(".signup_cta_on_answer"));
+forEach.call(getEl(".text_hider", true), removeNode);
+forEach.call(getEl(".blurred_answer", true), function(el) {
+    el.className = el.className.replace("blurred_answer", "");
+});
+```
+    
+
+</div>
             </div>
         </section>
     </main>
@@ -43,4 +64,3 @@
     </script>
 </body>
 </html>
-

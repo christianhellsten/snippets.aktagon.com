@@ -2,23 +2,66 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title></title>
+    <title>Celery tips</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,900;1,900&amp;display=swap" rel="stylesheet">
     <link href=" https://cdn.jsdelivr.net/npm/destyle.css@4.0.0/destyle.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
     <header class="flex">
-        <h1 class="fadeout"></h1>
+        <h1 class="fadeout">Celery tips</h1>
     </header>
     <main>
         <section class="flex">
             <div class="flex-item flex-100">
-                <div class="code"></div>
+                <div class="code">1. Set a global task timeout
+
+The default is no timeout.
+
+CELERYD_TASK_SOFT_TIME_LIMIT = 30
+CELERYD_TASK_TIME_LIMIT = 60
+
+2. Use autoretry_for
+
+By default, no exceptions will be retried.
+
+3. Set max_retries at task or global level
+
+The default is 3 retries. None means unlimited retries.
+
+4. Use queues
+
+Otherwise, low priority tasks might prevent higher priority tasks from being executed.
+
+> @app.task(base=SqlAlchemyTask, queue='medium')
+
+5. Use Flower for monitoring
+
+https://docs.celeryproject.org/en/latest/userguide/monitoring.html#flower-real-time-celery-web-monitor
+
+6. Separate slow tasks from fast tasks
+
+Slow tasks will monopolizes workers, even if you have separate queues.
+
+7. Use late_ack=True
+
+Setting late_ack to True means we acknowledge the message after the task has run, not when received. This increases reliability.
+
+8. Make tasks idempotent
+
+9. There's no exactly-once
+
+Exactly-once is a lie.
+
+Reference:
+
+- https://docs.celeryproject.org/en/stable/userguide/tasks.html
+
+- https://lc0.github.io/blog/2013/05/01/celery-messaging-at-scale-at-instagram/
+</div>
             </div>
         </section>
     </main>
@@ -43,4 +86,3 @@
     </script>
 </body>
 </html>
-

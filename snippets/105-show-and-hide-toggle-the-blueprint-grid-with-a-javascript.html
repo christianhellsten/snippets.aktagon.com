@@ -2,23 +2,85 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title></title>
+    <title>Show and Hide (toggle) the Blueprint Grid with a JavaScript</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,900;1,900&amp;display=swap" rel="stylesheet">
     <link href=" https://cdn.jsdelivr.net/npm/destyle.css@4.0.0/destyle.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
     <header class="flex">
-        <h1 class="fadeout"></h1>
+        <h1 class="fadeout">Show and Hide (toggle) the Blueprint Grid with a JavaScript</h1>
     </header>
     <main>
         <section class="flex">
             <div class="flex-item flex-100">
-                <div class="code"></div>
+                <div class="code">This snippet--which could be improved on--allows you to easily display and hide the [BlueprintCSS](http://code.google.com/p/blueprintcss/) grid.
+
+Put the following code inside the &lt;head&gt; element:
+
+
+```javascript
+<style title="grid" type="text/css">
+		.container { }
+</style>
+<script type="text/javascript">
+	function toggleGrid() {
+		if (!document.styleSheets) return;
+	
+		var cssTitle  	 = "grid"
+		var selectorName = ".container";
+		var cssText   	 = "background: url('images/grid.png');";
+		var css = new Array();
+	
+		// Find the stylesheet
+		for(i = 0; i < document.styleSheets.length; i++)
+		{
+			var styleSheet = document.styleSheets[i];
+			
+			if(styleSheet.title == cssTitle) {
+				if (document.styleSheets[i].cssRules)
+					css = document.styleSheets[i].cssRules;
+				else if (document.styleSheets[i].rules)
+					css = document.styleSheets[i].rules;
+				else return;
+				
+				break;
+			}
+		}
+
+		// Find the selector
+		for (i = 0; i < css.length; i++) {
+		
+			if ((css[i].selectorText.toLowerCase() == selectorName)) {
+				if(css[i].style.cssText == "") {
+					css[i].style.cssText = cssText;
+				}
+				else {
+					css[i].style.cssText = "";
+				}
+			}
+		}
+	}
+</script>
+```
+    
+
+Change selectorName or cssText, if needed. Next add the following link, for example, to the footer:
+
+
+```javascript
+<a href="javascript:toggleGrid();" id="toggle-grid">Show grid</a>
+```
+    
+
+Now when you click the link, the grid will be displayed. Click again to hide it.
+
+Note that this is a simple example of how to change a CSS style sheet dynamically with JavaScript. You can use it to change any selector at runtime.
+
+</div>
             </div>
         </section>
     </main>
@@ -43,4 +105,3 @@
     </script>
 </body>
 </html>
-

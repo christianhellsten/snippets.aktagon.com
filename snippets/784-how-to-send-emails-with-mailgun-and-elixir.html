@@ -2,23 +2,51 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title></title>
+    <title>How to send emails with Mailgun and Elixir</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,900;1,900&amp;display=swap" rel="stylesheet">
     <link href=" https://cdn.jsdelivr.net/npm/destyle.css@4.0.0/destyle.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
     <header class="flex">
-        <h1 class="fadeout"></h1>
+        <h1 class="fadeout">How to send emails with Mailgun and Elixir</h1>
     </header>
     <main>
         <section class="flex">
             <div class="flex-item flex-100">
-                <div class="code"></div>
+                <div class="code">This example shows how to send emails with Mailgun and Elixir:
+
+```elixir
+url = "https://api.mailgun.net/v3/xxx.mailgun.org/messages"
+headers = [
+  "User-Agent": "My App",
+  "Content-Type": "application/x-www-form-urlencoded"
+]
+params = %{
+  "from" => "christian@xxx.mailgun.org",
+  "to" => "christian@aktagon.com",
+  "subject" => "Hello Christian",
+  "text" => "Hello"
+}
+body = URI.encode_query(params)
+auth = { "api", "key-xxx" }
+response = HTTPotion.post url, [body: body, headers: headers, basic_auth: auth]
+if !HTTPotion.Response.success?(response) do
+  throw(response.body)
+end
+Poison.decode!(response.body)
+```
+
+Replace the API key and mailgun URL with your own API key and URL.
+
+## Dependencies
+
+* [HTTPotion - HTTP client](https://github.com/myfreeweb/httpotion)
+* [Poison - JSON](https://github.com/devinus/poison)
+</div>
             </div>
         </section>
     </main>
@@ -43,4 +71,3 @@
     </script>
 </body>
 </html>
-

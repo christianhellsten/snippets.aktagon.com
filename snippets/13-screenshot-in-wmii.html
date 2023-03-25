@@ -2,23 +2,55 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title></title>
+    <title>Screenshot in wmii</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,900;1,900&amp;display=swap" rel="stylesheet">
     <link href=" https://cdn.jsdelivr.net/npm/destyle.css@4.0.0/destyle.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
     <header class="flex">
-        <h1 class="fadeout"></h1>
+        <h1 class="fadeout">Screenshot in wmii</h1>
     </header>
     <main>
         <section class="flex">
             <div class="flex-item flex-100">
-                <div class="code"></div>
+                <div class="code">Method 1
+--------
+
+A simple script to create a screenshot in wmii. It probably works in other window managers too. I call it 'scrot'. Put it in the path and run it as you'd run any program in wmii. The "import" program comes with imagemagick.
+
+
+```bash
+#!/bin/bash
+import -window root /tmp/screenshot.png
+```
+    
+
+Method 2
+--------
+
+If you want timestamped screenshots then
+
+
+```bash
+apt-get install scrot
+mkdir -p ~/screenshots
+```
+    
+
+And create a script with the following content for making the screenshot.
+
+
+```bash
+#!/bin/bash
+scrot '%Y-%m-%d-%H-%M-%S_$wx$h_scrot.png' -e 'mv $f ~/screenshots'
+```
+    
+
+</div>
             </div>
         </section>
     </main>
@@ -43,4 +75,3 @@
     </script>
 </body>
 </html>
-

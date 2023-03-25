@@ -2,23 +2,103 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title></title>
+    <title>ElasticSearch Wildcard and NGram Search With Tire</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,900;1,900&amp;display=swap" rel="stylesheet">
     <link href=" https://cdn.jsdelivr.net/npm/destyle.css@4.0.0/destyle.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
     <header class="flex">
-        <h1 class="fadeout"></h1>
+        <h1 class="fadeout">ElasticSearch Wildcard and NGram Search With Tire</h1>
     </header>
     <main>
         <section class="flex">
             <div class="flex-item flex-100">
-                <div class="code"></div>
+                <div class="code">How to implement wildcard search with Tire and Elasticsearch:
+
+
+```ruby
+settings analysis: {
+    filter: {
+      ngram_filter: {
+        type: "nGram",
+        min_gram: 1,
+        max_gram: 15
+      }
+    },
+    analyzer: {
+      index_ngram_analyzer: {
+        tokenizer: "standard",
+        filter: ['standard', 'lowercase', "stop", "ngram_filter"],
+        type: "custom"
+      },
+      search_ngram_analyzer: {
+        tokenizer: "standard",
+        filter: ['standard', 'lowercase', "stop"],
+        type: "custom"
+      }
+    }
+  }
+
+  mapping do
+    indexes :name,
+      search_analyzer: 'search_ngram_analyzer',
+      index_analyzer: 'index_ngram_analyzer', 
+      #analyzer: 'index_ngram_analyzer', 
+      boost: 100.0
+      # …
+  end
+```
+    
+
+With curl, make sure the mapping is set up properly:
+
+
+```ruby
+curl 'http://localhost:9200/activities/_mapping?pretty=true'
+{
+  "skulls" : {
+    "skull" : {
+      "_all" : {
+        "auto_boost" : true
+      },
+      "properties" : {
+        "name" : {
+          "type" : "string",
+          "boost" : 100.0,
+          "analyzer" : "index_ngram_analyzer"
+        }
+      }
+    }
+  }
+}
+```
+    
+
+You now have wildcard search as long as you remember to specify the fields that you want to search, because by default the \_all field is used for search:
+
+
+```ruby
+# This searches the _all field
+curl 'http://localhost:9200/activities/_search?q=simpsons&pretty=true'
+
+# Yes, it really works
+curl -XGET 'http://localhost:9200/activities/_search?pretty' -d ' 
+{ 
+   "query" : { 
+      "query_string" : { 
+         "query" : "simpsons", 
+         "fields" : ["name"] 
+      } 
+   } 
+}'
+```
+    
+
+</div>
             </div>
         </section>
     </main>
@@ -43,4 +123,3 @@
     </script>
 </body>
 </html>
-

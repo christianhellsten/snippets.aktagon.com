@@ -2,23 +2,88 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title></title>
+    <title>How to use PostgreSQL advisory locks with SQLAlchemy and Python</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,900;1,900&amp;display=swap" rel="stylesheet">
     <link href=" https://cdn.jsdelivr.net/npm/destyle.css@4.0.0/destyle.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
     <header class="flex">
-        <h1 class="fadeout"></h1>
+        <h1 class="fadeout">How to use PostgreSQL advisory locks with SQLAlchemy and Python</h1>
     </header>
     <main>
         <section class="flex">
             <div class="flex-item flex-100">
-                <div class="code"></div>
+                <div class="code">advisory_lock.py
+
+```python
+from models import Session
+from sqlalchemy import func, select
+
+
+def execute(session, lock_fn, lock_id, scope):
+    """
+    Executes the lock function
+    """
+    return session.execute(select([lock_fn(lock_id, scope)])).scalar()
+
+
+def obtain_lock(session, lock_id, scope):
+    """
+    Obtains the advisory lock
+    """
+    lock_fn = func.pg_try_advisory_lock
+    return execute(session, lock_fn, lock_id, scope)
+
+
+def release_lock(session, lock_id, scope):
+    """
+    Releases the advisory lock
+    """
+    lock_fn = func.pg_advisory_unlock
+    return execute(session, lock_fn, lock_id, scope)
+
+
+def with_lock(my_func, lock_id, scope=1):
+    """
+    Executes my_func if the lock can be obtained.
+    """
+    session = Session()
+    obtained_lock = False
+    try:
+        obtained_lock = obtain_lock(session, lock_id, scope)
+        if obtained_lock:
+            my_func()
+    finally:
+        if obtained_lock:
+            release_lock(session, lock_id, scope)
+```
+
+Usage:
+
+```python
+from advisory_lock import with_lock
+
+def run():
+    print("It runs")
+
+if __name__ == '__main__':
+    with_lock(run, 300000)
+```
+
+There are two types of advisory locks:
+
+- session-level: released when session ends (might be never when using session pooling), or manually with pg_advisory_unlock
+
+For example: pg_try_advisory_lock
+
+- transaction-level: released automatically on commit and rollback
+
+For example: pg_advisory_xact_lock
+</div>
             </div>
         </section>
     </main>
@@ -43,4 +108,3 @@
     </script>
 </body>
 </html>
-

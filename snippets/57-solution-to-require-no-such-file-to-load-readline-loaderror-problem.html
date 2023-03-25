@@ -2,23 +2,44 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title></title>
+    <title>Solution to "require': no such file to load -- readline (LoadError)" problem</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,900;1,900&amp;display=swap" rel="stylesheet">
     <link href=" https://cdn.jsdelivr.net/npm/destyle.css@4.0.0/destyle.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
     <header class="flex">
-        <h1 class="fadeout"></h1>
+        <h1 class="fadeout">Solution to "require': no such file to load -- readline (LoadError)" problem</h1>
     </header>
     <main>
         <section class="flex">
             <div class="flex-item flex-100">
-                <div class="code"></div>
+                <div class="code">If you've compiled Ruby from source, you might get this error when executing **script/console**:
+
+
+```bash
+/usr/local/lib/ruby/1.8/irb/completion.rb:10:in require': no such file to load -- readline (LoadError)
+```
+    
+
+One way of fixing this is to compile readline, which is distributed along with the Ruby source:
+
+
+```bash
+cd /opt/src/ruby-1.8.5-p2/ext/readline
+ruby extconf.rb
+make
+sudo make install
+```
+    
+
+This works even after compiling Ruby, so no need to recompile... If you're wondering what readline is then this quote from the [project homepage](http://tiswww.case.edu/php/chet/readline/rltop.html) sums it up in one sentence:
+"The GNU Readline library provides a set of functions for use by applications that allow users to edit command lines as they are typed in."
+
+</div>
             </div>
         </section>
     </main>
@@ -43,4 +64,3 @@
     </script>
 </body>
 </html>
-

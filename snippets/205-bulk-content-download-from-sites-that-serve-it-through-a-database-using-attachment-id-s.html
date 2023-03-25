@@ -2,23 +2,38 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title></title>
+    <title>Bulk content download from sites that serve it through a database using attachment id's</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,900;1,900&amp;display=swap" rel="stylesheet">
     <link href=" https://cdn.jsdelivr.net/npm/destyle.css@4.0.0/destyle.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
     <header class="flex">
-        <h1 class="fadeout"></h1>
+        <h1 class="fadeout">Bulk content download from sites that serve it through a database using attachment id's</h1>
     </header>
     <main>
         <section class="flex">
             <div class="flex-item flex-100">
-                <div class="code"></div>
+                <div class="code">This needs to be customized according to site. The --content-disposition is experimental. It also may cause files by the same name to be downloaded. Wget will name them like abc.jpg, abc.jpg.1, abc.jpg.2 and so on. You can always [rename](http://snippets.aktagon.com/snippets/4-Bulk-renaming-of-files) them afterwards :)
+
+
+```bash
+#!/bin/bash
+destination_dir=$HOME/thecontent
+mkdir -p $destination_dir
+for page in 0 1 2 3 4 5 6 7 8 9; do 
+	attachment_ids=$(wget -O - "http://www.xyz.com/showthread.php?page=77${page}" |grep attachmentid|cut -d'"' -f2| cut -d'=' -f3 |cut -d'&' -f1)
+	for attachment_id in $attachment_ids; do
+		wget --content-disposition --directory-prefix=$destination_dir http://www.xyz.com/attachment.php?attachmentid=${attachment_id}
+	done
+done
+```
+    
+
+</div>
             </div>
         </section>
     </main>
@@ -43,4 +58,3 @@
     </script>
 </body>
 </html>
-

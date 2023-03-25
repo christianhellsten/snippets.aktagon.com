@@ -2,23 +2,48 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title></title>
+    <title>Detecting software version with Ansible</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,900;1,900&amp;display=swap" rel="stylesheet">
     <link href=" https://cdn.jsdelivr.net/npm/destyle.css@4.0.0/destyle.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
     <header class="flex">
-        <h1 class="fadeout"></h1>
+        <h1 class="fadeout">Detecting software version with Ansible</h1>
     </header>
     <main>
         <section class="flex">
             <div class="flex-item flex-100">
-                <div class="code"></div>
+                <div class="code">With Ansible, detecting the version of, for example, Redis or Racket can be done like this:
+```yaml
+- name: Detect Redis version
+  # Input: Redis server v=3.2.1 sha=00000000:0 malloc=libc bits=64 build=62a67eec83b28403
+  # Output: 3.2.1
+  shell: redis-server -v | awk '{print $3}' | sed -e 's/v=//'
+  changed_when: False
+  register: redis_installed_version
+
+- name: Detect racket versions
+  # Input: Welcome to Racket v6.6.
+  # Output: 6.6
+  shell: "racket -v | rev | cut -d ' ' -f1 | rev | sed 's/.$//' | sed 's/^v//'"
+  register: racket_installed_version
+```
+
+Example: Download src only if version does not match:
+
+```yaml
+- get_url:
+    url: http://download.redis.io/releases/redis-{{redis_version}}.tar.gz
+    dest: /usr/local/src/
+    sha256sum: "{{redis_sha256}}"
+  register: get_redis_result
+  when: redis_installed_version.stdout | version_compare(redis_version, '!=')
+```
+</div>
             </div>
         </section>
     </main>
@@ -43,4 +68,3 @@
     </script>
 </body>
 </html>
-

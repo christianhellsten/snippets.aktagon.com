@@ -2,23 +2,43 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title></title>
+    <title>Autotest...</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,900;1,900&amp;display=swap" rel="stylesheet">
     <link href=" https://cdn.jsdelivr.net/npm/destyle.css@4.0.0/destyle.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
     <header class="flex">
-        <h1 class="fadeout"></h1>
+        <h1 class="fadeout">Autotest...</h1>
     </header>
     <main>
         <section class="flex">
             <div class="flex-item flex-100">
-                <div class="code"></div>
+                <div class="code">Getting autotest to run your tests is f\*****\*g impossible sometimes. Instead of beating up your keyboard, try this:
+
+
+```ruby
+require 'autotest/fsevent'
+
+class Autotest
+  
+  def get_to_green
+    begin
+      rerun_all_tests
+      wait_for_changes unless all_good
+    end until all_good
+  end
+                            
+end
+```
+    
+
+From <http://ph7spot.com/musings/getting-started-with-autotest#running_the_whole_test_suite_for_all_changes>
+
+</div>
             </div>
         </section>
     </main>
@@ -43,4 +63,3 @@
     </script>
 </body>
 </html>
-

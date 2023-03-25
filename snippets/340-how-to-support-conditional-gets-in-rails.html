@@ -2,23 +2,72 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title></title>
+    <title>How to support conditional gets in Rails</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,900;1,900&amp;display=swap" rel="stylesheet">
     <link href=" https://cdn.jsdelivr.net/npm/destyle.css@4.0.0/destyle.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
     <header class="flex">
-        <h1 class="fadeout"></h1>
+        <h1 class="fadeout">How to support conditional gets in Rails</h1>
     </header>
     <main>
         <section class="flex">
             <div class="flex-item flex-100">
-                <div class="code"></div>
+                <div class="code">From the [When to Tell Your Kids About Client Caching RailsConf presentation (PDF)](http://assets.en.oreilly.com/1/event/24/When%20to%20Tell%20Your%20Kids%20About%20Client%20Caching%20Presentation.pdf)
+
+
+```ruby
+def fresh?(response)
+def stale?(:etag => @object, :last_modified => updated_at.utc)
+def not_modified?(modified_at)
+def etag_matches?(etag)
+```
+    
+
+
+```ruby
+class PeopleController < ApplicationController
+	def show
+		@person = Person.find(params[:id])
+		response.last_modified = @person.updated_at.utc
+		response.etag = @person	
+		return head(:not_modified) if request.fresh?(response)
+
+		respond_to do |wants|
+			#...
+		end
+	end
+end
+```
+    
+
+
+```ruby
+response.etag = @person # => “5cb44721b6ce18857ff6900486dc4aba”
+@person.cache_key # => "people/5-20071224150000"
+```
+    
+
+
+```ruby
+class PeopleController < ApplicationController
+	def show
+		@person = Person.find(params[:id])
+		if stale?(:etag => @person, :last_modified => @person.updated_at.utc)
+			respond_to do |wants|
+			#...
+			end
+		end
+	end
+end
+```
+    
+
+</div>
             </div>
         </section>
     </main>
@@ -43,4 +92,3 @@
     </script>
 </body>
 </html>
-

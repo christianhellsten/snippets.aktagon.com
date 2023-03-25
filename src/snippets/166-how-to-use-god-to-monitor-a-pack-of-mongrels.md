@@ -1,0 +1,291 @@
+---
+id: '166'
+title: How to use god to monitor a pack of mongrels
+languages:
+- ruby
+tags:
+- address
+- ip
+- listen
+- phoenix
+---
+[God](http://god.rubyforge.org/) is a monitoring framework written in Ruby that can be used for monitoring, for example, mongrel processes.
+
+Installing god
+--------------
+
+Install god with the following command:
+
+
+```ruby
+sudo gem install god
+```
+    
+
+Configuring god
+---------------
+
+To configure god, first create a master configuration script by saving the following in /etc/god/god.rb:
+
+
+```ruby
+# load in all god configs
+God.load "/etc/god/conf/*.rb"
+```
+    
+
+Now, save this configuration in /etc/god/conf/site.com.rb:
+
+
+```ruby
+#
+# Test this configuration file by executing:  
+#   god -c /path_to_this_file -D
+# 
+require 'yaml'
+
+
+#
+# Change these to match your project setup
+#
+APPLICATION  = "xxx.com"
+ROOT         = "/var/www/#{APPLICATION}" # deployment directory
+RAILS_ROOT   = ROOT + '/current'         # current release directory
+MONGREL_CONF = ROOT + '/shared/mongrel_cluster.conf' # mongrel_cluster.conf file
+
+# Read in mongrel_conf
+OPTIONS      = YAML.load_file(MONGREL_CONF)   # Read mongrel configuration
+
+#
+# TODO This can be simplified
+#
+def ports(port, servers)
+  ports = []
+  
+  start_port = port
+  end_port   = start_port + servers - 1
+  
+  for port in start_port..end_port do
+    ports << port
+  end
+  
+  ports
+end
+
+PORTS        = ports(OPTIONS['port'].to_i, OPTIONS['servers'].to_i)
+
+#
+# Returns path of mongrel pid or log file:
+#
+#   mongrel_path "/tmp/mongrel.pid", 9000 => "/tmp/mongrel.9000.pid"
+#
+def mongrel_path(file_path, port)
+    file_ext = File.extname(file_path)
+    file_base = File.basename(file_path, file_ext)
+    file_dir = File.dirname(file_path)
+    file = [file_base, port].join(".") +  file_ext
+    
+    File.join(file_dir, file)
+end
+
+#
+# Returns the mongrel_rails start, stop or restart command depending on command parameter
+#
+def mongrel_rails(command, port)
+  raise "Unsupported command '#{command}'" if !['start', 'stop', 'restart'].include?(command)
+
+  argv = [ "mongrel_rails" ]
+  argv << command
+  argv << "-d" if command != 'stop'
+  argv << "-e #{OPTIONS['environment']}" if OPTIONS['environment'] && command != 'stop'
+  argv << "-a #{OPTIONS['address']}"  if OPTIONS['address'] && command != 'stop'
+  argv << "-c #{OPTIONS['cwd']}" if OPTIONS['cwd']
+  argv << "-f #{OPTIONS['force']}" if OPTIONS['force'] && command == 'stop'
+  argv << "-o #{OPTIONS['timeout']}" if OPTIONS['timeout'] && command != 'stop'
+  argv << "-t #{OPTIONS['throttle']}" if OPTIONS['throttle'] && command != 'stop'
+  argv << "-m #{OPTIONS['mime_map']}" if OPTIONS['mime_map'] && command != 'stop'
+  argv << "-r #{OPTIONS['docroot']}" if OPTIONS['docroot'] && command != 'stop'
+  argv << "-n #{OPTIONS['num_procs']}" if OPTIONS['num_procs'] && command != 'stop'
+  argv << "-B" if OPTIONS['debug'] && command != 'stop'
+  argv << "-S #{OPTIONS['config_script']}" if OPTIONS['config_script'] && command != 'stop'
+  argv << "--user #{OPTIONS['user']}" if OPTIONS['user'] && command != 'stop'
+  argv << "--group #{OPTIONS['group']}" if OPTIONS['group'] && command != 'stop'
+  argv << "--prefix #{OPTIONS['prefix']}" if OPTIONS['prefix'] && command != 'stop'
+  argv << "-p #{port}" if command != 'stop'
+  argv << '-P ' + mongrel_path(OPTIONS['pid_file'], port)
+  argv << '-l ' + mongrel_path(OPTIONS['log_file'], port) if command != 'stop'
+
+  cmd = argv.join " "
+
+  return cmd
+end
+
+PORTS.each do |port|
+  God.watch do |w|
+    w.name          = "#{APPLICATION}-#{port}"
+    w.group         = "mongrels"
+    w.interval      = 30.seconds
+    w.start         = mongrel_rails('start', port)
+    w.stop          = mongrel_rails('stop', port)
+    w.restart       = mongrel_rails('restart', port)
+    w.start_grace   = 10.seconds
+    w.restart_grace = 10.seconds
+    w.pid_file      = File.join(RAILS_ROOT, "/tmp/pids/mongrel.#{port}.pid")
+        
+    w.behavior(:clean_pid_file)
+
+    w.start_if do |start|
+      start.condition(:process_running) do |c|
+        c.interval = 5.seconds
+        c.running  = false
+      end
+    end
+    
+    w.restart_if do |restart|
+      restart.condition(:memory_usage) do |c|
+        c.above = 150.megabytes
+        c.times = [3, 5] # 3 out of 5 intervals
+      end
+    
+      restart.condition(:cpu_usage) do |c|
+        c.above = 50.percent
+        c.times = 5
+      end
+    end
+    
+    # lifecycle
+    w.lifecycle do |on|
+      on.condition(:flapping) do |c|
+        c.to_state     = [:start, :restart]
+        c.times        = 5
+        c.within       = 5.minute
+        c.transition   = :unmonitored
+        c.retry_in     = 10.minutes
+        c.retry_times  = 5
+        c.retry_within = 2.hours
+      end
+    end
+  end
+end
+```
+    
+
+Add a script for each site you want to monitor.
+
+Starting god
+------------
+
+To start god execute:
+
+
+```ruby
+god -c /etc/god/god.rb
+```
+    
+
+For a list of available commands run god with the help switch:
+
+
+```ruby
+$ god --help
+  Usage:
+    Starting:
+      god [-c <config file>] [-p <port> | -b] [-P <file>] [-l <file>] [-D]
+      
+    Querying:
+      god <command> <argument> [-p <port>]
+      god <command> [-p <port>]
+      god -v
+      god -V (must be run as root to be accurate on Linux)
+      
+    Commands:
+      start <task or group name>         start task or group
+      restart <task or group name>       restart task or group
+      stop <task or group name>          stop task or group
+      monitor <task or group name>       monitor task or group
+      unmonitor <task or group name>     unmonitor task or group
+      remove <task or group name>        remove task or group from god
+      load <file>                        load a config into a running god
+      log <task name>                    show realtime log for given task
+      status                             show status of each task
+      quit                               stop god
+      terminate                          stop god and all tasks
+      check                              run self diagnostic
+      
+    Options:
+    -c, --config-file CONFIG         Configuration file
+    -p, --port PORT                  Communications port (default 17165)
+    -b, --auto-bind                  Auto-bind to an unused port number
+    -P, --pid FILE                   Where to write the PID file
+    -l, --log FILE                   Where to write the log file
+    -D, --no-daemonize               Don't daemonize
+    -v, --version                    Print the version number and exit
+    -V                               Print extended version and build information
+        --log-level LEVEL            Log level [debug|info|warn|error|fatal]
+        --no-syslog                  Disable output to syslog
+        --attach PID                 Quit god when the attached process dies
+        --no-events                  Disable the event system
+        --bleakhouse                 Enable bleakhouse profiling
+```
+    
+
+Surviving reboots
+-----------------
+
+Save the following in /etc/init.d/god:
+
+
+```ruby
+#!/bin/bash
+#
+# God
+#
+
+RETVAL=0
+
+case "$1" in
+    start)
+      god -c /etc/god/god.rb -P /var/run/god.pid -l /var/log/god.log
+      RETVAL=$?
+      echo "God started"
+  ;;
+    stop)
+      kill cat /var/run/god.pid
+      RETVAL=$?
+      echo "God stopped"
+  ;;
+    restart)
+      kill cat /var/run/god.pid
+      god -c /etc/god/god.rb -P /var/run/god.pid -l /var/log/god.log
+      RETVAL=$?
+      echo "God restarted"
+  ;;
+    status)
+      RETVAL=$?
+  ;;
+    *)
+      echo "Usage: god {start|stop|restart|status}"
+      exit 1
+  ;;
+esac
+
+exit $RETVAL
+```
+    
+
+Make the file executable with chmod:
+
+
+```ruby
+chmod +x /etc/init.d/god
+```
+    
+
+Tell Debian to run the script at startup:
+
+
+```ruby
+sudo /usr/sbin/update-rc.d -f god defaults
+```
+    
+

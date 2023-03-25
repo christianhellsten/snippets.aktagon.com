@@ -2,23 +2,54 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title></title>
+    <title>SEO optimized image URLs with the Paperclip Rails plugin</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,900;1,900&amp;display=swap" rel="stylesheet">
     <link href=" https://cdn.jsdelivr.net/npm/destyle.css@4.0.0/destyle.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
     <header class="flex">
-        <h1 class="fadeout"></h1>
+        <h1 class="fadeout">SEO optimized image URLs with the Paperclip Rails plugin</h1>
     </header>
     <main>
         <section class="flex">
             <div class="flex-item flex-100">
-                <div class="code"></div>
+                <div class="code">Create config/initializers/paperclip.rb:
+
+
+```ruby
+# http://wiki.github.com/thoughtbot/paperclip/interpolations
+Paperclip.interpolates :to_param do |attachment, style|
+  attachment.instance.to_param
+end
+```
+    
+
+In the model:
+
+
+```ruby
+has_attached_file :image, 
+                    :path => ":rails_root/public/images:to_param/:style/:basename.:extension",
+                    :url => "/images:to_param/:style/:basename.:extension",
+                    :styles => { :large  => "250x360#",
+                                 :medium => "150x230#",
+                                 :small  => "110x150#" }
+```
+    
+
+Instead of URLs like:
+
+/images/products/249/large/temp.jpg
+
+You can get a URL based on, for example, a permalink as in the example above. In my case I get URLs like this:
+
+/images/games/nintendo-wii/large/super-mario-galaxy.jpg
+
+</div>
             </div>
         </section>
     </main>
@@ -43,4 +74,3 @@
     </script>
 </body>
 </html>
-

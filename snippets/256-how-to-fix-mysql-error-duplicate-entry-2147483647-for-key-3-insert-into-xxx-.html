@@ -2,23 +2,50 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title></title>
+    <title>How to fix "Mysql::Error: Duplicate entry '2147483647' for key 3: INSERT INTO xxx"</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,900;1,900&amp;display=swap" rel="stylesheet">
     <link href=" https://cdn.jsdelivr.net/npm/destyle.css@4.0.0/destyle.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
     <header class="flex">
-        <h1 class="fadeout"></h1>
+        <h1 class="fadeout">How to fix "Mysql::Error: Duplicate entry '2147483647' for key 3: INSERT INTO xxx"</h1>
     </header>
     <main>
         <section class="flex">
             <div class="flex-item flex-100">
-                <div class="code"></div>
+                <div class="code">2147483647 is the maximum for an integer column in MySQL, so this error probably means you've exceeded this limit somewhere in your code.
+
+Rails automatically detects the best type for your columns, so be sure to specify the correct limit when creating the column with migrations:
+
+
+```ruby
+# from activerecord-2.1.1/lib/active_record/connection_adapters/mysql_adapter.rb
+        case limit
+        when 1; 'tinyint'
+        when 2; 'smallint'
+        when 3; 'mediumint'
+        when nil, 4, 11; 'int(11)'  # compatibility with MySQL default
+        when 5..8; 'bigint'
+        else raise(ActiveRecordError, "No integer type has byte size #{limit}")
+        end
+```
+    
+
+This Rails migration code would create a big integer column:
+
+
+```ruby
+t.integer :product_id, :null => false, :limit => 8
+```
+    
+
+See [the section on Numeric Types](http://dev.mysql.com/doc/refman/5.1/en/numeric-types.html) in the MySQL documentation for more information.
+
+</div>
             </div>
         </section>
     </main>
@@ -43,4 +70,3 @@
     </script>
 </body>
 </html>
-

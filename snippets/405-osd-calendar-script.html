@@ -2,23 +2,56 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title></title>
+    <title>OSD calendar script</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,900;1,900&amp;display=swap" rel="stylesheet">
     <link href=" https://cdn.jsdelivr.net/npm/destyle.css@4.0.0/destyle.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/monokai-sublime.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/styles.css">
 </head>
 <body>
     <header class="flex">
-        <h1 class="fadeout"></h1>
+        <h1 class="fadeout">OSD calendar script</h1>
     </header>
     <main>
         <section class="flex">
             <div class="flex-item flex-100">
-                <div class="code"></div>
+                <div class="code">Hook this script to your favourite keybinding to get an OSD calendar on your screen. The calendar modification used was found [here](http://www.macosxhints.com/article.php?story=20091014220449591).
+
+*osd\_cal.sh*
+
+
+```bash
+#!/bin/bash
+font="-*-*-medium-*-*-*-20-*-*-*-*-*-*-*"
+month=date "+%m" 
+cal_head=cal -m $month | head -1 
+cal_tail=cal -m $month | tail -7
+today=date "+%e"| sed 's/^ *//;s/ *$//'
+cal="$cal_head\n" 
+cal+=$(echo -en "${cal_tail/${today}/*${today}}\n")
+$(echo -e "$cal" | osd_cat -c white -l 8 -i 10 -o 10 -f $font -p bottom -A right -s 1)
+```
+    
+
+This is how I hooked it to Mod+c in [dwm](http://dwm.suckless.org/).
+
+*config.h*
+
+
+```bash
+// ... abbreviated
+static const char *calcmd[]  = { "osd_cal.sh",NULL };
+static Key keys[] = {
+// ...abbr
+{ MODKEY,                       XK_c,      spawn,          {.v = calcmd } },
+// ...abbr
+// ... abbreviated
+```
+    
+
+</div>
             </div>
         </section>
     </main>
@@ -43,4 +76,3 @@
     </script>
 </body>
 </html>
-
