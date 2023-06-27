@@ -29,6 +29,12 @@ def pg_array_to_a(text)
   text&.gsub(/^\{(.*)\}$/, '\1')&.gsub(/\ANULL\z/, '')&.split(',')&.compact
 end
 
+def clean
+  Dir['snippets/**.html'].each do |html_file|
+    File.rm(html_file)
+  end
+end
+
 def render_snippets
   Dir['src/snippets/**.md'].each do |markdown_file|
     markdown = File.read(markdown_file)
